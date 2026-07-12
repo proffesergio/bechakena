@@ -76,6 +76,11 @@ class Products extends Table with SyncColumns {
 /// stock number anywhere else.
 class StockMovements extends Table with SyncColumns {
   TextColumn get productId => text().references(Products, #id)();
+
+  /// Branch/outlet this movement belongs to. Stock is derived per branch:
+  /// stock(product, branch) = SUM(qtyDelta WHERE productId AND branchId).
+  /// Nullable only for legacy rows (backfilled to the default branch on open).
+  TextColumn get branchId => text().nullable().references(Shops, #id)();
   IntColumn get qtyDelta => integer().map(const QtyConverter())();
   TextColumn get type => textEnum<MovementType>()();
 
@@ -98,6 +103,9 @@ class Customers extends Table with SyncColumns {
 /// adjustments, never by editing these rows.
 class Sales extends Table with SyncColumns {
   TextColumn get invoiceNo => text().unique()();
+
+  /// Branch/outlet where the sale was rung up. Nullable only for legacy rows.
+  TextColumn get branchId => text().nullable().references(Shops, #id)();
   TextColumn get staffId => text().nullable().references(Staff, #id)();
   TextColumn get customerId => text().nullable().references(Customers, #id)();
   IntColumn get subtotal => integer().map(const MoneyConverter())();
@@ -171,6 +179,8 @@ class Suppliers extends Table with SyncColumns {
 }
 
 class Purchases extends Table with SyncColumns {
+  /// Branch/outlet the stock was received into. Nullable only for legacy rows.
+  TextColumn get branchId => text().nullable().references(Shops, #id)();
   TextColumn get supplierId => text().nullable().references(Suppliers, #id)();
   TextColumn get invoiceRef => text().nullable()();
   IntColumn get totalCost =>

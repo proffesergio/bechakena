@@ -22,6 +22,7 @@ class BechaKenaApp extends ConsumerWidget {
       onGenerateTitle: (_) => Brand.name,
       theme: lightTheme(),
       darkTheme: darkTheme(),
+      themeMode: ref.watch(themeModeProvider),
       locale: ref.watch(localeProvider),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

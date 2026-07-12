@@ -45,6 +45,7 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
     required List<TenderDraft> tenders,
     Money billDiscount = Money.zero,
     DateTime? now,
+    String? branchId,
   }) {
     if (items.isEmpty) {
       throw StateError('Cannot finalize a sale with no items');
@@ -70,10 +71,12 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
     }
 
     return transaction(() async {
+      final branch = branchId ?? await attachedDatabase.currentBranchId();
       final seq = await _nextSeqForDay(at);
       final sale = await into(sales).insertReturning(SalesCompanion.insert(
         invoiceNo: formatInvoiceNo(
             prefix: invoicePrefix, date: at, seq: seq, deviceNo: deviceNo),
+        branchId: Value(branch),
         staffId: Value(staffId),
         customerId: Value(customerId),
         subtotal: subtotal,
@@ -100,6 +103,7 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
         if (item.productId != null) {
           await into(stockMovements).insert(StockMovementsCompanion.insert(
             productId: item.productId!,
+            branchId: Value(branch),
             qtyDelta: -item.qty,
             type: MovementType.sale,
             refId: Value(sale.id),

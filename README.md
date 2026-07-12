@@ -101,7 +101,7 @@ flowchart TB
 | Routing | go_router |
 | Local database | Drift (SQLite) |
 | Cloud (optional) | Supabase — Postgres, Auth, Edge Functions |
-| Receipts | ESC/POS thermal 58/80 mm — USB, Bluetooth, LAN *(in progress)* |
+| Receipts | ESC/POS thermal 58/80 mm — LAN today; USB/Bluetooth transports built-in (plugin-enabled) + shop-logo raster header |
 | Localization | Flutter ARB — `bn` + `en` |
 
 ---
@@ -172,15 +172,21 @@ flutter test      # money math, stock derivation, sales, baki, cart, widgets
 - To correct stock (shrinkage, count fixes), tap any product on the **Products** tab → **Adjust stock** with a signed change and a reason. Every correction is a permanent movement record.
 
 ### Printer setup
-1. **Settings → Printer**: enter the LAN thermal printer's IP (RAW/JetDirect, port 9100), choose 58 mm or 80 mm paper, **Save**.
-2. Hit **Test print** to verify.
-3. Receipts print in ASCII with `Tk` amounts — universal across cheap thermal printers; Bangla bitmap headers are on the roadmap. USB (Windows) and Bluetooth (Android) transports are coming next.
+1. **Settings → Printer**: pick the connection — **LAN / USB / Bluetooth**.
+   - **LAN** (recommended, works everywhere): enter the printer's IP (RAW/JetDirect, port 9100).
+   - **USB / Bluetooth**: tap **Select device** and choose the printer (needs the native plugin enabled — see [`docs/OPERATIONS.md`](docs/OPERATIONS.md) §6).
+2. Choose 58 mm or 80 mm paper, **Save**, then hit **Test print** to verify.
+3. Add a **shop logo** in **Settings → Shop profile → Choose logo** — it's rasterised and printed at the top of every receipt (mono, auto-scaled). Shop name, address, phone and footer print on every invoice too.
+4. Amounts print as `Tk` — universal across cheap thermal printers.
 
 ### Data & backup
 - All data lives in a single SQLite file on the device (`bechakena.db` under the app's data directory).
 - **Settings → Backup now** writes a clean snapshot (`BechaKena-backup-<timestamp>.db`) into your Downloads/Documents folder — copy it to a pen drive.
 - **Settings → Restore from backup** picks a snapshot; it is applied the next time the app starts.
+- **Settings → Clear local data** wipes this device back to a fresh install (for testing → production, or handing over a device) — back up first; it applies on next launch. See [`docs/OPERATIONS.md`](docs/OPERATIONS.md).
 - **Sales can never be edited after finalization.** Mistakes are corrected with returns/adjustments — this is what makes the numbers trustworthy.
+
+> **Full day-to-day operations guide** — seeding demo data, clearing local data, shop logo/invoice setup, and what you need for the optional Cloud Plan (Supabase sync + SMS gateway): [`docs/OPERATIONS.md`](docs/OPERATIONS.md).
 
 ### License & Cloud Plan *(rolling out)*
 - One-time license per shop, verified fully offline (signed key bound to the machine).
@@ -228,7 +234,9 @@ lib/
 - [x] Sale returns/refunds + sales history (reprint receipts)
 - [x] CSV product import/export
 - [x] SMS due-reminder templates + local outbox queue (bn/en)
-- [ ] USB/Bluetooth printer transports + Bangla bitmap receipt header
+- [x] Shop-logo raster header on receipts + clear-local-data reset
+- [x] USB/Bluetooth printer transports (plugin-enabled) alongside LAN
+- [ ] Bangla bitmap text on receipt body
 - [ ] Cloud Plan: SMS gateway dispatch, encrypted backup, multi-device sync
 - [ ] Ed25519 offline licensing + activation
 

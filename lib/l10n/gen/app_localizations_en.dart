@@ -471,4 +471,146 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get smsQueued =>
       'SMS queued (will send when the Cloud Plan is active)';
+
+  @override
+  String get transportLan => 'LAN';
+
+  @override
+  String get transportUsb => 'USB';
+
+  @override
+  String get transportBt => 'Bluetooth';
+
+  @override
+  String get selectDevice => 'Select device';
+
+  @override
+  String get noDeviceSelected => 'No device selected';
+
+  @override
+  String get noDevices => 'No printer found on this device';
+
+  @override
+  String get shopLogoHint =>
+      'Printed at the top of every receipt (black & white, up to ~384px wide)';
+
+  @override
+  String get chooseLogo => 'Choose logo';
+
+  @override
+  String get removeLogo => 'Remove logo';
+
+  @override
+  String get clearData => 'Clear local data';
+
+  @override
+  String get clearDataWarning =>
+      'This permanently deletes ALL products, sales, customers, staff and settings on this device. Back up first if you might need this data. Continue?';
+
+  @override
+  String get clearDataDone =>
+      'All data will be cleared. Please close and reopen the app.';
+
+  @override
+  String get theme => 'Theme';
+
+  @override
+  String get themeSystem => 'System';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get saveInvoice => 'Save invoice';
+
+  @override
+  String get saveAsPdf => 'Save as PDF';
+
+  @override
+  String get saveAsImage => 'Save as image';
+
+  @override
+  String invoiceSaved(String path) {
+    return 'Saved to $path';
+  }
+
+  @override
+  String saveFailed(String error) {
+    return 'Save failed: $error';
+  }
+
+  @override
+  String get editProduct => 'Edit product';
+
+  @override
+  String get deleteProduct => 'Delete product';
+
+  @override
+  String deleteProductConfirm(String name) {
+    return 'Delete \"$name\"? It stays in past sales but is removed from the catalog.';
+  }
+
+  @override
+  String get productDeleted => 'Product deleted';
+
+  @override
+  String get productNameBn => 'Name (Bengali)';
+
+  @override
+  String get sku => 'SKU';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get noCategory => 'No category';
+
+  @override
+  String get costPrice => 'Cost price';
+
+  @override
+  String get unit => 'Unit';
+
+  @override
+  String get lowStockLevel => 'Low-stock alert level';
+
+  @override
+  String get productImage => 'Product photo';
+
+  @override
+  String get chooseImage => 'Choose photo';
+
+  @override
+  String get removeImage => 'Remove photo';
+
+  @override
+  String get lowStockOnly => 'Low stock only';
+
+  @override
+  String get clearFilters => 'Clear filters';
+
+  @override
+  String get noResults => 'No products match your filters';
+
+  @override
+  String get branchSection => 'Branch / outlet';
+
+  @override
+  String get currentBranch => 'This device\'s branch';
+
+  @override
+  String get addBranch => 'Add branch';
+
+  @override
+  String get branchName => 'Branch name';
+
+  @override
+  String get branchHint =>
+      'Sales, purchases and stock on this device are recorded against this branch.';
+
+  @override
+  String get branchAdded => 'Branch added';
 }

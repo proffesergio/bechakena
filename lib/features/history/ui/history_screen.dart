@@ -148,7 +148,7 @@ class _SaleDetailDialog extends ConsumerWidget {
     if (!rootContext.mounted) return;
     showDialog<void>(
       context: rootContext,
-      builder: (_) => ReceiptDialog(text: text),
+      builder: (_) => ReceiptDialog(text: text, invoiceNo: sale.invoiceNo),
     );
   }
 }

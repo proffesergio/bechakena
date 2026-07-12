@@ -242,5 +242,70 @@
   },
   "dueReminderSms": "Send due reminder",
   "queueSms": "Queue SMS",
-  "smsQueued": "SMS queued (will send when the Cloud Plan is active)"
+  "smsQueued": "SMS queued (will send when the Cloud Plan is active)",
+  "transportLan": "LAN",
+  "transportUsb": "USB",
+  "transportBt": "Bluetooth",
+  "selectDevice": "Select device",
+  "noDeviceSelected": "No device selected",
+  "noDevices": "No printer found on this device",
+  "shopLogoHint": "Printed at the top of every receipt (black & white, up to ~384px wide)",
+  "chooseLogo": "Choose logo",
+  "removeLogo": "Remove logo",
+  "clearData": "Clear local data",
+  "clearDataWarning": "This permanently deletes ALL products, sales, customers, staff and settings on this device. Back up first if you might need this data. Continue?",
+  "clearDataDone": "All data will be cleared. Please close and reopen the app.",
+  "theme": "Theme",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "saveInvoice": "Save invoice",
+  "saveAsPdf": "Save as PDF",
+  "saveAsImage": "Save as image",
+  "invoiceSaved": "Saved to {path}",
+  "@invoiceSaved": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "saveFailed": "Save failed: {error}",
+  "@saveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "editProduct": "Edit product",
+  "deleteProduct": "Delete product",
+  "deleteProductConfirm": "Delete \"{name}\"? It stays in past sales but is removed from the catalog.",
+  "@deleteProductConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productDeleted": "Product deleted",
+  "productNameBn": "Name (Bengali)",
+  "sku": "SKU",
+  "category": "Category",
+  "noCategory": "No category",
+  "costPrice": "Cost price",
+  "unit": "Unit",
+  "lowStockLevel": "Low-stock alert level",
+  "productImage": "Product photo",
+  "chooseImage": "Choose photo",
+  "removeImage": "Remove photo",
+  "lowStockOnly": "Low stock only",
+  "clearFilters": "Clear filters",
+  "noResults": "No products match your filters",
+  "branchSection": "Branch / outlet",
+  "currentBranch": "This device's branch",
+  "addBranch": "Add branch",
+  "branchName": "Branch name",
+  "branchHint": "Sales, purchases and stock on this device are recorded against this branch.",
+  "branchAdded": "Branch added"
 }

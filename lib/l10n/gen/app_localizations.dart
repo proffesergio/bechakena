@@ -967,6 +967,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'SMS queued (will send when the Cloud Plan is active)'**
   String get smsQueued;
+
+  /// No description provided for @transportLan.
+  ///
+  /// In en, this message translates to:
+  /// **'LAN'**
+  String get transportLan;
+
+  /// No description provided for @transportUsb.
+  ///
+  /// In en, this message translates to:
+  /// **'USB'**
+  String get transportUsb;
+
+  /// No description provided for @transportBt.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth'**
+  String get transportBt;
+
+  /// No description provided for @selectDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Select device'**
+  String get selectDevice;
+
+  /// No description provided for @noDeviceSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No device selected'**
+  String get noDeviceSelected;
+
+  /// No description provided for @noDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'No printer found on this device'**
+  String get noDevices;
+
+  /// No description provided for @shopLogoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Printed at the top of every receipt (black & white, up to ~384px wide)'**
+  String get shopLogoHint;
+
+  /// No description provided for @chooseLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose logo'**
+  String get chooseLogo;
+
+  /// No description provided for @removeLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove logo'**
+  String get removeLogo;
+
+  /// No description provided for @clearData.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear local data'**
+  String get clearData;
+
+  /// No description provided for @clearDataWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This permanently deletes ALL products, sales, customers, staff and settings on this device. Back up first if you might need this data. Continue?'**
+  String get clearDataWarning;
+
+  /// No description provided for @clearDataDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All data will be cleared. Please close and reopen the app.'**
+  String get clearDataDone;
+
+  /// No description provided for @theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get themeSystem;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// No description provided for @saveInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Save invoice'**
+  String get saveInvoice;
+
+  /// No description provided for @saveAsPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as PDF'**
+  String get saveAsPdf;
+
+  /// No description provided for @saveAsImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as image'**
+  String get saveAsImage;
+
+  /// No description provided for @invoiceSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to {path}'**
+  String invoiceSaved(String path);
+
+  /// No description provided for @saveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed: {error}'**
+  String saveFailed(String error);
+
+  /// No description provided for @editProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit product'**
+  String get editProduct;
+
+  /// No description provided for @deleteProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete product'**
+  String get deleteProduct;
+
+  /// No description provided for @deleteProductConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\"? It stays in past sales but is removed from the catalog.'**
+  String deleteProductConfirm(String name);
+
+  /// No description provided for @productDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Product deleted'**
+  String get productDeleted;
+
+  /// No description provided for @productNameBn.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (Bengali)'**
+  String get productNameBn;
+
+  /// No description provided for @sku.
+  ///
+  /// In en, this message translates to:
+  /// **'SKU'**
+  String get sku;
+
+  /// No description provided for @category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get category;
+
+  /// No description provided for @noCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No category'**
+  String get noCategory;
+
+  /// No description provided for @costPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost price'**
+  String get costPrice;
+
+  /// No description provided for @unit.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get unit;
+
+  /// No description provided for @lowStockLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Low-stock alert level'**
+  String get lowStockLevel;
+
+  /// No description provided for @productImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Product photo'**
+  String get productImage;
+
+  /// No description provided for @chooseImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose photo'**
+  String get chooseImage;
+
+  /// No description provided for @removeImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get removeImage;
+
+  /// No description provided for @lowStockOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Low stock only'**
+  String get lowStockOnly;
+
+  /// No description provided for @clearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get clearFilters;
+
+  /// No description provided for @noResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No products match your filters'**
+  String get noResults;
+
+  /// No description provided for @branchSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch / outlet'**
+  String get branchSection;
+
+  /// No description provided for @currentBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'This device\'s branch'**
+  String get currentBranch;
+
+  /// No description provided for @addBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Add branch'**
+  String get addBranch;
+
+  /// No description provided for @branchName.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch name'**
+  String get branchName;
+
+  /// No description provided for @branchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales, purchases and stock on this device are recorded against this branch.'**
+  String get branchHint;
+
+  /// No description provided for @branchAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch added'**
+  String get branchAdded;
 }
 
 class _AppLocalizationsDelegate

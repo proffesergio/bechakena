@@ -18,9 +18,22 @@ Future<File> pendingRestoreFile() async {
   return File(p.join(dir.path, 'bechakena.restore.db'));
 }
 
+/// Sentinel written by "Clear local data": the live DB file is deleted on next
+/// launch so the app starts empty (fresh owner setup). Can't drop the open file.
+Future<File> pendingWipeFile() async {
+  final dir = await getApplicationSupportDirectory();
+  return File(p.join(dir.path, 'bechakena.wipe'));
+}
+
 QueryExecutor openAppDatabase() {
   return LazyDatabase(() async {
     final file = await databaseFile();
+    // A pending wipe takes effect before anything else: drop the old DB.
+    final wipe = await pendingWipeFile();
+    if (await wipe.exists()) {
+      if (await file.exists()) await file.delete();
+      await wipe.delete();
+    }
     final restore = await pendingRestoreFile();
     if (await restore.exists()) {
       await restore.copy(file.path);

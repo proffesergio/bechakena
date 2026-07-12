@@ -4,6 +4,7 @@ part of 'returns_dao.dart';
 
 // ignore_for_file: type=lint
 mixin _$ReturnsDaoMixin on DatabaseAccessor<AppDatabase> {
+  $ShopsTable get shops => attachedDatabase.shops;
   $StaffTable get staff => attachedDatabase.staff;
   $CustomersTable get customers => attachedDatabase.customers;
   $SalesTable get sales => attachedDatabase.sales;
@@ -18,6 +19,8 @@ mixin _$ReturnsDaoMixin on DatabaseAccessor<AppDatabase> {
 class ReturnsDaoManager {
   final _$ReturnsDaoMixin _db;
   ReturnsDaoManager(this._db);
+  $$ShopsTableTableManager get shops =>
+      $$ShopsTableTableManager(_db.attachedDatabase, _db.shops);
   $$StaffTableTableManager get staff =>
       $$StaffTableTableManager(_db.attachedDatabase, _db.staff);
   $$CustomersTableTableManager get customers =>

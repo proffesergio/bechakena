@@ -472,4 +472,146 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get smsQueued =>
       'SMS কিউ হয়েছে (ক্লাউড প্ল্যান সক্রিয় হলে পাঠানো হবে)';
+
+  @override
+  String get transportLan => 'LAN';
+
+  @override
+  String get transportUsb => 'USB';
+
+  @override
+  String get transportBt => 'ব্লুটুথ';
+
+  @override
+  String get selectDevice => 'ডিভাইস নির্বাচন';
+
+  @override
+  String get noDeviceSelected => 'কোনো ডিভাইস নির্বাচিত হয়নি';
+
+  @override
+  String get noDevices => 'এই ডিভাইসে কোনো প্রিন্টার পাওয়া যায়নি';
+
+  @override
+  String get shopLogoHint =>
+      'প্রতিটি রসিদের উপরে ছাপা হবে (সাদা-কালো, ~৩৮৪px পর্যন্ত চওড়া)';
+
+  @override
+  String get chooseLogo => 'লোগো নির্বাচন';
+
+  @override
+  String get removeLogo => 'লোগো সরান';
+
+  @override
+  String get clearData => 'স্থানীয় ডেটা মুছুন';
+
+  @override
+  String get clearDataWarning =>
+      'এটি এই ডিভাইসের সব পণ্য, বিক্রয়, গ্রাহক, কর্মী ও সেটিংস স্থায়ীভাবে মুছে ফেলবে। প্রয়োজন হলে আগে ব্যাকআপ নিন। চালিয়ে যাবেন?';
+
+  @override
+  String get clearDataDone =>
+      'সব ডেটা মুছে ফেলা হবে। অ্যাপটি বন্ধ করে আবার চালু করুন।';
+
+  @override
+  String get theme => 'থিম';
+
+  @override
+  String get themeSystem => 'সিস্টেম';
+
+  @override
+  String get themeLight => 'লাইট';
+
+  @override
+  String get themeDark => 'ডার্ক';
+
+  @override
+  String get saveInvoice => 'ইনভয়েস সংরক্ষণ';
+
+  @override
+  String get saveAsPdf => 'PDF হিসেবে সংরক্ষণ';
+
+  @override
+  String get saveAsImage => 'ছবি হিসেবে সংরক্ষণ';
+
+  @override
+  String invoiceSaved(String path) {
+    return '$path-এ সংরক্ষিত হয়েছে';
+  }
+
+  @override
+  String saveFailed(String error) {
+    return 'সংরক্ষণ ব্যর্থ: $error';
+  }
+
+  @override
+  String get editProduct => 'পণ্য সম্পাদনা';
+
+  @override
+  String get deleteProduct => 'পণ্য মুছুন';
+
+  @override
+  String deleteProductConfirm(String name) {
+    return '\"$name\" মুছবেন? এটি পূর্বের বিক্রয়ে থাকবে তবে ক্যাটালগ থেকে সরানো হবে।';
+  }
+
+  @override
+  String get productDeleted => 'পণ্য মুছে ফেলা হয়েছে';
+
+  @override
+  String get productNameBn => 'নাম (বাংলা)';
+
+  @override
+  String get sku => 'এসকেইউ';
+
+  @override
+  String get category => 'ক্যাটাগরি';
+
+  @override
+  String get noCategory => 'ক্যাটাগরি নেই';
+
+  @override
+  String get costPrice => 'ক্রয় মূল্য';
+
+  @override
+  String get unit => 'একক';
+
+  @override
+  String get lowStockLevel => 'কম স্টক সতর্কতার মাত্রা';
+
+  @override
+  String get productImage => 'পণ্যের ছবি';
+
+  @override
+  String get chooseImage => 'ছবি বাছুন';
+
+  @override
+  String get removeImage => 'ছবি সরান';
+
+  @override
+  String get lowStockOnly => 'শুধু কম স্টক';
+
+  @override
+  String get clearFilters => 'ফিল্টার মুছুন';
+
+  @override
+  String get noResults => 'আপনার ফিল্টারের সাথে কোনো পণ্য মিলছে না';
+
+  @override
+  String get branchSection => 'শাখা / আউটলেট';
+
+  @override
+  String get currentBranch => 'এই ডিভাইসের শাখা';
+
+  @override
+  String get addBranch => 'শাখা যোগ করুন';
+
+  @override
+  String get branchName => 'শাখার নাম';
+
+  @override
+  String get branchHint =>
+      'এই ডিভাইসের বিক্রয়, ক্রয় ও স্টক এই শাখার অধীনে রেকর্ড হয়।';
+
+  @override
+  String get branchAdded => 'শাখা যোগ হয়েছে';
 }

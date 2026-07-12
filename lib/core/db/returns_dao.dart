@@ -34,6 +34,7 @@ class ReturnsDao extends DatabaseAccessor<AppDatabase> with _$ReturnsDaoMixin {
     required List<ReturnDraftItem> items,
     String? note,
     DateTime? now,
+    String? branchId,
   }) {
     if (items.isEmpty) {
       throw StateError('Cannot record a return with no items');
@@ -45,6 +46,7 @@ class ReturnsDao extends DatabaseAccessor<AppDatabase> with _$ReturnsDaoMixin {
     }
 
     return transaction(() async {
+      final branch = branchId ?? await attachedDatabase.currentBranchId();
       final ret = await into(returns).insertReturning(ReturnsCompanion.insert(
         originalSaleId: Value(originalSaleId),
         staffId: Value(staffId),
@@ -64,6 +66,7 @@ class ReturnsDao extends DatabaseAccessor<AppDatabase> with _$ReturnsDaoMixin {
         if (item.productId != null) {
           await into(stockMovements).insert(StockMovementsCompanion.insert(
             productId: item.productId!,
+            branchId: Value(branch),
             qtyDelta: item.qty, // positive: restock
             type: MovementType.saleReturn,
             refId: Value(ret.id),

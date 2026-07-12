@@ -33,6 +33,7 @@ class PurchasesDao extends DatabaseAccessor<AppDatabase>
     String? invoiceRef,
     required List<PurchaseDraftItem> items,
     DateTime? now,
+    String? branchId,
   }) {
     if (items.isEmpty) {
       throw StateError('Cannot record a purchase with no items');
@@ -44,8 +45,10 @@ class PurchasesDao extends DatabaseAccessor<AppDatabase>
     }
 
     return transaction(() async {
+      final branch = branchId ?? await attachedDatabase.currentBranchId();
       final purchase =
           await into(purchases).insertReturning(PurchasesCompanion.insert(
+        branchId: Value(branch),
         supplierId: Value(supplierId),
         invoiceRef: Value(invoiceRef),
         totalCost: Value(totalCost),
@@ -62,6 +65,7 @@ class PurchasesDao extends DatabaseAccessor<AppDatabase>
         ));
         await into(stockMovements).insert(StockMovementsCompanion.insert(
           productId: item.productId,
+          branchId: Value(branch),
           qtyDelta: item.qty,
           type: MovementType.purchase,
           refId: Value(purchase.id),
