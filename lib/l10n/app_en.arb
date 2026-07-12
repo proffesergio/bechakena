@@ -239,5 +239,8 @@
         "type": "String"
       }
     }
-  }
+  },
+  "dueReminderSms": "Send due reminder",
+  "queueSms": "Queue SMS",
+  "smsQueued": "SMS queued (will send when the Cloud Plan is active)"
 }

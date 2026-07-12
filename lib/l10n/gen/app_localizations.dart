@@ -949,6 +949,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Exported to {path}'**
   String exportDone(String path);
+
+  /// No description provided for @dueReminderSms.
+  ///
+  /// In en, this message translates to:
+  /// **'Send due reminder'**
+  String get dueReminderSms;
+
+  /// No description provided for @queueSms.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue SMS'**
+  String get queueSms;
+
+  /// No description provided for @smsQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS queued (will send when the Cloud Plan is active)'**
+  String get smsQueued;
 }
 
 class _AppLocalizationsDelegate

@@ -141,5 +141,8 @@
   "exportCsv": "CSV এক্সপোর্ট",
   "importDone": "{count}টি পণ্য ইমপোর্ট হয়েছে",
   "importErrors": "{count}টি সারি বাদ পড়েছে",
-  "exportDone": "এক্সপোর্ট হয়েছে {path}"
+  "exportDone": "এক্সপোর্ট হয়েছে {path}",
+  "dueReminderSms": "বাকির রিমাইন্ডার পাঠান",
+  "queueSms": "SMS কিউ করুন",
+  "smsQueued": "SMS কিউ হয়েছে (ক্লাউড প্ল্যান সক্রিয় হলে পাঠানো হবে)"
 }

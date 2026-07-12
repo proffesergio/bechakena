@@ -2,10 +2,12 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/brand.dart';
 import '../../../app/providers.dart';
 import '../../../core/db/database.dart';
 import '../../../core/format.dart';
 import '../../../core/money.dart';
+import '../../../core/sms/templates.dart';
 import '../../../l10n/gen/app_localizations.dart';
 
 class CustomersScreen extends ConsumerWidget {
@@ -52,21 +54,38 @@ class _CustomerTile extends ConsumerWidget {
     final due = ref.watch(customerDueProvider(customer.id));
     final dueMoney = due.value ?? Money.zero;
 
+    final canRemind = dueMoney > Money.zero && (customer.phone?.isNotEmpty ?? false);
     return ListTile(
       title: Text(customer.name),
       subtitle: customer.phone == null ? null : Text(customer.phone!),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(l10n.dueLabel, style: Theme.of(context).textTheme.bodySmall),
-          Text(
-            formatTaka(dueMoney, locale: locale),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: dueMoney > Money.zero
-                      ? Theme.of(context).colorScheme.error
-                      : null,
-                ),
+          if (canRemind)
+            IconButton(
+              tooltip: l10n.dueReminderSms,
+              icon: const Icon(Icons.sms),
+              onPressed: () => showDialog<void>(
+                context: context,
+                builder: (_) => DueReminderDialog(
+                    customer: customer, due: dueMoney),
+              ),
+            ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(l10n.dueLabel,
+                  style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                formatTaka(dueMoney, locale: locale),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: dueMoney > Money.zero
+                          ? Theme.of(context).colorScheme.error
+                          : null,
+                    ),
+              ),
+            ],
           ),
         ],
       ),
@@ -77,6 +96,80 @@ class _CustomerTile extends ConsumerWidget {
                     customerId: customer.id, outstanding: dueMoney),
               )
           : null,
+    );
+  }
+}
+
+/// Previews the due-reminder SMS and queues it in the local outbox. Actual
+/// delivery happens via the Cloud Plan dispatcher (offline-first: additive).
+class DueReminderDialog extends ConsumerWidget {
+  const DueReminderDialog({super.key, required this.customer, required this.due});
+
+  final Customer customer;
+  final Money due;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).languageCode;
+    final message = renderDueReminderSms(
+      shopName: Brand.name,
+      customerName: customer.name,
+      due: due,
+      locale: locale,
+    );
+
+    return AlertDialog(
+      title: Text(l10n.dueReminderSms),
+      content: SizedBox(
+        width: 360,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(customer.phone ?? '',
+                style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(message),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton.icon(
+          icon: const Icon(Icons.sms),
+          label: Text(l10n.queueSms),
+          onPressed: () async {
+            final messenger = ScaffoldMessenger.of(context);
+            final navigator = Navigator.of(context);
+            final shopName =
+                await ref.read(databaseProvider).settingsDao.getValue('shop.name');
+            await ref.read(databaseProvider).smsDao.enqueue(
+                  phone: customer.phone!,
+                  kind: SmsKind.dueReminder,
+                  body: renderDueReminderSms(
+                    shopName: shopName ?? Brand.name,
+                    customerName: customer.name,
+                    due: due,
+                    locale: locale,
+                  ),
+                  customerId: Value(customer.id),
+                );
+            navigator.pop();
+            messenger.showSnackBar(SnackBar(content: Text(l10n.smsQueued)));
+          },
+        ),
+      ],
     );
   }
 }

@@ -461,4 +461,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String exportDone(String path) {
     return 'Exported to $path';
   }
+
+  @override
+  String get dueReminderSms => 'Send due reminder';
+
+  @override
+  String get queueSms => 'Queue SMS';
+
+  @override
+  String get smsQueued =>
+      'SMS queued (will send when the Cloud Plan is active)';
 }

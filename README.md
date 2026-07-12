@@ -11,7 +11,7 @@
 [![State: Riverpod](https://img.shields.io/badge/State-Riverpod-45C4B0)](https://riverpod.dev)
 [![DB: Drift/SQLite](https://img.shields.io/badge/DB-Drift%20%2F%20SQLite-003B57?logo=sqlite&logoColor=white)](https://drift.simonbinder.eu)
 [![Platforms](https://img.shields.io/badge/Windows%20·%20Android%20·%20iOS-lightgrey?logo=windows)](#-getting-started)
-[![Tests](https://img.shields.io/badge/tests-110%20passing-brightgreen)](#-development)
+[![Tests](https://img.shields.io/badge/tests-136%20passing-brightgreen)](#-development)
 [![Made in Bangladesh](https://img.shields.io/badge/Made%20for-🇧🇩%20Bangladesh-006A4E)](#)
 
 *by **neWell Software***
@@ -225,9 +225,12 @@ lib/
 - [x] Analytics dashboard: sales trend, top products, payment split (date ranges)
 - [x] Staff PINs & roles, offline login gate, staff-wise sales
 - [x] Low-stock & expiring-soon inventory alerts
+- [x] Sale returns/refunds + sales history (reprint receipts)
+- [x] CSV product import/export
+- [x] SMS due-reminder templates + local outbox queue (bn/en)
 - [ ] USB/Bluetooth printer transports + Bangla bitmap receipt header
-- [ ] SMS receipts & due reminders
-- [ ] Licensing + Cloud Plan sync
+- [ ] Cloud Plan: SMS gateway dispatch, encrypted backup, multi-device sync
+- [ ] Ed25519 offline licensing + activation
 
 ---
 

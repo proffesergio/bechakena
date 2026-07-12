@@ -462,4 +462,14 @@ class AppLocalizationsBn extends AppLocalizations {
   String exportDone(String path) {
     return 'এক্সপোর্ট হয়েছে $path';
   }
+
+  @override
+  String get dueReminderSms => 'বাকির রিমাইন্ডার পাঠান';
+
+  @override
+  String get queueSms => 'SMS কিউ করুন';
+
+  @override
+  String get smsQueued =>
+      'SMS কিউ হয়েছে (ক্লাউড প্ল্যান সক্রিয় হলে পাঠানো হবে)';
 }
