@@ -397,4 +397,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffSalesTitle => 'Sales by staff';
+
+  @override
+  String get navHistory => 'History';
+
+  @override
+  String get noSales => 'No sales yet';
+
+  @override
+  String saleDetail(String invoiceNo) {
+    return 'Sale $invoiceNo';
+  }
+
+  @override
+  String get reprint => 'Reprint receipt';
+
+  @override
+  String get returnItems => 'Return items';
+
+  @override
+  String get returnQty => 'Return qty';
+
+  @override
+  String get refund => 'Refund';
+
+  @override
+  String get refundTotal => 'Refund total';
+
+  @override
+  String get confirmReturn => 'Confirm return';
+
+  @override
+  String returnDone(String amount) {
+    return 'Return recorded — $amount refunded';
+  }
+
+  @override
+  String get refundsToday => 'Refunds';
+
+  @override
+  String get netSales => 'Net sales';
+
+  @override
+  String get alreadyReturned => 'Returned';
 }

@@ -186,5 +186,32 @@
     }
   },
   "expired": "Expired",
-  "staffSalesTitle": "Sales by staff"
+  "staffSalesTitle": "Sales by staff",
+  "navHistory": "History",
+  "noSales": "No sales yet",
+  "saleDetail": "Sale {invoiceNo}",
+  "@saleDetail": {
+    "placeholders": {
+      "invoiceNo": {
+        "type": "String"
+      }
+    }
+  },
+  "reprint": "Reprint receipt",
+  "returnItems": "Return items",
+  "returnQty": "Return qty",
+  "refund": "Refund",
+  "refundTotal": "Refund total",
+  "confirmReturn": "Confirm return",
+  "returnDone": "Return recorded — {amount} refunded",
+  "@returnDone": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "refundsToday": "Refunds",
+  "netSales": "Net sales",
+  "alreadyReturned": "Returned"
 }

@@ -841,6 +841,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sales by staff'**
   String get staffSalesTitle;
+
+  /// No description provided for @navHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get navHistory;
+
+  /// No description provided for @noSales.
+  ///
+  /// In en, this message translates to:
+  /// **'No sales yet'**
+  String get noSales;
+
+  /// No description provided for @saleDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale {invoiceNo}'**
+  String saleDetail(String invoiceNo);
+
+  /// No description provided for @reprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reprint receipt'**
+  String get reprint;
+
+  /// No description provided for @returnItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Return items'**
+  String get returnItems;
+
+  /// No description provided for @returnQty.
+  ///
+  /// In en, this message translates to:
+  /// **'Return qty'**
+  String get returnQty;
+
+  /// No description provided for @refund.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund'**
+  String get refund;
+
+  /// No description provided for @refundTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund total'**
+  String get refundTotal;
+
+  /// No description provided for @confirmReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm return'**
+  String get confirmReturn;
+
+  /// No description provided for @returnDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Return recorded — {amount} refunded'**
+  String returnDone(String amount);
+
+  /// No description provided for @refundsToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunds'**
+  String get refundsToday;
+
+  /// No description provided for @netSales.
+  ///
+  /// In en, this message translates to:
+  /// **'Net sales'**
+  String get netSales;
+
+  /// No description provided for @alreadyReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned'**
+  String get alreadyReturned;
 }
 
 class _AppLocalizationsDelegate

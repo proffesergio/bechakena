@@ -121,11 +121,23 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
     });
   }
 
+  Future<Sale?> byId(String saleId) =>
+      (select(sales)..where((s) => s.id.equals(saleId))).getSingleOrNull();
+
+  Future<Sale?> findByInvoiceNo(String invoiceNo) =>
+      (select(sales)..where((s) => s.invoiceNo.equals(invoiceNo)))
+          .getSingleOrNull();
+
   Future<List<SaleItem>> itemsOf(String saleId) =>
       (select(saleItems)..where((i) => i.saleId.equals(saleId))).get();
 
   Future<List<SalePayment>> paymentsOf(String saleId) =>
       (select(salePayments)..where((p) => p.saleId.equals(saleId))).get();
+
+  Stream<List<Sale>> watchRecent({int limit = 100}) => (select(sales)
+        ..orderBy([(s) => OrderingTerm.desc(s.createdAt)])
+        ..limit(limit))
+      .watch();
 
   Stream<List<Sale>> watchSalesOn(DateTime day) {
     final start = DateTime.utc(day.year, day.month, day.day);

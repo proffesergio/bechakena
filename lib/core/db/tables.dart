@@ -145,6 +145,25 @@ class DuePayments extends Table with SyncColumns {
       dateTime().clientDefault(() => DateTime.now().toUtc())();
 }
 
+/// A refund against a finalized (immutable) sale — the correction path.
+/// Restocks via append-only saleReturn stock movements.
+class Returns extends Table with SyncColumns {
+  TextColumn get originalSaleId => text().nullable().references(Sales, #id)();
+  TextColumn get staffId => text().nullable().references(Staff, #id)();
+  IntColumn get refundTotal => integer().map(const MoneyConverter())();
+  TextColumn get note => text().nullable()();
+  DateTimeColumn get createdAt =>
+      dateTime().clientDefault(() => DateTime.now().toUtc())();
+}
+
+class ReturnItems extends Table with SyncColumns {
+  TextColumn get returnId => text().references(Returns, #id)();
+  TextColumn get productId => text().nullable().references(Products, #id)();
+  TextColumn get nameSnapshot => text()();
+  IntColumn get qty => integer().map(const QtyConverter())();
+  IntColumn get refundAmount => integer().map(const MoneyConverter())();
+}
+
 class Suppliers extends Table with SyncColumns {
   TextColumn get name => text()();
   TextColumn get phone => text().nullable()();

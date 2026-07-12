@@ -11,6 +11,7 @@ import 'daos/sales_dao.dart';
 import 'daos/settings_dao.dart';
 import 'daos/staff_dao.dart';
 import 'daos/stock_dao.dart';
+import 'returns_dao.dart';
 import 'tables.dart';
 
 export 'daos/customers_dao.dart';
@@ -20,6 +21,7 @@ export 'daos/sales_dao.dart';
 export 'daos/settings_dao.dart';
 export 'daos/staff_dao.dart';
 export 'daos/stock_dao.dart';
+export 'returns_dao.dart';
 export 'tables.dart';
 
 part 'database.g.dart';
@@ -42,6 +44,8 @@ part 'database.g.dart';
     SmsLog,
     SyncOutbox,
     Settings,
+    Returns,
+    ReturnItems,
   ],
   daos: [
     ProductsDao,
@@ -51,16 +55,25 @@ part 'database.g.dart';
     PurchasesDao,
     SettingsDao,
     StaffDao,
+    ReturnsDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) => m.createAll(),
+        onUpgrade: (m, from, to) async {
+          // v2 adds the returns tables (immutable-sale correction path).
+          if (from < 2) {
+            await m.createTable(returns);
+            await m.createTable(returnItems);
+          }
+        },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
         },

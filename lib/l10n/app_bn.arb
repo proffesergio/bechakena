@@ -123,5 +123,18 @@
   "noAlerts": "সব ঠিক আছে — কোনো সতর্কতা নেই",
   "expiresOn": "মেয়াদ {date}",
   "expired": "মেয়াদোত্তীর্ণ",
-  "staffSalesTitle": "কর্মী অনুযায়ী বিক্রয়"
+  "staffSalesTitle": "কর্মী অনুযায়ী বিক্রয়",
+  "navHistory": "ইতিহাস",
+  "noSales": "এখনও কোনো বিক্রয় নেই",
+  "saleDetail": "বিক্রয় {invoiceNo}",
+  "reprint": "রসিদ পুনরায় প্রিন্ট",
+  "returnItems": "পণ্য ফেরত",
+  "returnQty": "ফেরত পরিমাণ",
+  "refund": "ফেরত",
+  "refundTotal": "মোট ফেরত",
+  "confirmReturn": "ফেরত নিশ্চিত করুন",
+  "returnDone": "ফেরত রেকর্ড হয়েছে — {amount} ফেরত দেওয়া হয়েছে",
+  "refundsToday": "ফেরত",
+  "netSales": "নিট বিক্রয়",
+  "alreadyReturned": "ফেরত"
 }

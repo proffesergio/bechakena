@@ -43,16 +43,19 @@ class DashboardData {
     required this.top,
     required this.payments,
     required this.staff,
+    required this.refunds,
   });
 
   final List<DailyTotal> days;
   final List<TopProduct> top;
   final Map<PayMethod, Money> payments;
   final Map<String?, Money> staff;
+  final Money refunds;
 
   Money get total => days.fold(Money.zero, (s, d) => s + d.total);
   int get count => days.fold(0, (s, d) => s + d.count);
   Money get avg => count == 0 ? Money.zero : Money(total.paisa ~/ count);
+  Money get net => total - refunds;
 }
 
 final _dashboardProvider = FutureProvider<DashboardData>((ref) async {
@@ -66,8 +69,13 @@ final _dashboardProvider = FutureProvider<DashboardData>((ref) async {
   final top = await db.salesDao.topProducts(start: start, end: end);
   final payments = await db.salesDao.paymentTotals(start: start, end: end);
   final staff = await db.salesDao.staffTotals(start: start, end: end);
+  final refunds = await db.returnsDao.refundsInRange(start: start, end: end);
   return DashboardData(
-      days: days, top: top, payments: payments, staff: staff);
+      days: days,
+      top: top,
+      payments: payments,
+      staff: staff,
+      refunds: refunds);
 });
 
 class ReportsScreen extends ConsumerWidget {
@@ -131,6 +139,18 @@ class ReportsScreen extends ConsumerWidget {
                     value: formatTaka(d.avg, locale: locale),
                     icon: Icons.trending_up,
                     color: Theme.of(context).colorScheme.secondary),
+                if (d.refunds > Money.zero) ...[
+                  _StatCard(
+                      title: l10n.refundsToday,
+                      value: '-${formatTaka(d.refunds, locale: locale)}',
+                      icon: Icons.assignment_return,
+                      color: Theme.of(context).colorScheme.error),
+                  _StatCard(
+                      title: l10n.netSales,
+                      value: formatTaka(d.net, locale: locale),
+                      icon: Icons.account_balance_wallet,
+                      color: Theme.of(context).colorScheme.primary),
+                ],
               ],
             ),
             const SizedBox(height: 16),

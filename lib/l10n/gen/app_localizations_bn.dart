@@ -398,4 +398,47 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get staffSalesTitle => 'কর্মী অনুযায়ী বিক্রয়';
+
+  @override
+  String get navHistory => 'ইতিহাস';
+
+  @override
+  String get noSales => 'এখনও কোনো বিক্রয় নেই';
+
+  @override
+  String saleDetail(String invoiceNo) {
+    return 'বিক্রয় $invoiceNo';
+  }
+
+  @override
+  String get reprint => 'রসিদ পুনরায় প্রিন্ট';
+
+  @override
+  String get returnItems => 'পণ্য ফেরত';
+
+  @override
+  String get returnQty => 'ফেরত পরিমাণ';
+
+  @override
+  String get refund => 'ফেরত';
+
+  @override
+  String get refundTotal => 'মোট ফেরত';
+
+  @override
+  String get confirmReturn => 'ফেরত নিশ্চিত করুন';
+
+  @override
+  String returnDone(String amount) {
+    return 'ফেরত রেকর্ড হয়েছে — $amount ফেরত দেওয়া হয়েছে';
+  }
+
+  @override
+  String get refundsToday => 'ফেরত';
+
+  @override
+  String get netSales => 'নিট বিক্রয়';
+
+  @override
+  String get alreadyReturned => 'ফেরত';
 }

@@ -51,6 +51,9 @@ final customerDueProvider = FutureProvider.family<Money, String>(
 final todaySalesProvider = StreamProvider<List<Sale>>((ref) =>
     ref.watch(databaseProvider).salesDao.watchSalesOn(DateTime.now().toUtc()));
 
+final recentSalesProvider = StreamProvider<List<Sale>>(
+    (ref) => ref.watch(databaseProvider).salesDao.watchRecent());
+
 final lowStockProvider = FutureProvider<List<LowStockRow>>(
     (ref) => ref.watch(databaseProvider).stockDao.lowStockProducts());
 

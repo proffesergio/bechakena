@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/customers/ui/customers_screen.dart';
+import '../features/history/ui/history_screen.dart';
 import '../features/inventory/ui/inventory_screen.dart';
 import '../features/pos/ui/pos_screen.dart';
 import '../features/products/ui/products_screen.dart';
@@ -27,6 +28,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
               path: '/customers', builder: (_, _) => const CustomersScreen()),
           GoRoute(path: '/reports', builder: (_, _) => const ReportsScreen()),
+          GoRoute(path: '/history', builder: (_, _) => const HistoryScreen()),
           GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
         ],
       ),
@@ -47,6 +49,7 @@ class AppShell extends StatelessWidget {
     '/inventory',
     '/customers',
     '/reports',
+    '/history',
     '/settings',
   ];
 
@@ -86,6 +89,9 @@ class AppShell extends StatelessWidget {
                       NavigationRailDestination(
                           icon: const Icon(Icons.bar_chart),
                           label: Text(l10n.navReports)),
+                      NavigationRailDestination(
+                          icon: const Icon(Icons.history),
+                          label: Text(l10n.navHistory)),
                       NavigationRailDestination(
                           icon: const Icon(Icons.settings),
                           label: Text(l10n.navSettings)),
