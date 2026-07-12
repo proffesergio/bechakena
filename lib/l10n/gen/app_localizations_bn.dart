@@ -441,4 +441,25 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get alreadyReturned => 'ফেরত';
+
+  @override
+  String get importCsv => 'CSV ইমপোর্ট';
+
+  @override
+  String get exportCsv => 'CSV এক্সপোর্ট';
+
+  @override
+  String importDone(String count) {
+    return '$countটি পণ্য ইমপোর্ট হয়েছে';
+  }
+
+  @override
+  String importErrors(String count) {
+    return '$countটি সারি বাদ পড়েছে';
+  }
+
+  @override
+  String exportDone(String path) {
+    return 'এক্সপোর্ট হয়েছে $path';
+  }
 }

@@ -440,4 +440,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get alreadyReturned => 'Returned';
+
+  @override
+  String get importCsv => 'Import CSV';
+
+  @override
+  String get exportCsv => 'Export CSV';
+
+  @override
+  String importDone(String count) {
+    return 'Imported $count products';
+  }
+
+  @override
+  String importErrors(String count) {
+    return '$count rows skipped';
+  }
+
+  @override
+  String exportDone(String path) {
+    return 'Exported to $path';
+  }
 }

@@ -213,5 +213,31 @@
   },
   "refundsToday": "Refunds",
   "netSales": "Net sales",
-  "alreadyReturned": "Returned"
+  "alreadyReturned": "Returned",
+  "importCsv": "Import CSV",
+  "exportCsv": "Export CSV",
+  "importDone": "Imported {count} products",
+  "@importDone": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "importErrors": "{count} rows skipped",
+  "@importErrors": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "exportDone": "Exported to {path}",
+  "@exportDone": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  }
 }

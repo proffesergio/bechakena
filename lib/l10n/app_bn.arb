@@ -136,5 +136,10 @@
   "returnDone": "ফেরত রেকর্ড হয়েছে — {amount} ফেরত দেওয়া হয়েছে",
   "refundsToday": "ফেরত",
   "netSales": "নিট বিক্রয়",
-  "alreadyReturned": "ফেরত"
+  "alreadyReturned": "ফেরত",
+  "importCsv": "CSV ইমপোর্ট",
+  "exportCsv": "CSV এক্সপোর্ট",
+  "importDone": "{count}টি পণ্য ইমপোর্ট হয়েছে",
+  "importErrors": "{count}টি সারি বাদ পড়েছে",
+  "exportDone": "এক্সপোর্ট হয়েছে {path}"
 }

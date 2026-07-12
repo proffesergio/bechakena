@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart' show Value;
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/providers.dart';
+import '../../../core/csv/product_csv.dart';
 import '../../../core/db/database.dart';
 import '../../../core/format.dart';
 import '../../../core/money.dart';
@@ -19,6 +23,22 @@ class ProductsScreen extends ConsumerWidget {
     final products = ref.watch(productsProvider);
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.navProducts),
+        actions: [
+          TextButton.icon(
+            icon: const Icon(Icons.upload_file),
+            label: Text(l10n.importCsv),
+            onPressed: () => _importCsv(context, ref),
+          ),
+          TextButton.icon(
+            icon: const Icon(Icons.download),
+            label: Text(l10n.exportCsv),
+            onPressed: () => _exportCsv(context, ref),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
       body: products.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
@@ -55,6 +75,65 @@ class ProductsScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _importCsv(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final file = await openFile(acceptedTypeGroups: [
+      const XTypeGroup(label: 'CSV', extensions: ['csv']),
+    ]);
+    if (file == null) return;
+    final result = parseProductRows(await file.readAsString());
+    final db = ref.read(databaseProvider);
+    for (final p in result.products) {
+      final product = await db.productsDao.insertProduct(ProductsCompanion.insert(
+        name: p.name,
+        nameBn: Value(p.nameBn),
+        barcode: Value(p.barcode),
+        unit: Value(p.unit),
+        salePrice: p.salePrice,
+        vatRateBp: Value(p.vatRateBp),
+      ));
+      if (!p.openingStock.isZero) {
+        await db.stockDao.addMovement(
+          productId: product.id,
+          qtyDelta: p.openingStock,
+          type: MovementType.adjustment,
+          note: 'csv import',
+        );
+      }
+    }
+    final msg = result.errors.isEmpty
+        ? l10n.importDone('${result.products.length}')
+        : '${l10n.importDone('${result.products.length}')} · '
+            '${l10n.importErrors('${result.errors.length}')}';
+    messenger.showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  Future<void> _exportCsv(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final db = ref.read(databaseProvider);
+    final products = await db.productsDao.watchActive().first;
+    final rows = <ProductCsvRow>[];
+    for (final p in products) {
+      final stock = await db.stockDao.stockFor(p.id);
+      rows.add(ProductCsvRow(
+        name: p.name,
+        nameBn: p.nameBn,
+        barcode: p.barcode,
+        unit: p.unit,
+        salePrice: p.salePrice,
+        vatRateBp: p.vatRateBp,
+        openingStock: stock,
+      ));
+    }
+    final location = await getSaveLocation(suggestedName: 'products.csv');
+    if (location == null) return;
+    await File(location.path).writeAsString(productsToCsv(rows));
+    messenger.showSnackBar(
+        SnackBar(content: Text(l10n.exportDone(location.path))));
   }
 }
 

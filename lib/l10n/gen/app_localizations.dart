@@ -919,6 +919,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Returned'**
   String get alreadyReturned;
+
+  /// No description provided for @importCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Import CSV'**
+  String get importCsv;
+
+  /// No description provided for @exportCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Export CSV'**
+  String get exportCsv;
+
+  /// No description provided for @importDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {count} products'**
+  String importDone(String count);
+
+  /// No description provided for @importErrors.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} rows skipped'**
+  String importErrors(String count);
+
+  /// No description provided for @exportDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported to {path}'**
+  String exportDone(String path);
 }
 
 class _AppLocalizationsDelegate
