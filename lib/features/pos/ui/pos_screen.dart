@@ -14,6 +14,7 @@ import '../../../core/printing/print_service.dart';
 import '../../../core/printing/receipt.dart';
 import '../../../core/qty.dart';
 import '../../../l10n/gen/app_localizations.dart';
+import '../../auth/logic/session.dart';
 import '../logic/cart_controller.dart';
 import 'receipt_dialog.dart';
 
@@ -716,6 +717,7 @@ class _CheckoutDialogState extends ConsumerState<CheckoutDialog> {
 
     final sale = await db.salesDao.finalizeSale(
       invoicePrefix: 'BK',
+      staffId: ref.read(currentStaffProvider)?.id,
       customerId: _customerId,
       items: cartController.toDraftItems(),
       tenders: [

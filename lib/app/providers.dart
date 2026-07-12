@@ -50,3 +50,11 @@ final customerDueProvider = FutureProvider.family<Money, String>(
 
 final todaySalesProvider = StreamProvider<List<Sale>>((ref) =>
     ref.watch(databaseProvider).salesDao.watchSalesOn(DateTime.now().toUtc()));
+
+final lowStockProvider = FutureProvider<List<LowStockRow>>(
+    (ref) => ref.watch(databaseProvider).stockDao.lowStockProducts());
+
+final expiringSoonProvider = FutureProvider<List<ExpiringBatch>>((ref) => ref
+    .watch(databaseProvider)
+    .stockDao
+    .expiringSoon(within: const Duration(days: 14)));

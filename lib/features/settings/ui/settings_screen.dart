@@ -5,11 +5,13 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../../app/brand.dart';
 import '../../../app/providers.dart';
+import '../../../core/db/database.dart';
 import '../../../core/db/open.dart';
 import '../../../core/printing/escpos.dart';
 import '../../../core/seed/demo_catalog.dart';
 import '../../../core/printing/print_service.dart';
 import '../../../l10n/gen/app_localizations.dart';
+import '../../auth/logic/session.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -238,6 +240,185 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               },
             ),
           ],
+        ),
+        const Divider(height: 32),
+        _buildStaffSection(context, l10n),
+      ],
+    );
+  }
+
+  Widget _buildStaffSection(BuildContext context, AppLocalizations l10n) {
+    final me = ref.watch(currentStaffProvider);
+    final staff = ref.watch(staffListProvider).value ?? const <StaffData>[];
+    // Only owners/managers manage staff.
+    final canManage =
+        me != null && me.role != StaffRole.cashier;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Text(l10n.staffSection,
+                style: Theme.of(context).textTheme.titleMedium),
+            const Spacer(),
+            if (canManage)
+              TextButton.icon(
+                icon: const Icon(Icons.person_add),
+                label: Text(l10n.addStaff),
+                onPressed: () => showDialog<void>(
+                  context: context,
+                  builder: (_) => const _AddStaffDialog(),
+                ),
+              ),
+          ],
+        ),
+        for (final s in staff)
+          ListTile(
+            dense: true,
+            leading: const Icon(Icons.badge),
+            title: Text(s.name),
+            subtitle: Text(_roleLabel(l10n, s.role)),
+            trailing: canManage && s.id != me.id
+                ? IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: () async {
+                      final ok = await showDialog<bool>(
+                        context: context,
+                        builder: (dctx) => AlertDialog(
+                          content: Text(l10n.removeStaff(s.name)),
+                          actions: [
+                            TextButton(
+                                onPressed: () =>
+                                    Navigator.of(dctx).pop(false),
+                                child: Text(l10n.cancel)),
+                            FilledButton(
+                                onPressed: () =>
+                                    Navigator.of(dctx).pop(true),
+                                child: Text(l10n.remove)),
+                          ],
+                        ),
+                      );
+                      if (ok ?? false) {
+                        await ref
+                            .read(databaseProvider)
+                            .staffDao
+                            .softDelete(s.id);
+                      }
+                    },
+                  )
+                : null,
+          ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            if (me != null)
+              Expanded(
+                child: Text(l10n.loggedInAs(me.name),
+                    style: Theme.of(context).textTheme.bodySmall),
+              ),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.logout),
+              label: Text(l10n.logout),
+              onPressed: () =>
+                  ref.read(currentStaffProvider.notifier).logout(),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  String _roleLabel(AppLocalizations l10n, StaffRole role) => switch (role) {
+        StaffRole.owner => l10n.roleOwner,
+        StaffRole.manager => l10n.roleManager,
+        StaffRole.cashier => l10n.roleCashier,
+      };
+}
+
+class _AddStaffDialog extends ConsumerStatefulWidget {
+  const _AddStaffDialog();
+
+  @override
+  ConsumerState<_AddStaffDialog> createState() => _AddStaffDialogState();
+}
+
+class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _name = TextEditingController();
+  final _pin = TextEditingController();
+  StaffRole _role = StaffRole.cashier;
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _pin.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l10n.addStaff),
+      content: Form(
+        key: _formKey,
+        child: SizedBox(
+          width: 320,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _name,
+                autofocus: true,
+                decoration: InputDecoration(labelText: l10n.staffName),
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? l10n.requiredField
+                    : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _pin,
+                obscureText: true,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: l10n.pin),
+                validator: (v) => (v == null || v.trim().length < 4)
+                    ? l10n.pinTooShort
+                    : null,
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<StaffRole>(
+                initialValue: _role,
+                decoration: InputDecoration(labelText: l10n.role),
+                items: [
+                  DropdownMenuItem(
+                      value: StaffRole.manager, child: Text(l10n.roleManager)),
+                  DropdownMenuItem(
+                      value: StaffRole.cashier, child: Text(l10n.roleCashier)),
+                ],
+                onChanged: (v) => setState(() => _role = v ?? _role),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () async {
+            if (!_formKey.currentState!.validate()) return;
+            final navigator = Navigator.of(context);
+            await ref.read(databaseProvider).staffDao.createStaff(
+                  name: _name.text.trim(),
+                  pin: _pin.text.trim(),
+                  role: _role,
+                );
+            if (mounted) navigator.pop();
+          },
+          child: Text(l10n.save),
         ),
       ],
     );

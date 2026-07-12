@@ -9,6 +9,7 @@ import 'daos/products_dao.dart';
 import 'daos/purchases_dao.dart';
 import 'daos/sales_dao.dart';
 import 'daos/settings_dao.dart';
+import 'daos/staff_dao.dart';
 import 'daos/stock_dao.dart';
 import 'tables.dart';
 
@@ -17,6 +18,7 @@ export 'daos/products_dao.dart';
 export 'daos/purchases_dao.dart';
 export 'daos/sales_dao.dart';
 export 'daos/settings_dao.dart';
+export 'daos/staff_dao.dart';
 export 'daos/stock_dao.dart';
 export 'tables.dart';
 
@@ -48,6 +50,7 @@ part 'database.g.dart';
     CustomersDao,
     PurchasesDao,
     SettingsDao,
+    StaffDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {

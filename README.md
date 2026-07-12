@@ -11,7 +11,7 @@
 [![State: Riverpod](https://img.shields.io/badge/State-Riverpod-45C4B0)](https://riverpod.dev)
 [![DB: Drift/SQLite](https://img.shields.io/badge/DB-Drift%20%2F%20SQLite-003B57?logo=sqlite&logoColor=white)](https://drift.simonbinder.eu)
 [![Platforms](https://img.shields.io/badge/Windows%20·%20Android%20·%20iOS-lightgrey?logo=windows)](#-getting-started)
-[![Tests](https://img.shields.io/badge/tests-87%20passing-brightgreen)](#-development)
+[![Tests](https://img.shields.io/badge/tests-110%20passing-brightgreen)](#-development)
 [![Made in Bangladesh](https://img.shields.io/badge/Made%20for-🇧🇩%20Bangladesh-006A4E)](#)
 
 *by **neWell Software***
@@ -139,9 +139,18 @@ flutter test      # money math, stock derivation, sales, baki, cart, widgets
 ## 📖 Admin Guide
 
 ### First-time setup
-1. Launch BechaKena — it creates its local database automatically (no account, no internet needed).
+1. Launch BechaKena — on first run it asks you to **create the owner account** (name + PIN). Everything is offline; no internet or sign-up.
 2. Go to **Settings → ভাষা/Language** and choose বাংলা or English.
-3. Add your products: **Products → Add product** — name, price (VAT-inclusive), optional barcode and opening stock.
+3. Add your products: **Products → Add product** — name, price (VAT-inclusive), optional barcode and opening stock. Or **Settings → Load sample products** for a ready-made Bangladeshi catalog.
+
+### Staff & PINs
+- **Settings → Staff & PINs**: owners and managers can add staff (manager/cashier) each with their own PIN, or remove them.
+- Every sale is attributed to the signed-in staff; **Reports** shows a sales-by-staff breakdown.
+- **Log out** from Settings returns to the PIN screen — the next cashier signs in with their own PIN.
+
+### Inventory alerts
+- The **Inventory** tab lists products at or below their low-stock level and purchase batches expiring within 14 days (already-expired flagged in red).
+- Set a product's low-stock level when adding it; expiry dates come from purchase entries.
 
 ### Daily selling
 | Task | How |
@@ -213,9 +222,10 @@ lib/
 - [x] Split payments (cash + bKash/Nagad/card)
 - [x] Purchases UI with supplier & expiry tracking
 - [x] Manual items, stock adjustments, backup/restore
+- [x] Analytics dashboard: sales trend, top products, payment split (date ranges)
+- [x] Staff PINs & roles, offline login gate, staff-wise sales
+- [x] Low-stock & expiring-soon inventory alerts
 - [ ] USB/Bluetooth printer transports + Bangla bitmap receipt header
-- [ ] Staff PINs & roles
-- [ ] Low-stock & expiring-soon dashboards, date-range reports
 - [ ] SMS receipts & due reminders
 - [ ] Licensing + Cloud Plan sync
 

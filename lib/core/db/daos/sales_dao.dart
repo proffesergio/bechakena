@@ -187,6 +187,22 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
     ];
   }
 
+  /// Sales total per staff id in [start, end). A null key = sales with no
+  /// attributed staff (recorded before login was enforced, or walk-in).
+  Future<Map<String?, Money>> staffTotals(
+      {required DateTime start, required DateTime end}) async {
+    final total = sales.total.sum();
+    final query = selectOnly(sales)
+      ..addColumns([sales.staffId, total])
+      ..where(_inRange(start, end))
+      ..groupBy([sales.staffId]);
+    final rows = await query.get();
+    return {
+      for (final row in rows)
+        row.read(sales.staffId): Money(row.read(total) ?? 0),
+    };
+  }
+
   /// Tender totals per payment method in [start, end).
   Future<Map<PayMethod, Money>> paymentTotals(
       {required DateTime start, required DateTime end}) async {

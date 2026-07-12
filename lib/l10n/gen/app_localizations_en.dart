@@ -307,4 +307,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allCategories => 'All';
+
+  @override
+  String get setupOwnerTitle => 'Welcome — create the owner account';
+
+  @override
+  String get setupOwnerSubtitle => 'This account manages staff and settings';
+
+  @override
+  String get loginTitle => 'Enter your PIN';
+
+  @override
+  String get staffName => 'Your name';
+
+  @override
+  String get pin => 'PIN';
+
+  @override
+  String get confirmPin => 'Confirm PIN';
+
+  @override
+  String get pinMismatch => 'PINs do not match';
+
+  @override
+  String get pinTooShort => 'PIN must be at least 4 digits';
+
+  @override
+  String get wrongPin => 'Wrong PIN';
+
+  @override
+  String get createAccount => 'Create account';
+
+  @override
+  String get login => 'Log in';
+
+  @override
+  String get logout => 'Log out';
+
+  @override
+  String loggedInAs(String name) {
+    return 'Signed in: $name';
+  }
+
+  @override
+  String get roleOwner => 'Owner';
+
+  @override
+  String get roleManager => 'Manager';
+
+  @override
+  String get roleCashier => 'Cashier';
+
+  @override
+  String get staffSection => 'Staff & PINs';
+
+  @override
+  String get addStaff => 'Add staff';
+
+  @override
+  String get role => 'Role';
+
+  @override
+  String removeStaff(String name) {
+    return 'Remove $name?';
+  }
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get navInventory => 'Inventory';
+
+  @override
+  String get lowStockTitle => 'Low stock';
+
+  @override
+  String get expiringSoonTitle => 'Expiring soon';
+
+  @override
+  String get noAlerts => 'All good — no stock alerts';
+
+  @override
+  String expiresOn(String date) {
+    return 'Expires $date';
+  }
+
+  @override
+  String get expired => 'Expired';
+
+  @override
+  String get staffSalesTitle => 'Sales by staff';
 }

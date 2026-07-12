@@ -5,6 +5,8 @@ import 'app/brand.dart';
 import 'app/providers.dart';
 import 'app/router.dart';
 import 'app/theme.dart';
+import 'features/auth/logic/session.dart';
+import 'features/auth/ui/login_screen.dart';
 import 'l10n/gen/app_localizations.dart';
 
 void main() {
@@ -24,6 +26,16 @@ class BechaKenaApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: ref.watch(routerProvider),
+      // Gate the whole app behind staff login (offline PIN). The login screen
+      // gets its own Navigator so its fields/dialogs have an Overlay ancestor.
+      builder: (context, child) {
+        final staff = ref.watch(currentStaffProvider);
+        if (staff != null) return child!;
+        return Navigator(
+          onGenerateRoute: (_) =>
+              MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
+        );
+      },
     );
   }
 }

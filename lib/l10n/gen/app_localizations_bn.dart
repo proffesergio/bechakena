@@ -308,4 +308,94 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get allCategories => 'সব';
+
+  @override
+  String get setupOwnerTitle => 'স্বাগতম — মালিক অ্যাকাউন্ট তৈরি করুন';
+
+  @override
+  String get setupOwnerSubtitle => 'এই অ্যাকাউন্ট কর্মী ও সেটিংস পরিচালনা করে';
+
+  @override
+  String get loginTitle => 'আপনার পিন দিন';
+
+  @override
+  String get staffName => 'আপনার নাম';
+
+  @override
+  String get pin => 'পিন';
+
+  @override
+  String get confirmPin => 'পিন নিশ্চিত করুন';
+
+  @override
+  String get pinMismatch => 'পিন মিলছে না';
+
+  @override
+  String get pinTooShort => 'পিন কমপক্ষে ৪ সংখ্যার হতে হবে';
+
+  @override
+  String get wrongPin => 'ভুল পিন';
+
+  @override
+  String get createAccount => 'অ্যাকাউন্ট তৈরি করুন';
+
+  @override
+  String get login => 'লগ ইন';
+
+  @override
+  String get logout => 'লগ আউট';
+
+  @override
+  String loggedInAs(String name) {
+    return 'সাইন ইন: $name';
+  }
+
+  @override
+  String get roleOwner => 'মালিক';
+
+  @override
+  String get roleManager => 'ম্যানেজার';
+
+  @override
+  String get roleCashier => 'ক্যাশিয়ার';
+
+  @override
+  String get staffSection => 'কর্মী ও পিন';
+
+  @override
+  String get addStaff => 'কর্মী যোগ করুন';
+
+  @override
+  String get role => 'ভূমিকা';
+
+  @override
+  String removeStaff(String name) {
+    return '$name সরাবেন?';
+  }
+
+  @override
+  String get remove => 'সরান';
+
+  @override
+  String get navInventory => 'ইনভেন্টরি';
+
+  @override
+  String get lowStockTitle => 'স্টক কম';
+
+  @override
+  String get expiringSoonTitle => 'মেয়াদ শেষ হচ্ছে';
+
+  @override
+  String get noAlerts => 'সব ঠিক আছে — কোনো সতর্কতা নেই';
+
+  @override
+  String expiresOn(String date) {
+    return 'মেয়াদ $date';
+  }
+
+  @override
+  String get expired => 'মেয়াদোত্তীর্ণ';
+
+  @override
+  String get staffSalesTitle => 'কর্মী অনুযায়ী বিক্রয়';
 }

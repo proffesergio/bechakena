@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/customers/ui/customers_screen.dart';
+import '../features/inventory/ui/inventory_screen.dart';
 import '../features/pos/ui/pos_screen.dart';
 import '../features/products/ui/products_screen.dart';
 import '../features/purchases/ui/purchases_screen.dart';
@@ -21,6 +22,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/products', builder: (_, _) => const ProductsScreen()),
           GoRoute(
               path: '/purchases', builder: (_, _) => const PurchasesScreen()),
+          GoRoute(
+              path: '/inventory', builder: (_, _) => const InventoryScreen()),
           GoRoute(
               path: '/customers', builder: (_, _) => const CustomersScreen()),
           GoRoute(path: '/reports', builder: (_, _) => const ReportsScreen()),
@@ -41,6 +44,7 @@ class AppShell extends StatelessWidget {
     '/',
     '/products',
     '/purchases',
+    '/inventory',
     '/customers',
     '/reports',
     '/settings',
@@ -53,27 +57,43 @@ class AppShell extends StatelessWidget {
     return Scaffold(
       body: Row(
         children: [
-          NavigationRail(
-            selectedIndex: index,
-            labelType: NavigationRailLabelType.all,
-            onDestinationSelected: (i) => context.go(_paths[i]),
-            destinations: [
-              NavigationRailDestination(
-                  icon: const Icon(Icons.point_of_sale),
-                  label: Text(l10n.navPos)),
-              NavigationRailDestination(
-                  icon: const Icon(Icons.inventory_2),
-                  label: Text(l10n.navProducts)),
-              NavigationRailDestination(
-                  icon: const Icon(Icons.local_shipping),
-                  label: Text(l10n.navPurchases)),
-              NavigationRailDestination(
-                  icon: const Icon(Icons.people), label: Text(l10n.navCustomers)),
-              NavigationRailDestination(
-                  icon: const Icon(Icons.bar_chart), label: Text(l10n.navReports)),
-              NavigationRailDestination(
-                  icon: const Icon(Icons.settings), label: Text(l10n.navSettings)),
-            ],
+          // Height-safe: the rail scrolls if the window is short.
+          LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: NavigationRail(
+                    selectedIndex: index,
+                    labelType: NavigationRailLabelType.all,
+                    onDestinationSelected: (i) => context.go(_paths[i]),
+                    destinations: [
+                      NavigationRailDestination(
+                          icon: const Icon(Icons.point_of_sale),
+                          label: Text(l10n.navPos)),
+                      NavigationRailDestination(
+                          icon: const Icon(Icons.inventory_2),
+                          label: Text(l10n.navProducts)),
+                      NavigationRailDestination(
+                          icon: const Icon(Icons.local_shipping),
+                          label: Text(l10n.navPurchases)),
+                      NavigationRailDestination(
+                          icon: const Icon(Icons.warehouse),
+                          label: Text(l10n.navInventory)),
+                      NavigationRailDestination(
+                          icon: const Icon(Icons.people),
+                          label: Text(l10n.navCustomers)),
+                      NavigationRailDestination(
+                          icon: const Icon(Icons.bar_chart),
+                          label: Text(l10n.navReports)),
+                      NavigationRailDestination(
+                          icon: const Icon(Icons.settings),
+                          label: Text(l10n.navSettings)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
           const VerticalDivider(width: 1),
           Expanded(child: child),

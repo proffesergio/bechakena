@@ -673,6 +673,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All'**
   String get allCategories;
+
+  /// No description provided for @setupOwnerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome — create the owner account'**
+  String get setupOwnerTitle;
+
+  /// No description provided for @setupOwnerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This account manages staff and settings'**
+  String get setupOwnerSubtitle;
+
+  /// No description provided for @loginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your PIN'**
+  String get loginTitle;
+
+  /// No description provided for @staffName.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name'**
+  String get staffName;
+
+  /// No description provided for @pin.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN'**
+  String get pin;
+
+  /// No description provided for @confirmPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm PIN'**
+  String get confirmPin;
+
+  /// No description provided for @pinMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'PINs do not match'**
+  String get pinMismatch;
+
+  /// No description provided for @pinTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN must be at least 4 digits'**
+  String get pinTooShort;
+
+  /// No description provided for @wrongPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong PIN'**
+  String get wrongPin;
+
+  /// No description provided for @createAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get createAccount;
+
+  /// No description provided for @login.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in'**
+  String get login;
+
+  /// No description provided for @logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get logout;
+
+  /// No description provided for @loggedInAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in: {name}'**
+  String loggedInAs(String name);
+
+  /// No description provided for @roleOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get roleOwner;
+
+  /// No description provided for @roleManager.
+  ///
+  /// In en, this message translates to:
+  /// **'Manager'**
+  String get roleManager;
+
+  /// No description provided for @roleCashier.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier'**
+  String get roleCashier;
+
+  /// No description provided for @staffSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff & PINs'**
+  String get staffSection;
+
+  /// No description provided for @addStaff.
+  ///
+  /// In en, this message translates to:
+  /// **'Add staff'**
+  String get addStaff;
+
+  /// No description provided for @role.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get role;
+
+  /// No description provided for @removeStaff.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}?'**
+  String removeStaff(String name);
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @navInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory'**
+  String get navInventory;
+
+  /// No description provided for @lowStockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Low stock'**
+  String get lowStockTitle;
+
+  /// No description provided for @expiringSoonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiring soon'**
+  String get expiringSoonTitle;
+
+  /// No description provided for @noAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'All good — no stock alerts'**
+  String get noAlerts;
+
+  /// No description provided for @expiresOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires {date}'**
+  String expiresOn(String date);
+
+  /// No description provided for @expired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get expired;
+
+  /// No description provided for @staffSalesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales by staff'**
+  String get staffSalesTitle;
 }
 
 class _AppLocalizationsDelegate

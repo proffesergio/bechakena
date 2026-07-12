@@ -137,5 +137,54 @@
   "range30d": "30 days",
   "noData": "No sales in this period yet",
   "avgPerSale": "Average per sale",
-  "allCategories": "All"
+  "allCategories": "All",
+  "setupOwnerTitle": "Welcome — create the owner account",
+  "setupOwnerSubtitle": "This account manages staff and settings",
+  "loginTitle": "Enter your PIN",
+  "staffName": "Your name",
+  "pin": "PIN",
+  "confirmPin": "Confirm PIN",
+  "pinMismatch": "PINs do not match",
+  "pinTooShort": "PIN must be at least 4 digits",
+  "wrongPin": "Wrong PIN",
+  "createAccount": "Create account",
+  "login": "Log in",
+  "logout": "Log out",
+  "loggedInAs": "Signed in: {name}",
+  "@loggedInAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "roleOwner": "Owner",
+  "roleManager": "Manager",
+  "roleCashier": "Cashier",
+  "staffSection": "Staff & PINs",
+  "addStaff": "Add staff",
+  "role": "Role",
+  "removeStaff": "Remove {name}?",
+  "@removeStaff": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "remove": "Remove",
+  "navInventory": "Inventory",
+  "lowStockTitle": "Low stock",
+  "expiringSoonTitle": "Expiring soon",
+  "noAlerts": "All good — no stock alerts",
+  "expiresOn": "Expires {date}",
+  "@expiresOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "expired": "Expired",
+  "staffSalesTitle": "Sales by staff"
 }

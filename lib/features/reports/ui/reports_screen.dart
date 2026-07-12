@@ -8,6 +8,7 @@ import '../../../core/db/database.dart';
 import '../../../core/format.dart';
 import '../../../core/money.dart';
 import '../../../l10n/gen/app_localizations.dart';
+import '../../auth/logic/session.dart';
 
 // Chart colors from the validated dataviz reference palette (light/dark are
 // selected steps, not an automatic flip). Payment methods keep fixed entity
@@ -41,11 +42,13 @@ class DashboardData {
     required this.days,
     required this.top,
     required this.payments,
+    required this.staff,
   });
 
   final List<DailyTotal> days;
   final List<TopProduct> top;
   final Map<PayMethod, Money> payments;
+  final Map<String?, Money> staff;
 
   Money get total => days.fold(Money.zero, (s, d) => s + d.total);
   int get count => days.fold(0, (s, d) => s + d.count);
@@ -62,7 +65,9 @@ final _dashboardProvider = FutureProvider<DashboardData>((ref) async {
   final days = await db.salesDao.dailyTotals(start: start, end: end);
   final top = await db.salesDao.topProducts(start: start, end: end);
   final payments = await db.salesDao.paymentTotals(start: start, end: end);
-  return DashboardData(days: days, top: top, payments: payments);
+  final staff = await db.salesDao.staffTotals(start: start, end: end);
+  return DashboardData(
+      days: days, top: top, payments: payments, staff: staff);
 });
 
 class ReportsScreen extends ConsumerWidget {
@@ -163,6 +168,13 @@ class ReportsScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+              if (d.staff.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                _ChartCard(
+                  title: l10n.staffSalesTitle,
+                  child: _StaffSales(staff: d.staff),
+                ),
+              ],
             ],
           ].animate(interval: 60.ms).fadeIn(duration: 250.ms),
         ),
@@ -411,6 +423,64 @@ class _TopProductsList extends StatelessWidget {
                     value: maxRevenue == 0
                         ? 0
                         : p.revenue.paisa / maxRevenue,
+                    minHeight: 6,
+                    color: series,
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Sales per staff member, resolving ids to names. Single-hue ranked bars.
+class _StaffSales extends ConsumerWidget {
+  const _StaffSales({required this.staff});
+
+  final Map<String?, Money> staff;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final locale = Localizations.localeOf(context).languageCode;
+    final dark = theme.brightness == Brightness.dark;
+    final series = dark ? _seriesDark : _seriesLight;
+    final names = {
+      for (final s in ref.watch(staffListProvider).value ?? const <StaffData>[])
+        s.id: s.name
+    };
+    final entries = staff.entries.toList()
+      ..sort((a, b) => b.value.paisa.compareTo(a.value.paisa));
+    final maxPaisa =
+        entries.fold<int>(0, (m, e) => e.value.paisa > m ? e.value.paisa : m);
+
+    return Column(
+      children: [
+        for (final e in entries)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(names[e.key] ?? '—',
+                          style: theme.textTheme.bodyMedium),
+                    ),
+                    Text(formatTaka(e.value, locale: locale),
+                        style: theme.textTheme.bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: maxPaisa == 0 ? 0 : e.value.paisa / maxPaisa,
                     minHeight: 6,
                     color: series,
                     backgroundColor: theme.colorScheme.surfaceContainerHighest,
