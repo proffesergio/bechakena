@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter *)",
+      "Bash(dart *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *.g.dart) ;; *.dart) out=$(flutter analyze 2>&1) || { printf '%s\\n' \"$out\" | tail -20; exit 2; } ;; esac",
+            "asyncRewake": true,
+            "timeout": 120,
+            "statusMessage": "flutter analyze"
+          }
+        ]
+      }
+    ]
+  }
+}

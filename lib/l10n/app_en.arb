@@ -1,0 +1,141 @@
+{
+  "@@locale": "en",
+  "navPos": "POS",
+  "navProducts": "Products",
+  "navCustomers": "Customers",
+  "navReports": "Reports",
+  "navSettings": "Settings",
+  "searchProducts": "Search products (name or barcode)",
+  "invoicePanel": "Invoice",
+  "emptyCart": "Scan or tap a product to start",
+  "noProducts": "No products yet — add your first product",
+  "subtotal": "Subtotal",
+  "discount": "Discount",
+  "vat": "VAT",
+  "total": "Total",
+  "pay": "Pay",
+  "cashReceived": "Cash received",
+  "change": "Change",
+  "confirmSale": "Confirm sale",
+  "saleComplete": "Sale complete — {invoiceNo}",
+  "@saleComplete": {
+    "placeholders": {
+      "invoiceNo": {
+        "type": "String"
+      }
+    }
+  },
+  "addProduct": "Add product",
+  "productName": "Name",
+  "price": "Price",
+  "barcode": "Barcode (optional)",
+  "openingStock": "Opening stock (optional)",
+  "stockLabel": "Stock: {qty}",
+  "@stockLabel": {
+    "placeholders": {
+      "qty": {
+        "type": "String"
+      }
+    }
+  },
+  "save": "Save",
+  "cancel": "Cancel",
+  "customerLabel": "Customer",
+  "walkIn": "Walk-in customer",
+  "willBeDue": "{amount} will be due (baki)",
+  "@willBeDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "addCustomer": "Add customer",
+  "customerName": "Customer name",
+  "phone": "Phone (optional)",
+  "dueLabel": "Due",
+  "receivePayment": "Receive payment",
+  "amount": "Amount",
+  "noCustomers": "No customers yet",
+  "todayTransactions": "Transactions today",
+  "todaySalesTotal": "Sales today",
+  "todayNewDue": "New due today",
+  "language": "Language",
+  "invalidAmount": "Enter a valid amount",
+  "requiredField": "Required",
+  "cashLabel": "Cash",
+  "bkash": "bKash",
+  "nagad": "Nagad",
+  "card": "Card",
+  "receiptTitle": "Receipt",
+  "printReceipt": "Print",
+  "close": "Close",
+  "printFailed": "Print failed: {error}",
+  "@printFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "manualItem": "Manual item",
+  "quantity": "Quantity",
+  "navPurchases": "Purchases",
+  "newPurchase": "New purchase",
+  "supplier": "Supplier (optional)",
+  "invoiceRef": "Supplier invoice no (optional)",
+  "unitCost": "Unit cost",
+  "expiry": "Expiry YYYY-MM-DD (optional)",
+  "addLine": "Add line",
+  "product": "Product",
+  "noPurchases": "No purchases recorded yet",
+  "addSupplier": "Add supplier",
+  "supplierName": "Supplier name",
+  "invalidDate": "Invalid date",
+  "adjustStock": "Adjust stock",
+  "qtyChange": "Change (+ receive / − remove)",
+  "reason": "Reason",
+  "currentStock": "Current stock: {qty}",
+  "@currentStock": {
+    "placeholders": {
+      "qty": {
+        "type": "String"
+      }
+    }
+  },
+  "shopSection": "Shop profile",
+  "shopNameLabel": "Shop name",
+  "shopPhone": "Shop phone",
+  "shopAddress": "Address",
+  "receiptFooterLabel": "Receipt footer",
+  "printerSection": "Printer",
+  "printerHost": "Printer IP (LAN)",
+  "printerPort": "Port",
+  "paperWidth": "Paper",
+  "testPrint": "Test print",
+  "backupSection": "Backup",
+  "backupNow": "Backup now",
+  "backupSaved": "Backup saved: {path}",
+  "@backupSaved": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "restoreBackup": "Restore from backup",
+  "restoreDone": "Restored. Please close and reopen the app.",
+  "saved": "Saved",
+  "loadDemo": "Load sample products (demo)",
+  "demoLoaded": "Sample products loaded",
+  "demoSkipped": "Products already exist — demo not loaded",
+  "salesTrend": "Sales trend",
+  "topProductsTitle": "Top products",
+  "paymentMethodsTitle": "Payment methods",
+  "rangeToday": "Today",
+  "range7d": "7 days",
+  "range30d": "30 days",
+  "noData": "No sales in this period yet",
+  "avgPerSale": "Average per sale",
+  "allCategories": "All"
+}
