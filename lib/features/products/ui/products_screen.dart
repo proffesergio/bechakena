@@ -7,8 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../../../app/business_type.dart';
 import '../../../app/product_visuals.dart';
 import '../../../app/providers.dart';
+import '../../../app/widgets/app_loader.dart';
 import '../../../core/csv/product_csv.dart';
 import '../../../core/db/database.dart';
 import '../../../core/format.dart';
@@ -98,7 +100,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           const Divider(height: 1),
           Expanded(
             child: products.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: AppLoader()),
               error: (e, _) => Center(child: Text('$e')),
               data: (all) {
                 final list = _applyFilters(all, lowStockIds);
@@ -145,6 +147,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         unit: Value(pr.unit),
         salePrice: pr.salePrice,
         vatRateBp: Value(pr.vatRateBp),
+        businessType: Value(ref.read(catalogScopeProvider)),
       ));
       if (!pr.openingStock.isZero) {
         await db.stockDao.addMovement(
@@ -166,7 +169,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final db = ref.read(databaseProvider);
-    final products = await db.productsDao.watchActive().first;
+    final products = await db.productsDao
+        .watchActive(businessType: ref.read(catalogScopeProvider))
+        .first;
     final rows = <ProductCsvRow>[];
     for (final pr in products) {
       final stock = await db.stockDao.stockFor(pr.id);
@@ -779,6 +784,7 @@ class _ProductEditDialogState extends ConsumerState<ProductEditDialog> {
         categoryId: Value(_categoryId),
         lowStockLevel: Value(low),
         imagePath: Value(_imagePath),
+        businessType: Value(ref.read(catalogScopeProvider)),
       ));
       final openingText = _openingStock.text.trim();
       if (openingText.isNotEmpty) {

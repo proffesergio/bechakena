@@ -24,8 +24,15 @@ class ProductsDao extends DatabaseAccessor<AppDatabase> with _$ProductsDaoMixin 
             p.isActive.equals(true)))
       .getSingleOrNull();
 
-  Stream<List<Product>> watchActive() => (select(products)
-        ..where((p) => p.deletedAt.isNull() & p.isActive.equals(true))
+  /// Active products, optionally scoped to one module's catalog
+  /// ('superShop' or 'restaurant'). A null [businessType] returns all.
+  Stream<List<Product>> watchActive({String? businessType}) => (select(products)
+        ..where((p) =>
+            p.deletedAt.isNull() &
+            p.isActive.equals(true) &
+            (businessType == null
+                ? const Constant(true)
+                : p.businessType.equals(businessType)))
         ..orderBy([(p) => OrderingTerm.asc(p.name)]))
       .watch();
 

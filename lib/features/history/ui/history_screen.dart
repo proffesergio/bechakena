@@ -10,6 +10,7 @@ import '../../../core/qty.dart';
 import '../../../core/printing/print_service.dart';
 import '../../../core/printing/receipt.dart';
 import '../../../l10n/gen/app_localizations.dart';
+import '../../auth/logic/permissions.dart';
 import '../../auth/logic/session.dart';
 import '../../pos/ui/receipt_dialog.dart';
 
@@ -105,19 +106,20 @@ class _SaleDetailDialog extends ConsumerWidget {
           label: Text(l10n.reprint),
           onPressed: () => _reprint(context, ref),
         ),
-        TextButton.icon(
-          icon: const Icon(Icons.assignment_return),
-          label: Text(l10n.returnItems),
-          onPressed: () {
-            final items = itemsAsync.value;
-            if (items == null || items.isEmpty) return;
-            Navigator.of(context).pop();
-            showDialog<void>(
-              context: context,
-              builder: (_) => _ReturnDialog(sale: sale, items: items),
-            );
-          },
-        ),
+        if (ref.watch(canProvider(Capability.processReturns)))
+          TextButton.icon(
+            icon: const Icon(Icons.assignment_return),
+            label: Text(l10n.returnItems),
+            onPressed: () {
+              final items = itemsAsync.value;
+              if (items == null || items.isEmpty) return;
+              Navigator.of(context).pop();
+              showDialog<void>(
+                context: context,
+                builder: (_) => _ReturnDialog(sale: sale, items: items),
+              );
+            },
+          ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.close),

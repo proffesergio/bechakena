@@ -10,6 +10,7 @@ import 'daos/purchases_dao.dart';
 import 'daos/sales_dao.dart';
 import 'daos/settings_dao.dart';
 import 'daos/sms_dao.dart';
+import 'daos/orders_dao.dart';
 import 'daos/staff_dao.dart';
 import 'daos/stock_dao.dart';
 import 'returns_dao.dart';
@@ -21,6 +22,7 @@ export 'daos/purchases_dao.dart';
 export 'daos/sales_dao.dart';
 export 'daos/settings_dao.dart';
 export 'daos/sms_dao.dart';
+export 'daos/orders_dao.dart';
 export 'daos/staff_dao.dart';
 export 'daos/stock_dao.dart';
 export 'returns_dao.dart';
@@ -48,6 +50,9 @@ part 'database.g.dart';
     Settings,
     Returns,
     ReturnItems,
+    DiningTables,
+    DineOrders,
+    DineOrderItems,
   ],
   daos: [
     ProductsDao,
@@ -59,13 +64,14 @@ part 'database.g.dart';
     StaffDao,
     ReturnsDao,
     SmsDao,
+    OrdersDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -83,6 +89,23 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(stockMovements, stockMovements.branchId);
             await m.addColumn(sales, sales.branchId);
             await m.addColumn(purchases, purchases.branchId);
+          }
+          // v4 adds restaurant-mode dining tables.
+          if (from < 4) {
+            await m.createTable(diningTables);
+          }
+          // v5 tags catalog rows with a business type so supershop and
+          // restaurant have separate catalogs. Existing rows default to
+          // 'superShop' via the column default.
+          if (from < 5) {
+            await m.addColumn(products, products.businessType);
+            await m.addColumn(categories, categories.businessType);
+          }
+          // v6 adds restaurant running orders (dine-in / takeaway / delivery)
+          // and their line items.
+          if (from < 6) {
+            await m.createTable(dineOrders);
+            await m.createTable(dineOrderItems);
           }
         },
         beforeOpen: (details) async {

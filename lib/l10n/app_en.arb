@@ -307,5 +307,89 @@
   "addBranch": "Add branch",
   "branchName": "Branch name",
   "branchHint": "Sales, purchases and stock on this device are recorded against this branch.",
-  "branchAdded": "Branch added"
+  "branchAdded": "Branch added",
+  "chooseBusinessType": "What kind of business is this?",
+  "chooseBusinessTypeHint": "This sets up the right screens and tools for your business.",
+  "chooseModule": "Which module do you want to open?",
+  "chooseModuleHint": "Pick where you're working today. Supershop and Restaurant keep separate catalogs.",
+  "bizSupershop": "Supershop / Retail",
+  "bizSupershopDesc": "Products, barcode billing, inventory and baki khata.",
+  "bizRestaurant": "Restaurant",
+  "bizRestaurantDesc": "Menu items, dining tables and table-side orders.",
+  "tourWelcomeTitle": "Welcome!",
+  "tourWelcomeBody": "A fast, offline-first point of sale. Here's a 30-second tour — you can skip anytime.",
+  "tourSellTitle": "Sell in seconds",
+  "tourSellBody": "Scan a barcode, tap a product, or type an item. Take cash, bKash, Nagad, card or due — with change and split payments.",
+  "tourOrdersTitle": "Take orders fast",
+  "tourOrdersBody": "Add menu items to an order, manage dining tables, and print the bill in seconds.",
+  "tourStockTitle": "Inventory that maintains itself",
+  "tourStockBody": "Every sale reduces stock and every purchase restocks. Low-stock and expiry alerts keep you ahead — per branch.",
+  "tourReportsTitle": "Khata & reports built in",
+  "tourReportsBody": "Track customer due (baki), see daily profit and top products, and back up your data — all offline.",
+  "skip": "Skip",
+  "next": "Next",
+  "getStarted": "Get started",
+  "navOrders": "Orders",
+  "navMenu": "Menu",
+  "navTables": "Tables",
+  "noTables": "No tables yet — add your first table",
+  "addTable": "Add table",
+  "editTable": "Edit table",
+  "deleteTable": "Delete table",
+  "tableDeleted": "Table deleted",
+  "tableName": "Table name / number",
+  "tableArea": "Area (e.g. Rooftop)",
+  "tableSeats": "Seats",
+  "orderTypeDineIn": "Dine-in",
+  "orderTypeTakeaway": "Takeaway",
+  "orderTypeDelivery": "Delivery",
+  "newTakeaway": "New takeaway",
+  "newDelivery": "New delivery",
+  "openOrders": "Open orders",
+  "noOpenOrders": "No open orders — tap a table or start a takeaway",
+  "tableFree": "Free",
+  "tableOccupied": "Occupied",
+  "manageTables": "Manage tables",
+  "doneManaging": "Done",
+  "guest": "Guest",
+  "guestName": "Guest name (optional)",
+  "guestPhone": "Phone (optional)",
+  "orderPanel": "Order",
+  "addToOrder": "Add to order",
+  "noOrderItems": "No items yet — add from the menu",
+  "sendToKitchen": "Send to kitchen",
+  "kitchenTicket": "Kitchen ticket",
+  "sentToKitchen": "Sent to kitchen",
+  "nothingNewToSend": "Nothing new to send",
+  "settleOrder": "Settle & pay",
+  "orderSettled": "Order settled — {invoiceNo}",
+  "@orderSettled": {
+    "placeholders": {
+      "invoiceNo": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelOrder": "Cancel order",
+  "cancelOrderConfirm": "Cancel this order? Nothing will be charged.",
+  "orderCancelled": "Order cancelled",
+  "itemsCount": "{count} items",
+  "@itemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "newItemsToFire": "{count} new to fire",
+  "@newItemsToFire": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "switchModule": "Switch module",
+  "switchModuleConfirm": "Switch to the other module? You'll sign out and pick again. Each module keeps its own separate data.",
+  "switchModuleAction": "Switch"
 }

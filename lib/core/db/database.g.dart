@@ -1252,6 +1252,18 @@ class $CategoriesTable extends Categories
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _businessTypeMeta = const VerificationMeta(
+    'businessType',
+  );
+  @override
+  late final GeneratedColumn<String> businessType = GeneratedColumn<String>(
+    'business_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('superShop'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1262,6 +1274,7 @@ class $CategoriesTable extends Categories
     nameBn,
     colorHex,
     sortOrder,
+    businessType,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1322,6 +1335,15 @@ class $CategoriesTable extends Categories
         sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
       );
     }
+    if (data.containsKey('business_type')) {
+      context.handle(
+        _businessTypeMeta,
+        businessType.isAcceptableOrUnknown(
+          data['business_type']!,
+          _businessTypeMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1363,6 +1385,10 @@ class $CategoriesTable extends Categories
         DriftSqlType.int,
         data['${effectivePrefix}sort_order'],
       )!,
+      businessType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}business_type'],
+      )!,
     );
   }
 
@@ -1381,6 +1407,9 @@ class Category extends DataClass implements Insertable<Category> {
   final String? nameBn;
   final String? colorHex;
   final int sortOrder;
+
+  /// 'superShop' or 'restaurant' — keeps each module's categories separate.
+  final String businessType;
   const Category({
     required this.id,
     required this.updatedAt,
@@ -1390,6 +1419,7 @@ class Category extends DataClass implements Insertable<Category> {
     this.nameBn,
     this.colorHex,
     required this.sortOrder,
+    required this.businessType,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1408,6 +1438,7 @@ class Category extends DataClass implements Insertable<Category> {
       map['color_hex'] = Variable<String>(colorHex);
     }
     map['sort_order'] = Variable<int>(sortOrder);
+    map['business_type'] = Variable<String>(businessType);
     return map;
   }
 
@@ -1427,6 +1458,7 @@ class Category extends DataClass implements Insertable<Category> {
           ? const Value.absent()
           : Value(colorHex),
       sortOrder: Value(sortOrder),
+      businessType: Value(businessType),
     );
   }
 
@@ -1444,6 +1476,7 @@ class Category extends DataClass implements Insertable<Category> {
       nameBn: serializer.fromJson<String?>(json['nameBn']),
       colorHex: serializer.fromJson<String?>(json['colorHex']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      businessType: serializer.fromJson<String>(json['businessType']),
     );
   }
   @override
@@ -1458,6 +1491,7 @@ class Category extends DataClass implements Insertable<Category> {
       'nameBn': serializer.toJson<String?>(nameBn),
       'colorHex': serializer.toJson<String?>(colorHex),
       'sortOrder': serializer.toJson<int>(sortOrder),
+      'businessType': serializer.toJson<String>(businessType),
     };
   }
 
@@ -1470,6 +1504,7 @@ class Category extends DataClass implements Insertable<Category> {
     Value<String?> nameBn = const Value.absent(),
     Value<String?> colorHex = const Value.absent(),
     int? sortOrder,
+    String? businessType,
   }) => Category(
     id: id ?? this.id,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -1479,6 +1514,7 @@ class Category extends DataClass implements Insertable<Category> {
     nameBn: nameBn.present ? nameBn.value : this.nameBn,
     colorHex: colorHex.present ? colorHex.value : this.colorHex,
     sortOrder: sortOrder ?? this.sortOrder,
+    businessType: businessType ?? this.businessType,
   );
   Category copyWithCompanion(CategoriesCompanion data) {
     return Category(
@@ -1490,6 +1526,9 @@ class Category extends DataClass implements Insertable<Category> {
       nameBn: data.nameBn.present ? data.nameBn.value : this.nameBn,
       colorHex: data.colorHex.present ? data.colorHex.value : this.colorHex,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      businessType: data.businessType.present
+          ? data.businessType.value
+          : this.businessType,
     );
   }
 
@@ -1503,7 +1542,8 @@ class Category extends DataClass implements Insertable<Category> {
           ..write('name: $name, ')
           ..write('nameBn: $nameBn, ')
           ..write('colorHex: $colorHex, ')
-          ..write('sortOrder: $sortOrder')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('businessType: $businessType')
           ..write(')'))
         .toString();
   }
@@ -1518,6 +1558,7 @@ class Category extends DataClass implements Insertable<Category> {
     nameBn,
     colorHex,
     sortOrder,
+    businessType,
   );
   @override
   bool operator ==(Object other) =>
@@ -1530,7 +1571,8 @@ class Category extends DataClass implements Insertable<Category> {
           other.name == this.name &&
           other.nameBn == this.nameBn &&
           other.colorHex == this.colorHex &&
-          other.sortOrder == this.sortOrder);
+          other.sortOrder == this.sortOrder &&
+          other.businessType == this.businessType);
 }
 
 class CategoriesCompanion extends UpdateCompanion<Category> {
@@ -1542,6 +1584,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<String?> nameBn;
   final Value<String?> colorHex;
   final Value<int> sortOrder;
+  final Value<String> businessType;
   final Value<int> rowid;
   const CategoriesCompanion({
     this.id = const Value.absent(),
@@ -1552,6 +1595,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.nameBn = const Value.absent(),
     this.colorHex = const Value.absent(),
     this.sortOrder = const Value.absent(),
+    this.businessType = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CategoriesCompanion.insert({
@@ -1563,6 +1607,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.nameBn = const Value.absent(),
     this.colorHex = const Value.absent(),
     this.sortOrder = const Value.absent(),
+    this.businessType = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : name = Value(name);
   static Insertable<Category> custom({
@@ -1574,6 +1619,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Expression<String>? nameBn,
     Expression<String>? colorHex,
     Expression<int>? sortOrder,
+    Expression<String>? businessType,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1585,6 +1631,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       if (nameBn != null) 'name_bn': nameBn,
       if (colorHex != null) 'color_hex': colorHex,
       if (sortOrder != null) 'sort_order': sortOrder,
+      if (businessType != null) 'business_type': businessType,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1598,6 +1645,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Value<String?>? nameBn,
     Value<String?>? colorHex,
     Value<int>? sortOrder,
+    Value<String>? businessType,
     Value<int>? rowid,
   }) {
     return CategoriesCompanion(
@@ -1609,6 +1657,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       nameBn: nameBn ?? this.nameBn,
       colorHex: colorHex ?? this.colorHex,
       sortOrder: sortOrder ?? this.sortOrder,
+      businessType: businessType ?? this.businessType,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1640,6 +1689,9 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     if (sortOrder.present) {
       map['sort_order'] = Variable<int>(sortOrder.value);
     }
+    if (businessType.present) {
+      map['business_type'] = Variable<String>(businessType.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1657,6 +1709,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
           ..write('nameBn: $nameBn, ')
           ..write('colorHex: $colorHex, ')
           ..write('sortOrder: $sortOrder, ')
+          ..write('businessType: $businessType, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1842,6 +1895,18 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _businessTypeMeta = const VerificationMeta(
+    'businessType',
+  );
+  @override
+  late final GeneratedColumn<String> businessType = GeneratedColumn<String>(
+    'business_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('superShop'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1860,6 +1925,7 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     lowStockLevel,
     imagePath,
     isActive,
+    businessType,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1950,6 +2016,15 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
         isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
       );
     }
+    if (data.containsKey('business_type')) {
+      context.handle(
+        _businessTypeMeta,
+        businessType.isAcceptableOrUnknown(
+          data['business_type']!,
+          _businessTypeMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2029,6 +2104,10 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_active'],
       )!,
+      businessType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}business_type'],
+      )!,
     );
   }
 
@@ -2062,6 +2141,10 @@ class Product extends DataClass implements Insertable<Product> {
   final Qty lowStockLevel;
   final String? imagePath;
   final bool isActive;
+
+  /// Which module owns this item: 'superShop' or 'restaurant'. Keeps the retail
+  /// catalog and the restaurant menu separate on the same install.
+  final String businessType;
   const Product({
     required this.id,
     required this.updatedAt,
@@ -2079,6 +2162,7 @@ class Product extends DataClass implements Insertable<Product> {
     required this.lowStockLevel,
     this.imagePath,
     required this.isActive,
+    required this.businessType,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2123,6 +2207,7 @@ class Product extends DataClass implements Insertable<Product> {
       map['image_path'] = Variable<String>(imagePath);
     }
     map['is_active'] = Variable<bool>(isActive);
+    map['business_type'] = Variable<String>(businessType);
     return map;
   }
 
@@ -2154,6 +2239,7 @@ class Product extends DataClass implements Insertable<Product> {
           ? const Value.absent()
           : Value(imagePath),
       isActive: Value(isActive),
+      businessType: Value(businessType),
     );
   }
 
@@ -2179,6 +2265,7 @@ class Product extends DataClass implements Insertable<Product> {
       lowStockLevel: serializer.fromJson<Qty>(json['lowStockLevel']),
       imagePath: serializer.fromJson<String?>(json['imagePath']),
       isActive: serializer.fromJson<bool>(json['isActive']),
+      businessType: serializer.fromJson<String>(json['businessType']),
     );
   }
   @override
@@ -2201,6 +2288,7 @@ class Product extends DataClass implements Insertable<Product> {
       'lowStockLevel': serializer.toJson<Qty>(lowStockLevel),
       'imagePath': serializer.toJson<String?>(imagePath),
       'isActive': serializer.toJson<bool>(isActive),
+      'businessType': serializer.toJson<String>(businessType),
     };
   }
 
@@ -2221,6 +2309,7 @@ class Product extends DataClass implements Insertable<Product> {
     Qty? lowStockLevel,
     Value<String?> imagePath = const Value.absent(),
     bool? isActive,
+    String? businessType,
   }) => Product(
     id: id ?? this.id,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -2238,6 +2327,7 @@ class Product extends DataClass implements Insertable<Product> {
     lowStockLevel: lowStockLevel ?? this.lowStockLevel,
     imagePath: imagePath.present ? imagePath.value : this.imagePath,
     isActive: isActive ?? this.isActive,
+    businessType: businessType ?? this.businessType,
   );
   Product copyWithCompanion(ProductsCompanion data) {
     return Product(
@@ -2261,6 +2351,9 @@ class Product extends DataClass implements Insertable<Product> {
           : this.lowStockLevel,
       imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      businessType: data.businessType.present
+          ? data.businessType.value
+          : this.businessType,
     );
   }
 
@@ -2282,7 +2375,8 @@ class Product extends DataClass implements Insertable<Product> {
           ..write('vatRateBp: $vatRateBp, ')
           ..write('lowStockLevel: $lowStockLevel, ')
           ..write('imagePath: $imagePath, ')
-          ..write('isActive: $isActive')
+          ..write('isActive: $isActive, ')
+          ..write('businessType: $businessType')
           ..write(')'))
         .toString();
   }
@@ -2305,6 +2399,7 @@ class Product extends DataClass implements Insertable<Product> {
     lowStockLevel,
     imagePath,
     isActive,
+    businessType,
   );
   @override
   bool operator ==(Object other) =>
@@ -2325,7 +2420,8 @@ class Product extends DataClass implements Insertable<Product> {
           other.vatRateBp == this.vatRateBp &&
           other.lowStockLevel == this.lowStockLevel &&
           other.imagePath == this.imagePath &&
-          other.isActive == this.isActive);
+          other.isActive == this.isActive &&
+          other.businessType == this.businessType);
 }
 
 class ProductsCompanion extends UpdateCompanion<Product> {
@@ -2345,6 +2441,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
   final Value<Qty> lowStockLevel;
   final Value<String?> imagePath;
   final Value<bool> isActive;
+  final Value<String> businessType;
   final Value<int> rowid;
   const ProductsCompanion({
     this.id = const Value.absent(),
@@ -2363,6 +2460,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     this.lowStockLevel = const Value.absent(),
     this.imagePath = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.businessType = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ProductsCompanion.insert({
@@ -2382,6 +2480,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     this.lowStockLevel = const Value.absent(),
     this.imagePath = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.businessType = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : name = Value(name),
        salePrice = Value(salePrice);
@@ -2402,6 +2501,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     Expression<int>? lowStockLevel,
     Expression<String>? imagePath,
     Expression<bool>? isActive,
+    Expression<String>? businessType,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2421,6 +2521,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
       if (lowStockLevel != null) 'low_stock_level': lowStockLevel,
       if (imagePath != null) 'image_path': imagePath,
       if (isActive != null) 'is_active': isActive,
+      if (businessType != null) 'business_type': businessType,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2442,6 +2543,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     Value<Qty>? lowStockLevel,
     Value<String?>? imagePath,
     Value<bool>? isActive,
+    Value<String>? businessType,
     Value<int>? rowid,
   }) {
     return ProductsCompanion(
@@ -2461,6 +2563,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
       lowStockLevel: lowStockLevel ?? this.lowStockLevel,
       imagePath: imagePath ?? this.imagePath,
       isActive: isActive ?? this.isActive,
+      businessType: businessType ?? this.businessType,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2522,6 +2625,9 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     if (isActive.present) {
       map['is_active'] = Variable<bool>(isActive.value);
     }
+    if (businessType.present) {
+      map['business_type'] = Variable<String>(businessType.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2547,6 +2653,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
           ..write('lowStockLevel: $lowStockLevel, ')
           ..write('imagePath: $imagePath, ')
           ..write('isActive: $isActive, ')
+          ..write('businessType: $businessType, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -10370,6 +10477,2136 @@ class ReturnItemsCompanion extends UpdateCompanion<ReturnItem> {
   }
 }
 
+class $DiningTablesTable extends DiningTables
+    with TableInfo<$DiningTablesTable, DiningTable> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DiningTablesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: newUuidV7,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now().toUtc(),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deviceIdMeta = const VerificationMeta(
+    'deviceId',
+  );
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+    'device_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: () => currentDeviceId,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _areaMeta = const VerificationMeta('area');
+  @override
+  late final GeneratedColumn<String> area = GeneratedColumn<String>(
+    'area',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _seatsMeta = const VerificationMeta('seats');
+  @override
+  late final GeneratedColumn<int> seats = GeneratedColumn<int>(
+    'seats',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    updatedAt,
+    deletedAt,
+    deviceId,
+    name,
+    area,
+    seats,
+    sortOrder,
+    isActive,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'dining_tables';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DiningTable> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('device_id')) {
+      context.handle(
+        _deviceIdMeta,
+        deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('area')) {
+      context.handle(
+        _areaMeta,
+        area.isAcceptableOrUnknown(data['area']!, _areaMeta),
+      );
+    }
+    if (data.containsKey('seats')) {
+      context.handle(
+        _seatsMeta,
+        seats.isAcceptableOrUnknown(data['seats']!, _seatsMeta),
+      );
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DiningTable map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DiningTable(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      deviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      area: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}area'],
+      ),
+      seats: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}seats'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
+    );
+  }
+
+  @override
+  $DiningTablesTable createAlias(String alias) {
+    return $DiningTablesTable(attachedDatabase, alias);
+  }
+}
+
+class DiningTable extends DataClass implements Insertable<DiningTable> {
+  final String id;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String deviceId;
+  final String name;
+  final String? area;
+  final int seats;
+  final int sortOrder;
+  final bool isActive;
+  const DiningTable({
+    required this.id,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.deviceId,
+    required this.name,
+    this.area,
+    required this.seats,
+    required this.sortOrder,
+    required this.isActive,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['device_id'] = Variable<String>(deviceId);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || area != null) {
+      map['area'] = Variable<String>(area);
+    }
+    map['seats'] = Variable<int>(seats);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['is_active'] = Variable<bool>(isActive);
+    return map;
+  }
+
+  DiningTablesCompanion toCompanion(bool nullToAbsent) {
+    return DiningTablesCompanion(
+      id: Value(id),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      deviceId: Value(deviceId),
+      name: Value(name),
+      area: area == null && nullToAbsent ? const Value.absent() : Value(area),
+      seats: Value(seats),
+      sortOrder: Value(sortOrder),
+      isActive: Value(isActive),
+    );
+  }
+
+  factory DiningTable.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DiningTable(
+      id: serializer.fromJson<String>(json['id']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      deviceId: serializer.fromJson<String>(json['deviceId']),
+      name: serializer.fromJson<String>(json['name']),
+      area: serializer.fromJson<String?>(json['area']),
+      seats: serializer.fromJson<int>(json['seats']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'deviceId': serializer.toJson<String>(deviceId),
+      'name': serializer.toJson<String>(name),
+      'area': serializer.toJson<String?>(area),
+      'seats': serializer.toJson<int>(seats),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'isActive': serializer.toJson<bool>(isActive),
+    };
+  }
+
+  DiningTable copyWith({
+    String? id,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? deviceId,
+    String? name,
+    Value<String?> area = const Value.absent(),
+    int? seats,
+    int? sortOrder,
+    bool? isActive,
+  }) => DiningTable(
+    id: id ?? this.id,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    deviceId: deviceId ?? this.deviceId,
+    name: name ?? this.name,
+    area: area.present ? area.value : this.area,
+    seats: seats ?? this.seats,
+    sortOrder: sortOrder ?? this.sortOrder,
+    isActive: isActive ?? this.isActive,
+  );
+  DiningTable copyWithCompanion(DiningTablesCompanion data) {
+    return DiningTable(
+      id: data.id.present ? data.id.value : this.id,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+      name: data.name.present ? data.name.value : this.name,
+      area: data.area.present ? data.area.value : this.area,
+      seats: data.seats.present ? data.seats.value : this.seats,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DiningTable(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('name: $name, ')
+          ..write('area: $area, ')
+          ..write('seats: $seats, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isActive: $isActive')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    updatedAt,
+    deletedAt,
+    deviceId,
+    name,
+    area,
+    seats,
+    sortOrder,
+    isActive,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DiningTable &&
+          other.id == this.id &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.deviceId == this.deviceId &&
+          other.name == this.name &&
+          other.area == this.area &&
+          other.seats == this.seats &&
+          other.sortOrder == this.sortOrder &&
+          other.isActive == this.isActive);
+}
+
+class DiningTablesCompanion extends UpdateCompanion<DiningTable> {
+  final Value<String> id;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> deviceId;
+  final Value<String> name;
+  final Value<String?> area;
+  final Value<int> seats;
+  final Value<int> sortOrder;
+  final Value<bool> isActive;
+  final Value<int> rowid;
+  const DiningTablesCompanion({
+    this.id = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.area = const Value.absent(),
+    this.seats = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DiningTablesCompanion.insert({
+    this.id = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    required String name,
+    this.area = const Value.absent(),
+    this.seats = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : name = Value(name);
+  static Insertable<DiningTable> custom({
+    Expression<String>? id,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? deviceId,
+    Expression<String>? name,
+    Expression<String>? area,
+    Expression<int>? seats,
+    Expression<int>? sortOrder,
+    Expression<bool>? isActive,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (deviceId != null) 'device_id': deviceId,
+      if (name != null) 'name': name,
+      if (area != null) 'area': area,
+      if (seats != null) 'seats': seats,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (isActive != null) 'is_active': isActive,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DiningTablesCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? deviceId,
+    Value<String>? name,
+    Value<String?>? area,
+    Value<int>? seats,
+    Value<int>? sortOrder,
+    Value<bool>? isActive,
+    Value<int>? rowid,
+  }) {
+    return DiningTablesCompanion(
+      id: id ?? this.id,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      deviceId: deviceId ?? this.deviceId,
+      name: name ?? this.name,
+      area: area ?? this.area,
+      seats: seats ?? this.seats,
+      sortOrder: sortOrder ?? this.sortOrder,
+      isActive: isActive ?? this.isActive,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (area.present) {
+      map['area'] = Variable<String>(area.value);
+    }
+    if (seats.present) {
+      map['seats'] = Variable<int>(seats.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DiningTablesCompanion(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('name: $name, ')
+          ..write('area: $area, ')
+          ..write('seats: $seats, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isActive: $isActive, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DineOrdersTable extends DineOrders
+    with TableInfo<$DineOrdersTable, DineOrder> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DineOrdersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: newUuidV7,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now().toUtc(),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deviceIdMeta = const VerificationMeta(
+    'deviceId',
+  );
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+    'device_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: () => currentDeviceId,
+  );
+  static const VerificationMeta _tableIdMeta = const VerificationMeta(
+    'tableId',
+  );
+  @override
+  late final GeneratedColumn<String> tableId = GeneratedColumn<String>(
+    'table_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES dining_tables (id)',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<OrderType, String> orderType =
+      GeneratedColumn<String>(
+        'order_type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<OrderType>($DineOrdersTable.$converterorderType);
+  @override
+  late final GeneratedColumnWithTypeConverter<OrderStatus, String> status =
+      GeneratedColumn<String>(
+        'status',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('open'),
+      ).withConverter<OrderStatus>($DineOrdersTable.$converterstatus);
+  static const VerificationMeta _branchIdMeta = const VerificationMeta(
+    'branchId',
+  );
+  @override
+  late final GeneratedColumn<String> branchId = GeneratedColumn<String>(
+    'branch_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES shops (id)',
+    ),
+  );
+  static const VerificationMeta _staffIdMeta = const VerificationMeta(
+    'staffId',
+  );
+  @override
+  late final GeneratedColumn<String> staffId = GeneratedColumn<String>(
+    'staff_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES staff (id)',
+    ),
+  );
+  static const VerificationMeta _customerNameMeta = const VerificationMeta(
+    'customerName',
+  );
+  @override
+  late final GeneratedColumn<String> customerName = GeneratedColumn<String>(
+    'customer_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _customerPhoneMeta = const VerificationMeta(
+    'customerPhone',
+  );
+  @override
+  late final GeneratedColumn<String> customerPhone = GeneratedColumn<String>(
+    'customer_phone',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _saleIdMeta = const VerificationMeta('saleId');
+  @override
+  late final GeneratedColumn<String> saleId = GeneratedColumn<String>(
+    'sale_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES sales (id)',
+    ),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now().toUtc(),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    updatedAt,
+    deletedAt,
+    deviceId,
+    tableId,
+    orderType,
+    status,
+    branchId,
+    staffId,
+    customerName,
+    customerPhone,
+    note,
+    saleId,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'dine_orders';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DineOrder> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('device_id')) {
+      context.handle(
+        _deviceIdMeta,
+        deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta),
+      );
+    }
+    if (data.containsKey('table_id')) {
+      context.handle(
+        _tableIdMeta,
+        tableId.isAcceptableOrUnknown(data['table_id']!, _tableIdMeta),
+      );
+    }
+    if (data.containsKey('branch_id')) {
+      context.handle(
+        _branchIdMeta,
+        branchId.isAcceptableOrUnknown(data['branch_id']!, _branchIdMeta),
+      );
+    }
+    if (data.containsKey('staff_id')) {
+      context.handle(
+        _staffIdMeta,
+        staffId.isAcceptableOrUnknown(data['staff_id']!, _staffIdMeta),
+      );
+    }
+    if (data.containsKey('customer_name')) {
+      context.handle(
+        _customerNameMeta,
+        customerName.isAcceptableOrUnknown(
+          data['customer_name']!,
+          _customerNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('customer_phone')) {
+      context.handle(
+        _customerPhoneMeta,
+        customerPhone.isAcceptableOrUnknown(
+          data['customer_phone']!,
+          _customerPhoneMeta,
+        ),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('sale_id')) {
+      context.handle(
+        _saleIdMeta,
+        saleId.isAcceptableOrUnknown(data['sale_id']!, _saleIdMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DineOrder map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DineOrder(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      deviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_id'],
+      )!,
+      tableId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}table_id'],
+      ),
+      orderType: $DineOrdersTable.$converterorderType.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}order_type'],
+        )!,
+      ),
+      status: $DineOrdersTable.$converterstatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}status'],
+        )!,
+      ),
+      branchId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}branch_id'],
+      ),
+      staffId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}staff_id'],
+      ),
+      customerName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}customer_name'],
+      ),
+      customerPhone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}customer_phone'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      saleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sale_id'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $DineOrdersTable createAlias(String alias) {
+    return $DineOrdersTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<OrderType, String, String> $converterorderType =
+      const EnumNameConverter<OrderType>(OrderType.values);
+  static JsonTypeConverter2<OrderStatus, String, String> $converterstatus =
+      const EnumNameConverter<OrderStatus>(OrderStatus.values);
+}
+
+class DineOrder extends DataClass implements Insertable<DineOrder> {
+  final String id;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String deviceId;
+  final String? tableId;
+  final OrderType orderType;
+  final OrderStatus status;
+
+  /// Branch/outlet the order was opened in. Nullable only for legacy rows.
+  final String? branchId;
+  final String? staffId;
+
+  /// For takeaway/delivery (dine-in identifies the guest by the table).
+  final String? customerName;
+  final String? customerPhone;
+  final String? note;
+
+  /// The finalized sale this order became on settle; null while open.
+  final String? saleId;
+  final DateTime createdAt;
+  const DineOrder({
+    required this.id,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.deviceId,
+    this.tableId,
+    required this.orderType,
+    required this.status,
+    this.branchId,
+    this.staffId,
+    this.customerName,
+    this.customerPhone,
+    this.note,
+    this.saleId,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['device_id'] = Variable<String>(deviceId);
+    if (!nullToAbsent || tableId != null) {
+      map['table_id'] = Variable<String>(tableId);
+    }
+    {
+      map['order_type'] = Variable<String>(
+        $DineOrdersTable.$converterorderType.toSql(orderType),
+      );
+    }
+    {
+      map['status'] = Variable<String>(
+        $DineOrdersTable.$converterstatus.toSql(status),
+      );
+    }
+    if (!nullToAbsent || branchId != null) {
+      map['branch_id'] = Variable<String>(branchId);
+    }
+    if (!nullToAbsent || staffId != null) {
+      map['staff_id'] = Variable<String>(staffId);
+    }
+    if (!nullToAbsent || customerName != null) {
+      map['customer_name'] = Variable<String>(customerName);
+    }
+    if (!nullToAbsent || customerPhone != null) {
+      map['customer_phone'] = Variable<String>(customerPhone);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    if (!nullToAbsent || saleId != null) {
+      map['sale_id'] = Variable<String>(saleId);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  DineOrdersCompanion toCompanion(bool nullToAbsent) {
+    return DineOrdersCompanion(
+      id: Value(id),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      deviceId: Value(deviceId),
+      tableId: tableId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(tableId),
+      orderType: Value(orderType),
+      status: Value(status),
+      branchId: branchId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(branchId),
+      staffId: staffId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(staffId),
+      customerName: customerName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customerName),
+      customerPhone: customerPhone == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customerPhone),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      saleId: saleId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(saleId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory DineOrder.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DineOrder(
+      id: serializer.fromJson<String>(json['id']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      deviceId: serializer.fromJson<String>(json['deviceId']),
+      tableId: serializer.fromJson<String?>(json['tableId']),
+      orderType: $DineOrdersTable.$converterorderType.fromJson(
+        serializer.fromJson<String>(json['orderType']),
+      ),
+      status: $DineOrdersTable.$converterstatus.fromJson(
+        serializer.fromJson<String>(json['status']),
+      ),
+      branchId: serializer.fromJson<String?>(json['branchId']),
+      staffId: serializer.fromJson<String?>(json['staffId']),
+      customerName: serializer.fromJson<String?>(json['customerName']),
+      customerPhone: serializer.fromJson<String?>(json['customerPhone']),
+      note: serializer.fromJson<String?>(json['note']),
+      saleId: serializer.fromJson<String?>(json['saleId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'deviceId': serializer.toJson<String>(deviceId),
+      'tableId': serializer.toJson<String?>(tableId),
+      'orderType': serializer.toJson<String>(
+        $DineOrdersTable.$converterorderType.toJson(orderType),
+      ),
+      'status': serializer.toJson<String>(
+        $DineOrdersTable.$converterstatus.toJson(status),
+      ),
+      'branchId': serializer.toJson<String?>(branchId),
+      'staffId': serializer.toJson<String?>(staffId),
+      'customerName': serializer.toJson<String?>(customerName),
+      'customerPhone': serializer.toJson<String?>(customerPhone),
+      'note': serializer.toJson<String?>(note),
+      'saleId': serializer.toJson<String?>(saleId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  DineOrder copyWith({
+    String? id,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? deviceId,
+    Value<String?> tableId = const Value.absent(),
+    OrderType? orderType,
+    OrderStatus? status,
+    Value<String?> branchId = const Value.absent(),
+    Value<String?> staffId = const Value.absent(),
+    Value<String?> customerName = const Value.absent(),
+    Value<String?> customerPhone = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    Value<String?> saleId = const Value.absent(),
+    DateTime? createdAt,
+  }) => DineOrder(
+    id: id ?? this.id,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    deviceId: deviceId ?? this.deviceId,
+    tableId: tableId.present ? tableId.value : this.tableId,
+    orderType: orderType ?? this.orderType,
+    status: status ?? this.status,
+    branchId: branchId.present ? branchId.value : this.branchId,
+    staffId: staffId.present ? staffId.value : this.staffId,
+    customerName: customerName.present ? customerName.value : this.customerName,
+    customerPhone: customerPhone.present
+        ? customerPhone.value
+        : this.customerPhone,
+    note: note.present ? note.value : this.note,
+    saleId: saleId.present ? saleId.value : this.saleId,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  DineOrder copyWithCompanion(DineOrdersCompanion data) {
+    return DineOrder(
+      id: data.id.present ? data.id.value : this.id,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+      tableId: data.tableId.present ? data.tableId.value : this.tableId,
+      orderType: data.orderType.present ? data.orderType.value : this.orderType,
+      status: data.status.present ? data.status.value : this.status,
+      branchId: data.branchId.present ? data.branchId.value : this.branchId,
+      staffId: data.staffId.present ? data.staffId.value : this.staffId,
+      customerName: data.customerName.present
+          ? data.customerName.value
+          : this.customerName,
+      customerPhone: data.customerPhone.present
+          ? data.customerPhone.value
+          : this.customerPhone,
+      note: data.note.present ? data.note.value : this.note,
+      saleId: data.saleId.present ? data.saleId.value : this.saleId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DineOrder(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('tableId: $tableId, ')
+          ..write('orderType: $orderType, ')
+          ..write('status: $status, ')
+          ..write('branchId: $branchId, ')
+          ..write('staffId: $staffId, ')
+          ..write('customerName: $customerName, ')
+          ..write('customerPhone: $customerPhone, ')
+          ..write('note: $note, ')
+          ..write('saleId: $saleId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    updatedAt,
+    deletedAt,
+    deviceId,
+    tableId,
+    orderType,
+    status,
+    branchId,
+    staffId,
+    customerName,
+    customerPhone,
+    note,
+    saleId,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DineOrder &&
+          other.id == this.id &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.deviceId == this.deviceId &&
+          other.tableId == this.tableId &&
+          other.orderType == this.orderType &&
+          other.status == this.status &&
+          other.branchId == this.branchId &&
+          other.staffId == this.staffId &&
+          other.customerName == this.customerName &&
+          other.customerPhone == this.customerPhone &&
+          other.note == this.note &&
+          other.saleId == this.saleId &&
+          other.createdAt == this.createdAt);
+}
+
+class DineOrdersCompanion extends UpdateCompanion<DineOrder> {
+  final Value<String> id;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> deviceId;
+  final Value<String?> tableId;
+  final Value<OrderType> orderType;
+  final Value<OrderStatus> status;
+  final Value<String?> branchId;
+  final Value<String?> staffId;
+  final Value<String?> customerName;
+  final Value<String?> customerPhone;
+  final Value<String?> note;
+  final Value<String?> saleId;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const DineOrdersCompanion({
+    this.id = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.tableId = const Value.absent(),
+    this.orderType = const Value.absent(),
+    this.status = const Value.absent(),
+    this.branchId = const Value.absent(),
+    this.staffId = const Value.absent(),
+    this.customerName = const Value.absent(),
+    this.customerPhone = const Value.absent(),
+    this.note = const Value.absent(),
+    this.saleId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DineOrdersCompanion.insert({
+    this.id = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.tableId = const Value.absent(),
+    required OrderType orderType,
+    this.status = const Value.absent(),
+    this.branchId = const Value.absent(),
+    this.staffId = const Value.absent(),
+    this.customerName = const Value.absent(),
+    this.customerPhone = const Value.absent(),
+    this.note = const Value.absent(),
+    this.saleId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : orderType = Value(orderType);
+  static Insertable<DineOrder> custom({
+    Expression<String>? id,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? deviceId,
+    Expression<String>? tableId,
+    Expression<String>? orderType,
+    Expression<String>? status,
+    Expression<String>? branchId,
+    Expression<String>? staffId,
+    Expression<String>? customerName,
+    Expression<String>? customerPhone,
+    Expression<String>? note,
+    Expression<String>? saleId,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (deviceId != null) 'device_id': deviceId,
+      if (tableId != null) 'table_id': tableId,
+      if (orderType != null) 'order_type': orderType,
+      if (status != null) 'status': status,
+      if (branchId != null) 'branch_id': branchId,
+      if (staffId != null) 'staff_id': staffId,
+      if (customerName != null) 'customer_name': customerName,
+      if (customerPhone != null) 'customer_phone': customerPhone,
+      if (note != null) 'note': note,
+      if (saleId != null) 'sale_id': saleId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DineOrdersCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? deviceId,
+    Value<String?>? tableId,
+    Value<OrderType>? orderType,
+    Value<OrderStatus>? status,
+    Value<String?>? branchId,
+    Value<String?>? staffId,
+    Value<String?>? customerName,
+    Value<String?>? customerPhone,
+    Value<String?>? note,
+    Value<String?>? saleId,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return DineOrdersCompanion(
+      id: id ?? this.id,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      deviceId: deviceId ?? this.deviceId,
+      tableId: tableId ?? this.tableId,
+      orderType: orderType ?? this.orderType,
+      status: status ?? this.status,
+      branchId: branchId ?? this.branchId,
+      staffId: staffId ?? this.staffId,
+      customerName: customerName ?? this.customerName,
+      customerPhone: customerPhone ?? this.customerPhone,
+      note: note ?? this.note,
+      saleId: saleId ?? this.saleId,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
+    if (tableId.present) {
+      map['table_id'] = Variable<String>(tableId.value);
+    }
+    if (orderType.present) {
+      map['order_type'] = Variable<String>(
+        $DineOrdersTable.$converterorderType.toSql(orderType.value),
+      );
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(
+        $DineOrdersTable.$converterstatus.toSql(status.value),
+      );
+    }
+    if (branchId.present) {
+      map['branch_id'] = Variable<String>(branchId.value);
+    }
+    if (staffId.present) {
+      map['staff_id'] = Variable<String>(staffId.value);
+    }
+    if (customerName.present) {
+      map['customer_name'] = Variable<String>(customerName.value);
+    }
+    if (customerPhone.present) {
+      map['customer_phone'] = Variable<String>(customerPhone.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (saleId.present) {
+      map['sale_id'] = Variable<String>(saleId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DineOrdersCompanion(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('tableId: $tableId, ')
+          ..write('orderType: $orderType, ')
+          ..write('status: $status, ')
+          ..write('branchId: $branchId, ')
+          ..write('staffId: $staffId, ')
+          ..write('customerName: $customerName, ')
+          ..write('customerPhone: $customerPhone, ')
+          ..write('note: $note, ')
+          ..write('saleId: $saleId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DineOrderItemsTable extends DineOrderItems
+    with TableInfo<$DineOrderItemsTable, DineOrderItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DineOrderItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: newUuidV7,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now().toUtc(),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deviceIdMeta = const VerificationMeta(
+    'deviceId',
+  );
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+    'device_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: () => currentDeviceId,
+  );
+  static const VerificationMeta _orderIdMeta = const VerificationMeta(
+    'orderId',
+  );
+  @override
+  late final GeneratedColumn<String> orderId = GeneratedColumn<String>(
+    'order_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES dine_orders (id)',
+    ),
+  );
+  static const VerificationMeta _productIdMeta = const VerificationMeta(
+    'productId',
+  );
+  @override
+  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
+    'product_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES products (id)',
+    ),
+  );
+  static const VerificationMeta _nameSnapshotMeta = const VerificationMeta(
+    'nameSnapshot',
+  );
+  @override
+  late final GeneratedColumn<String> nameSnapshot = GeneratedColumn<String>(
+    'name_snapshot',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<Qty, int> qty =
+      GeneratedColumn<int>(
+        'qty',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<Qty>($DineOrderItemsTable.$converterqty);
+  @override
+  late final GeneratedColumnWithTypeConverter<Money, int> unitPrice =
+      GeneratedColumn<int>(
+        'unit_price',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<Money>($DineOrderItemsTable.$converterunitPrice);
+  static const VerificationMeta _vatRateBpMeta = const VerificationMeta(
+    'vatRateBp',
+  );
+  @override
+  late final GeneratedColumn<int> vatRateBp = GeneratedColumn<int>(
+    'vat_rate_bp',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _kotSentMeta = const VerificationMeta(
+    'kotSent',
+  );
+  @override
+  late final GeneratedColumn<bool> kotSent = GeneratedColumn<bool>(
+    'kot_sent',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("kot_sent" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now().toUtc(),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    updatedAt,
+    deletedAt,
+    deviceId,
+    orderId,
+    productId,
+    nameSnapshot,
+    qty,
+    unitPrice,
+    vatRateBp,
+    note,
+    kotSent,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'dine_order_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DineOrderItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('device_id')) {
+      context.handle(
+        _deviceIdMeta,
+        deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta),
+      );
+    }
+    if (data.containsKey('order_id')) {
+      context.handle(
+        _orderIdMeta,
+        orderId.isAcceptableOrUnknown(data['order_id']!, _orderIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orderIdMeta);
+    }
+    if (data.containsKey('product_id')) {
+      context.handle(
+        _productIdMeta,
+        productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta),
+      );
+    }
+    if (data.containsKey('name_snapshot')) {
+      context.handle(
+        _nameSnapshotMeta,
+        nameSnapshot.isAcceptableOrUnknown(
+          data['name_snapshot']!,
+          _nameSnapshotMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_nameSnapshotMeta);
+    }
+    if (data.containsKey('vat_rate_bp')) {
+      context.handle(
+        _vatRateBpMeta,
+        vatRateBp.isAcceptableOrUnknown(data['vat_rate_bp']!, _vatRateBpMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('kot_sent')) {
+      context.handle(
+        _kotSentMeta,
+        kotSent.isAcceptableOrUnknown(data['kot_sent']!, _kotSentMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DineOrderItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DineOrderItem(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      deviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_id'],
+      )!,
+      orderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}order_id'],
+      )!,
+      productId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}product_id'],
+      ),
+      nameSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name_snapshot'],
+      )!,
+      qty: $DineOrderItemsTable.$converterqty.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}qty'],
+        )!,
+      ),
+      unitPrice: $DineOrderItemsTable.$converterunitPrice.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}unit_price'],
+        )!,
+      ),
+      vatRateBp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}vat_rate_bp'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      kotSent: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}kot_sent'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $DineOrderItemsTable createAlias(String alias) {
+    return $DineOrderItemsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<Qty, int> $converterqty = const QtyConverter();
+  static TypeConverter<Money, int> $converterunitPrice = const MoneyConverter();
+}
+
+class DineOrderItem extends DataClass implements Insertable<DineOrderItem> {
+  final String id;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String deviceId;
+  final String orderId;
+
+  /// Null for manual (off-menu) items typed in at the table.
+  final String? productId;
+  final String nameSnapshot;
+  final Qty qty;
+  final Money unitPrice;
+  final int vatRateBp;
+  final String? note;
+  final bool kotSent;
+  final DateTime createdAt;
+  const DineOrderItem({
+    required this.id,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.deviceId,
+    required this.orderId,
+    this.productId,
+    required this.nameSnapshot,
+    required this.qty,
+    required this.unitPrice,
+    required this.vatRateBp,
+    this.note,
+    required this.kotSent,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['device_id'] = Variable<String>(deviceId);
+    map['order_id'] = Variable<String>(orderId);
+    if (!nullToAbsent || productId != null) {
+      map['product_id'] = Variable<String>(productId);
+    }
+    map['name_snapshot'] = Variable<String>(nameSnapshot);
+    {
+      map['qty'] = Variable<int>($DineOrderItemsTable.$converterqty.toSql(qty));
+    }
+    {
+      map['unit_price'] = Variable<int>(
+        $DineOrderItemsTable.$converterunitPrice.toSql(unitPrice),
+      );
+    }
+    map['vat_rate_bp'] = Variable<int>(vatRateBp);
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['kot_sent'] = Variable<bool>(kotSent);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  DineOrderItemsCompanion toCompanion(bool nullToAbsent) {
+    return DineOrderItemsCompanion(
+      id: Value(id),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      deviceId: Value(deviceId),
+      orderId: Value(orderId),
+      productId: productId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(productId),
+      nameSnapshot: Value(nameSnapshot),
+      qty: Value(qty),
+      unitPrice: Value(unitPrice),
+      vatRateBp: Value(vatRateBp),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      kotSent: Value(kotSent),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory DineOrderItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DineOrderItem(
+      id: serializer.fromJson<String>(json['id']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      deviceId: serializer.fromJson<String>(json['deviceId']),
+      orderId: serializer.fromJson<String>(json['orderId']),
+      productId: serializer.fromJson<String?>(json['productId']),
+      nameSnapshot: serializer.fromJson<String>(json['nameSnapshot']),
+      qty: serializer.fromJson<Qty>(json['qty']),
+      unitPrice: serializer.fromJson<Money>(json['unitPrice']),
+      vatRateBp: serializer.fromJson<int>(json['vatRateBp']),
+      note: serializer.fromJson<String?>(json['note']),
+      kotSent: serializer.fromJson<bool>(json['kotSent']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'deviceId': serializer.toJson<String>(deviceId),
+      'orderId': serializer.toJson<String>(orderId),
+      'productId': serializer.toJson<String?>(productId),
+      'nameSnapshot': serializer.toJson<String>(nameSnapshot),
+      'qty': serializer.toJson<Qty>(qty),
+      'unitPrice': serializer.toJson<Money>(unitPrice),
+      'vatRateBp': serializer.toJson<int>(vatRateBp),
+      'note': serializer.toJson<String?>(note),
+      'kotSent': serializer.toJson<bool>(kotSent),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  DineOrderItem copyWith({
+    String? id,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? deviceId,
+    String? orderId,
+    Value<String?> productId = const Value.absent(),
+    String? nameSnapshot,
+    Qty? qty,
+    Money? unitPrice,
+    int? vatRateBp,
+    Value<String?> note = const Value.absent(),
+    bool? kotSent,
+    DateTime? createdAt,
+  }) => DineOrderItem(
+    id: id ?? this.id,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    deviceId: deviceId ?? this.deviceId,
+    orderId: orderId ?? this.orderId,
+    productId: productId.present ? productId.value : this.productId,
+    nameSnapshot: nameSnapshot ?? this.nameSnapshot,
+    qty: qty ?? this.qty,
+    unitPrice: unitPrice ?? this.unitPrice,
+    vatRateBp: vatRateBp ?? this.vatRateBp,
+    note: note.present ? note.value : this.note,
+    kotSent: kotSent ?? this.kotSent,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  DineOrderItem copyWithCompanion(DineOrderItemsCompanion data) {
+    return DineOrderItem(
+      id: data.id.present ? data.id.value : this.id,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+      orderId: data.orderId.present ? data.orderId.value : this.orderId,
+      productId: data.productId.present ? data.productId.value : this.productId,
+      nameSnapshot: data.nameSnapshot.present
+          ? data.nameSnapshot.value
+          : this.nameSnapshot,
+      qty: data.qty.present ? data.qty.value : this.qty,
+      unitPrice: data.unitPrice.present ? data.unitPrice.value : this.unitPrice,
+      vatRateBp: data.vatRateBp.present ? data.vatRateBp.value : this.vatRateBp,
+      note: data.note.present ? data.note.value : this.note,
+      kotSent: data.kotSent.present ? data.kotSent.value : this.kotSent,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DineOrderItem(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('orderId: $orderId, ')
+          ..write('productId: $productId, ')
+          ..write('nameSnapshot: $nameSnapshot, ')
+          ..write('qty: $qty, ')
+          ..write('unitPrice: $unitPrice, ')
+          ..write('vatRateBp: $vatRateBp, ')
+          ..write('note: $note, ')
+          ..write('kotSent: $kotSent, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    updatedAt,
+    deletedAt,
+    deviceId,
+    orderId,
+    productId,
+    nameSnapshot,
+    qty,
+    unitPrice,
+    vatRateBp,
+    note,
+    kotSent,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DineOrderItem &&
+          other.id == this.id &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.deviceId == this.deviceId &&
+          other.orderId == this.orderId &&
+          other.productId == this.productId &&
+          other.nameSnapshot == this.nameSnapshot &&
+          other.qty == this.qty &&
+          other.unitPrice == this.unitPrice &&
+          other.vatRateBp == this.vatRateBp &&
+          other.note == this.note &&
+          other.kotSent == this.kotSent &&
+          other.createdAt == this.createdAt);
+}
+
+class DineOrderItemsCompanion extends UpdateCompanion<DineOrderItem> {
+  final Value<String> id;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> deviceId;
+  final Value<String> orderId;
+  final Value<String?> productId;
+  final Value<String> nameSnapshot;
+  final Value<Qty> qty;
+  final Value<Money> unitPrice;
+  final Value<int> vatRateBp;
+  final Value<String?> note;
+  final Value<bool> kotSent;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const DineOrderItemsCompanion({
+    this.id = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.orderId = const Value.absent(),
+    this.productId = const Value.absent(),
+    this.nameSnapshot = const Value.absent(),
+    this.qty = const Value.absent(),
+    this.unitPrice = const Value.absent(),
+    this.vatRateBp = const Value.absent(),
+    this.note = const Value.absent(),
+    this.kotSent = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DineOrderItemsCompanion.insert({
+    this.id = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    required String orderId,
+    this.productId = const Value.absent(),
+    required String nameSnapshot,
+    required Qty qty,
+    required Money unitPrice,
+    this.vatRateBp = const Value.absent(),
+    this.note = const Value.absent(),
+    this.kotSent = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : orderId = Value(orderId),
+       nameSnapshot = Value(nameSnapshot),
+       qty = Value(qty),
+       unitPrice = Value(unitPrice);
+  static Insertable<DineOrderItem> custom({
+    Expression<String>? id,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? deviceId,
+    Expression<String>? orderId,
+    Expression<String>? productId,
+    Expression<String>? nameSnapshot,
+    Expression<int>? qty,
+    Expression<int>? unitPrice,
+    Expression<int>? vatRateBp,
+    Expression<String>? note,
+    Expression<bool>? kotSent,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (deviceId != null) 'device_id': deviceId,
+      if (orderId != null) 'order_id': orderId,
+      if (productId != null) 'product_id': productId,
+      if (nameSnapshot != null) 'name_snapshot': nameSnapshot,
+      if (qty != null) 'qty': qty,
+      if (unitPrice != null) 'unit_price': unitPrice,
+      if (vatRateBp != null) 'vat_rate_bp': vatRateBp,
+      if (note != null) 'note': note,
+      if (kotSent != null) 'kot_sent': kotSent,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DineOrderItemsCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? deviceId,
+    Value<String>? orderId,
+    Value<String?>? productId,
+    Value<String>? nameSnapshot,
+    Value<Qty>? qty,
+    Value<Money>? unitPrice,
+    Value<int>? vatRateBp,
+    Value<String?>? note,
+    Value<bool>? kotSent,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return DineOrderItemsCompanion(
+      id: id ?? this.id,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      deviceId: deviceId ?? this.deviceId,
+      orderId: orderId ?? this.orderId,
+      productId: productId ?? this.productId,
+      nameSnapshot: nameSnapshot ?? this.nameSnapshot,
+      qty: qty ?? this.qty,
+      unitPrice: unitPrice ?? this.unitPrice,
+      vatRateBp: vatRateBp ?? this.vatRateBp,
+      note: note ?? this.note,
+      kotSent: kotSent ?? this.kotSent,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
+    if (orderId.present) {
+      map['order_id'] = Variable<String>(orderId.value);
+    }
+    if (productId.present) {
+      map['product_id'] = Variable<String>(productId.value);
+    }
+    if (nameSnapshot.present) {
+      map['name_snapshot'] = Variable<String>(nameSnapshot.value);
+    }
+    if (qty.present) {
+      map['qty'] = Variable<int>(
+        $DineOrderItemsTable.$converterqty.toSql(qty.value),
+      );
+    }
+    if (unitPrice.present) {
+      map['unit_price'] = Variable<int>(
+        $DineOrderItemsTable.$converterunitPrice.toSql(unitPrice.value),
+      );
+    }
+    if (vatRateBp.present) {
+      map['vat_rate_bp'] = Variable<int>(vatRateBp.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (kotSent.present) {
+      map['kot_sent'] = Variable<bool>(kotSent.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DineOrderItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('orderId: $orderId, ')
+          ..write('productId: $productId, ')
+          ..write('nameSnapshot: $nameSnapshot, ')
+          ..write('qty: $qty, ')
+          ..write('unitPrice: $unitPrice, ')
+          ..write('vatRateBp: $vatRateBp, ')
+          ..write('note: $note, ')
+          ..write('kotSent: $kotSent, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -10391,6 +12628,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SettingsTable settings = $SettingsTable(this);
   late final $ReturnsTable returns = $ReturnsTable(this);
   late final $ReturnItemsTable returnItems = $ReturnItemsTable(this);
+  late final $DiningTablesTable diningTables = $DiningTablesTable(this);
+  late final $DineOrdersTable dineOrders = $DineOrdersTable(this);
+  late final $DineOrderItemsTable dineOrderItems = $DineOrderItemsTable(this);
   late final ProductsDao productsDao = ProductsDao(this as AppDatabase);
   late final StockDao stockDao = StockDao(this as AppDatabase);
   late final SalesDao salesDao = SalesDao(this as AppDatabase);
@@ -10400,6 +12640,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final StaffDao staffDao = StaffDao(this as AppDatabase);
   late final ReturnsDao returnsDao = ReturnsDao(this as AppDatabase);
   late final SmsDao smsDao = SmsDao(this as AppDatabase);
+  late final OrdersDao ordersDao = OrdersDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -10423,6 +12664,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     settings,
     returns,
     returnItems,
+    diningTables,
+    dineOrders,
+    dineOrderItems,
   ];
 }
 
@@ -10513,6 +12757,24 @@ final class $$ShopsTableReferences
     ).filter((f) => f.branchId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_purchasesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$DineOrdersTable, List<DineOrder>>
+  _dineOrdersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.dineOrders,
+    aliasName: 'shops__id__dine_orders__branch_id',
+  );
+
+  $$DineOrdersTableProcessedTableManager get dineOrdersRefs {
+    final manager = $$DineOrdersTableTableManager(
+      $_db,
+      $_db.dineOrders,
+    ).filter((f) => f.branchId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_dineOrdersRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -10653,6 +12915,31 @@ class $$ShopsTableFilterComposer extends Composer<_$AppDatabase, $ShopsTable> {
           }) => $$PurchasesTableFilterComposer(
             $db: $db,
             $table: $db.purchases,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> dineOrdersRefs(
+    Expression<bool> Function($$DineOrdersTableFilterComposer f) f,
+  ) {
+    final $$DineOrdersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.dineOrders,
+      getReferencedColumn: (t) => t.branchId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DineOrdersTableFilterComposer(
+            $db: $db,
+            $table: $db.dineOrders,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -10856,6 +13143,31 @@ class $$ShopsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> dineOrdersRefs<T extends Object>(
+    Expression<T> Function($$DineOrdersTableAnnotationComposer a) f,
+  ) {
+    final $$DineOrdersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.dineOrders,
+      getReferencedColumn: (t) => t.branchId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DineOrdersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.dineOrders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ShopsTableTableManager
@@ -10875,6 +13187,7 @@ class $$ShopsTableTableManager
             bool stockMovementsRefs,
             bool salesRefs,
             bool purchasesRefs,
+            bool dineOrdersRefs,
           })
         > {
   $$ShopsTableTableManager(_$AppDatabase db, $ShopsTable table)
@@ -10959,6 +13272,7 @@ class $$ShopsTableTableManager
                 stockMovementsRefs = false,
                 salesRefs = false,
                 purchasesRefs = false,
+                dineOrdersRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -10966,6 +13280,7 @@ class $$ShopsTableTableManager
                     if (stockMovementsRefs) db.stockMovements,
                     if (salesRefs) db.sales,
                     if (purchasesRefs) db.purchases,
+                    if (dineOrdersRefs) db.dineOrders,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -11021,6 +13336,23 @@ class $$ShopsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (dineOrdersRefs)
+                        await $_getPrefetchedData<Shop, $ShopsTable, DineOrder>(
+                          currentTable: table,
+                          referencedTable: $$ShopsTableReferences
+                              ._dineOrdersRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ShopsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).dineOrdersRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.branchId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -11045,6 +13377,7 @@ typedef $$ShopsTableProcessedTableManager =
         bool stockMovementsRefs,
         bool salesRefs,
         bool purchasesRefs,
+        bool dineOrdersRefs,
       })
     >;
 typedef $$StaffTableCreateCompanionBuilder =
@@ -11107,6 +13440,24 @@ final class $$StaffTableReferences
     ).filter((f) => f.staffId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_returnsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$DineOrdersTable, List<DineOrder>>
+  _dineOrdersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.dineOrders,
+    aliasName: 'staff__id__dine_orders__staff_id',
+  );
+
+  $$DineOrdersTableProcessedTableManager get dineOrdersRefs {
+    final manager = $$DineOrdersTableTableManager(
+      $_db,
+      $_db.dineOrders,
+    ).filter((f) => f.staffId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_dineOrdersRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -11198,6 +13549,31 @@ class $$StaffTableFilterComposer extends Composer<_$AppDatabase, $StaffTable> {
           }) => $$ReturnsTableFilterComposer(
             $db: $db,
             $table: $db.returns,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> dineOrdersRefs(
+    Expression<bool> Function($$DineOrdersTableFilterComposer f) f,
+  ) {
+    final $$DineOrdersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.dineOrders,
+      getReferencedColumn: (t) => t.staffId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DineOrdersTableFilterComposer(
+            $db: $db,
+            $table: $db.dineOrders,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -11332,6 +13708,31 @@ class $$StaffTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> dineOrdersRefs<T extends Object>(
+    Expression<T> Function($$DineOrdersTableAnnotationComposer a) f,
+  ) {
+    final $$DineOrdersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.dineOrders,
+      getReferencedColumn: (t) => t.staffId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DineOrdersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.dineOrders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$StaffTableTableManager
@@ -11347,7 +13748,11 @@ class $$StaffTableTableManager
           $$StaffTableUpdateCompanionBuilder,
           (StaffData, $$StaffTableReferences),
           StaffData,
-          PrefetchHooks Function({bool salesRefs, bool returnsRefs})
+          PrefetchHooks Function({
+            bool salesRefs,
+            bool returnsRefs,
+            bool dineOrdersRefs,
+          })
         > {
   $$StaffTableTableManager(_$AppDatabase db, $StaffTable table)
     : super(
@@ -11406,44 +13811,77 @@ class $$StaffTableTableManager
                     (e.readTable(table), $$StaffTableReferences(db, table, e)),
               )
               .toList(),
-          prefetchHooksCallback: ({salesRefs = false, returnsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [
-                if (salesRefs) db.sales,
-                if (returnsRefs) db.returns,
-              ],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (salesRefs)
-                    await $_getPrefetchedData<StaffData, $StaffTable, Sale>(
-                      currentTable: table,
-                      referencedTable: $$StaffTableReferences._salesRefsTable(
-                        db,
-                      ),
-                      managerFromTypedResult: (p0) =>
-                          $$StaffTableReferences(db, table, p0).salesRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.staffId == item.id),
-                      typedResults: items,
-                    ),
-                  if (returnsRefs)
-                    await $_getPrefetchedData<StaffData, $StaffTable, Return>(
-                      currentTable: table,
-                      referencedTable: $$StaffTableReferences._returnsRefsTable(
-                        db,
-                      ),
-                      managerFromTypedResult: (p0) =>
-                          $$StaffTableReferences(db, table, p0).returnsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.staffId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({
+                salesRefs = false,
+                returnsRefs = false,
+                dineOrdersRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (salesRefs) db.sales,
+                    if (returnsRefs) db.returns,
+                    if (dineOrdersRefs) db.dineOrders,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (salesRefs)
+                        await $_getPrefetchedData<StaffData, $StaffTable, Sale>(
+                          currentTable: table,
+                          referencedTable: $$StaffTableReferences
+                              ._salesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$StaffTableReferences(db, table, p0).salesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.staffId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (returnsRefs)
+                        await $_getPrefetchedData<
+                          StaffData,
+                          $StaffTable,
+                          Return
+                        >(
+                          currentTable: table,
+                          referencedTable: $$StaffTableReferences
+                              ._returnsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$StaffTableReferences(db, table, p0).returnsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.staffId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (dineOrdersRefs)
+                        await $_getPrefetchedData<
+                          StaffData,
+                          $StaffTable,
+                          DineOrder
+                        >(
+                          currentTable: table,
+                          referencedTable: $$StaffTableReferences
+                              ._dineOrdersRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$StaffTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).dineOrdersRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.staffId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -11460,7 +13898,11 @@ typedef $$StaffTableProcessedTableManager =
       $$StaffTableUpdateCompanionBuilder,
       (StaffData, $$StaffTableReferences),
       StaffData,
-      PrefetchHooks Function({bool salesRefs, bool returnsRefs})
+      PrefetchHooks Function({
+        bool salesRefs,
+        bool returnsRefs,
+        bool dineOrdersRefs,
+      })
     >;
 typedef $$CategoriesTableCreateCompanionBuilder =
     CategoriesCompanion Function({
@@ -11472,6 +13914,7 @@ typedef $$CategoriesTableCreateCompanionBuilder =
       Value<String?> nameBn,
       Value<String?> colorHex,
       Value<int> sortOrder,
+      Value<String> businessType,
       Value<int> rowid,
     });
 typedef $$CategoriesTableUpdateCompanionBuilder =
@@ -11484,6 +13927,7 @@ typedef $$CategoriesTableUpdateCompanionBuilder =
       Value<String?> nameBn,
       Value<String?> colorHex,
       Value<int> sortOrder,
+      Value<String> businessType,
       Value<int> rowid,
     });
 
@@ -11557,6 +14001,11 @@ class $$CategoriesTableFilterComposer
 
   ColumnFilters<int> get sortOrder => $composableBuilder(
     column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get businessType => $composableBuilder(
+    column: $table.businessType,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -11634,6 +14083,11 @@ class $$CategoriesTableOrderingComposer
     column: $table.sortOrder,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get businessType => $composableBuilder(
+    column: $table.businessType,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CategoriesTableAnnotationComposer
@@ -11668,6 +14122,11 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumn<int> get sortOrder =>
       $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<String> get businessType => $composableBuilder(
+    column: $table.businessType,
+    builder: (column) => column,
+  );
 
   Expression<T> productsRefs<T extends Object>(
     Expression<T> Function($$ProductsTableAnnotationComposer a) f,
@@ -11731,6 +14190,7 @@ class $$CategoriesTableTableManager
                 Value<String?> nameBn = const Value.absent(),
                 Value<String?> colorHex = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
+                Value<String> businessType = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion(
                 id: id,
@@ -11741,6 +14201,7 @@ class $$CategoriesTableTableManager
                 nameBn: nameBn,
                 colorHex: colorHex,
                 sortOrder: sortOrder,
+                businessType: businessType,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -11753,6 +14214,7 @@ class $$CategoriesTableTableManager
                 Value<String?> nameBn = const Value.absent(),
                 Value<String?> colorHex = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
+                Value<String> businessType = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion.insert(
                 id: id,
@@ -11763,6 +14225,7 @@ class $$CategoriesTableTableManager
                 nameBn: nameBn,
                 colorHex: colorHex,
                 sortOrder: sortOrder,
+                businessType: businessType,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -11839,6 +14302,7 @@ typedef $$ProductsTableCreateCompanionBuilder =
       Value<Qty> lowStockLevel,
       Value<String?> imagePath,
       Value<bool> isActive,
+      Value<String> businessType,
       Value<int> rowid,
     });
 typedef $$ProductsTableUpdateCompanionBuilder =
@@ -11859,6 +14323,7 @@ typedef $$ProductsTableUpdateCompanionBuilder =
       Value<Qty> lowStockLevel,
       Value<String?> imagePath,
       Value<bool> isActive,
+      Value<String> businessType,
       Value<int> rowid,
     });
 
@@ -11954,6 +14419,24 @@ final class $$ProductsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$DineOrderItemsTable, List<DineOrderItem>>
+  _dineOrderItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.dineOrderItems,
+    aliasName: 'products__id__dine_order_items__product_id',
+  );
+
+  $$DineOrderItemsTableProcessedTableManager get dineOrderItemsRefs {
+    final manager = $$DineOrderItemsTableTableManager(
+      $_db,
+      $_db.dineOrderItems,
+    ).filter((f) => f.productId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_dineOrderItemsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$ProductsTableFilterComposer
@@ -12040,6 +14523,11 @@ class $$ProductsTableFilterComposer
 
   ColumnFilters<bool> get isActive => $composableBuilder(
     column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get businessType => $composableBuilder(
+    column: $table.businessType,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12165,6 +14653,31 @@ class $$ProductsTableFilterComposer
     );
     return f(composer);
   }
+
+  Expression<bool> dineOrderItemsRefs(
+    Expression<bool> Function($$DineOrderItemsTableFilterComposer f) f,
+  ) {
+    final $$DineOrderItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.dineOrderItems,
+      getReferencedColumn: (t) => t.productId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DineOrderItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.dineOrderItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ProductsTableOrderingComposer
@@ -12251,6 +14764,11 @@ class $$ProductsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get businessType => $composableBuilder(
+    column: $table.businessType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CategoriesTableOrderingComposer get categoryId {
     final $$CategoriesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -12331,6 +14849,11 @@ class $$ProductsTableAnnotationComposer
 
   GeneratedColumn<bool> get isActive =>
       $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<String> get businessType => $composableBuilder(
+    column: $table.businessType,
+    builder: (column) => column,
+  );
 
   $$CategoriesTableAnnotationComposer get categoryId {
     final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
@@ -12454,6 +14977,31 @@ class $$ProductsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> dineOrderItemsRefs<T extends Object>(
+    Expression<T> Function($$DineOrderItemsTableAnnotationComposer a) f,
+  ) {
+    final $$DineOrderItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.dineOrderItems,
+      getReferencedColumn: (t) => t.productId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DineOrderItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.dineOrderItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ProductsTableTableManager
@@ -12475,6 +15023,7 @@ class $$ProductsTableTableManager
             bool saleItemsRefs,
             bool purchaseItemsRefs,
             bool returnItemsRefs,
+            bool dineOrderItemsRefs,
           })
         > {
   $$ProductsTableTableManager(_$AppDatabase db, $ProductsTable table)
@@ -12506,6 +15055,7 @@ class $$ProductsTableTableManager
                 Value<Qty> lowStockLevel = const Value.absent(),
                 Value<String?> imagePath = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
+                Value<String> businessType = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProductsCompanion(
                 id: id,
@@ -12524,6 +15074,7 @@ class $$ProductsTableTableManager
                 lowStockLevel: lowStockLevel,
                 imagePath: imagePath,
                 isActive: isActive,
+                businessType: businessType,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -12544,6 +15095,7 @@ class $$ProductsTableTableManager
                 Value<Qty> lowStockLevel = const Value.absent(),
                 Value<String?> imagePath = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
+                Value<String> businessType = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProductsCompanion.insert(
                 id: id,
@@ -12562,6 +15114,7 @@ class $$ProductsTableTableManager
                 lowStockLevel: lowStockLevel,
                 imagePath: imagePath,
                 isActive: isActive,
+                businessType: businessType,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -12579,6 +15132,7 @@ class $$ProductsTableTableManager
                 saleItemsRefs = false,
                 purchaseItemsRefs = false,
                 returnItemsRefs = false,
+                dineOrderItemsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -12587,6 +15141,7 @@ class $$ProductsTableTableManager
                     if (saleItemsRefs) db.saleItems,
                     if (purchaseItemsRefs) db.purchaseItems,
                     if (returnItemsRefs) db.returnItems,
+                    if (dineOrderItemsRefs) db.dineOrderItems,
                   ],
                   addJoins:
                       <
@@ -12706,6 +15261,27 @@ class $$ProductsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (dineOrderItemsRefs)
+                        await $_getPrefetchedData<
+                          Product,
+                          $ProductsTable,
+                          DineOrderItem
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ProductsTableReferences
+                              ._dineOrderItemsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ProductsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).dineOrderItemsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.productId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -12732,6 +15308,7 @@ typedef $$ProductsTableProcessedTableManager =
         bool saleItemsRefs,
         bool purchaseItemsRefs,
         bool returnItemsRefs,
+        bool dineOrderItemsRefs,
       })
     >;
 typedef $$StockMovementsTableCreateCompanionBuilder =
@@ -13989,6 +16566,24 @@ final class $$SalesTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$DineOrdersTable, List<DineOrder>>
+  _dineOrdersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.dineOrders,
+    aliasName: 'sales__id__dine_orders__sale_id',
+  );
+
+  $$DineOrdersTableProcessedTableManager get dineOrdersRefs {
+    final manager = $$DineOrdersTableTableManager(
+      $_db,
+      $_db.dineOrders,
+    ).filter((f) => f.saleId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_dineOrdersRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$SalesTableFilterComposer extends Composer<_$AppDatabase, $SalesTable> {
@@ -14206,6 +16801,31 @@ class $$SalesTableFilterComposer extends Composer<_$AppDatabase, $SalesTable> {
           }) => $$ReturnsTableFilterComposer(
             $db: $db,
             $table: $db.returns,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> dineOrdersRefs(
+    Expression<bool> Function($$DineOrdersTableFilterComposer f) f,
+  ) {
+    final $$DineOrdersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.dineOrders,
+      getReferencedColumn: (t) => t.saleId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DineOrdersTableFilterComposer(
+            $db: $db,
+            $table: $db.dineOrders,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -14551,6 +17171,31 @@ class $$SalesTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> dineOrdersRefs<T extends Object>(
+    Expression<T> Function($$DineOrdersTableAnnotationComposer a) f,
+  ) {
+    final $$DineOrdersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.dineOrders,
+      getReferencedColumn: (t) => t.saleId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DineOrdersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.dineOrders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$SalesTableTableManager
@@ -14573,6 +17218,7 @@ class $$SalesTableTableManager
             bool saleItemsRefs,
             bool salePaymentsRefs,
             bool returnsRefs,
+            bool dineOrdersRefs,
           })
         > {
   $$SalesTableTableManager(_$AppDatabase db, $SalesTable table)
@@ -14676,6 +17322,7 @@ class $$SalesTableTableManager
                 saleItemsRefs = false,
                 salePaymentsRefs = false,
                 returnsRefs = false,
+                dineOrdersRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -14683,6 +17330,7 @@ class $$SalesTableTableManager
                     if (saleItemsRefs) db.saleItems,
                     if (salePaymentsRefs) db.salePayments,
                     if (returnsRefs) db.returns,
+                    if (dineOrdersRefs) db.dineOrders,
                   ],
                   addJoins:
                       <
@@ -14795,6 +17443,23 @@ class $$SalesTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (dineOrdersRefs)
+                        await $_getPrefetchedData<Sale, $SalesTable, DineOrder>(
+                          currentTable: table,
+                          referencedTable: $$SalesTableReferences
+                              ._dineOrdersRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$SalesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).dineOrdersRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.saleId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -14822,6 +17487,7 @@ typedef $$SalesTableProcessedTableManager =
         bool saleItemsRefs,
         bool salePaymentsRefs,
         bool returnsRefs,
+        bool dineOrdersRefs,
       })
     >;
 typedef $$SaleItemsTableCreateCompanionBuilder =
@@ -19384,6 +22050,1816 @@ typedef $$ReturnItemsTableProcessedTableManager =
       ReturnItem,
       PrefetchHooks Function({bool returnId, bool productId})
     >;
+typedef $$DiningTablesTableCreateCompanionBuilder =
+    DiningTablesCompanion Function({
+      Value<String> id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> deviceId,
+      required String name,
+      Value<String?> area,
+      Value<int> seats,
+      Value<int> sortOrder,
+      Value<bool> isActive,
+      Value<int> rowid,
+    });
+typedef $$DiningTablesTableUpdateCompanionBuilder =
+    DiningTablesCompanion Function({
+      Value<String> id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> deviceId,
+      Value<String> name,
+      Value<String?> area,
+      Value<int> seats,
+      Value<int> sortOrder,
+      Value<bool> isActive,
+      Value<int> rowid,
+    });
+
+final class $$DiningTablesTableReferences
+    extends BaseReferences<_$AppDatabase, $DiningTablesTable, DiningTable> {
+  $$DiningTablesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$DineOrdersTable, List<DineOrder>>
+  _dineOrdersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.dineOrders,
+    aliasName: 'dining_tables__id__dine_orders__table_id',
+  );
+
+  $$DineOrdersTableProcessedTableManager get dineOrdersRefs {
+    final manager = $$DineOrdersTableTableManager(
+      $_db,
+      $_db.dineOrders,
+    ).filter((f) => f.tableId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_dineOrdersRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$DiningTablesTableFilterComposer
+    extends Composer<_$AppDatabase, $DiningTablesTable> {
+  $$DiningTablesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get area => $composableBuilder(
+    column: $table.area,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get seats => $composableBuilder(
+    column: $table.seats,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> dineOrdersRefs(
+    Expression<bool> Function($$DineOrdersTableFilterComposer f) f,
+  ) {
+    final $$DineOrdersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.dineOrders,
+      getReferencedColumn: (t) => t.tableId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DineOrdersTableFilterComposer(
+            $db: $db,
+            $table: $db.dineOrders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$DiningTablesTableOrderingComposer
+    extends Composer<_$AppDatabase, $DiningTablesTable> {
+  $$DiningTablesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get area => $composableBuilder(
+    column: $table.area,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get seats => $composableBuilder(
+    column: $table.seats,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DiningTablesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DiningTablesTable> {
+  $$DiningTablesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get area =>
+      $composableBuilder(column: $table.area, builder: (column) => column);
+
+  GeneratedColumn<int> get seats =>
+      $composableBuilder(column: $table.seats, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  Expression<T> dineOrdersRefs<T extends Object>(
+    Expression<T> Function($$DineOrdersTableAnnotationComposer a) f,
+  ) {
+    final $$DineOrdersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.dineOrders,
+      getReferencedColumn: (t) => t.tableId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DineOrdersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.dineOrders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$DiningTablesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DiningTablesTable,
+          DiningTable,
+          $$DiningTablesTableFilterComposer,
+          $$DiningTablesTableOrderingComposer,
+          $$DiningTablesTableAnnotationComposer,
+          $$DiningTablesTableCreateCompanionBuilder,
+          $$DiningTablesTableUpdateCompanionBuilder,
+          (DiningTable, $$DiningTablesTableReferences),
+          DiningTable,
+          PrefetchHooks Function({bool dineOrdersRefs})
+        > {
+  $$DiningTablesTableTableManager(_$AppDatabase db, $DiningTablesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DiningTablesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DiningTablesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DiningTablesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> area = const Value.absent(),
+                Value<int> seats = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DiningTablesCompanion(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                deviceId: deviceId,
+                name: name,
+                area: area,
+                seats: seats,
+                sortOrder: sortOrder,
+                isActive: isActive,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                required String name,
+                Value<String?> area = const Value.absent(),
+                Value<int> seats = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DiningTablesCompanion.insert(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                deviceId: deviceId,
+                name: name,
+                area: area,
+                seats: seats,
+                sortOrder: sortOrder,
+                isActive: isActive,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$DiningTablesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({dineOrdersRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (dineOrdersRefs) db.dineOrders],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (dineOrdersRefs)
+                    await $_getPrefetchedData<
+                      DiningTable,
+                      $DiningTablesTable,
+                      DineOrder
+                    >(
+                      currentTable: table,
+                      referencedTable: $$DiningTablesTableReferences
+                          ._dineOrdersRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$DiningTablesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).dineOrdersRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.tableId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$DiningTablesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DiningTablesTable,
+      DiningTable,
+      $$DiningTablesTableFilterComposer,
+      $$DiningTablesTableOrderingComposer,
+      $$DiningTablesTableAnnotationComposer,
+      $$DiningTablesTableCreateCompanionBuilder,
+      $$DiningTablesTableUpdateCompanionBuilder,
+      (DiningTable, $$DiningTablesTableReferences),
+      DiningTable,
+      PrefetchHooks Function({bool dineOrdersRefs})
+    >;
+typedef $$DineOrdersTableCreateCompanionBuilder =
+    DineOrdersCompanion Function({
+      Value<String> id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> deviceId,
+      Value<String?> tableId,
+      required OrderType orderType,
+      Value<OrderStatus> status,
+      Value<String?> branchId,
+      Value<String?> staffId,
+      Value<String?> customerName,
+      Value<String?> customerPhone,
+      Value<String?> note,
+      Value<String?> saleId,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$DineOrdersTableUpdateCompanionBuilder =
+    DineOrdersCompanion Function({
+      Value<String> id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> deviceId,
+      Value<String?> tableId,
+      Value<OrderType> orderType,
+      Value<OrderStatus> status,
+      Value<String?> branchId,
+      Value<String?> staffId,
+      Value<String?> customerName,
+      Value<String?> customerPhone,
+      Value<String?> note,
+      Value<String?> saleId,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+final class $$DineOrdersTableReferences
+    extends BaseReferences<_$AppDatabase, $DineOrdersTable, DineOrder> {
+  $$DineOrdersTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $DiningTablesTable _tableIdTable(_$AppDatabase db) =>
+      db.diningTables.createAlias('dine_orders__table_id__dining_tables__id');
+
+  $$DiningTablesTableProcessedTableManager? get tableId {
+    final $_column = $_itemColumn<String>('table_id');
+    if ($_column == null) return null;
+    final manager = $$DiningTablesTableTableManager(
+      $_db,
+      $_db.diningTables,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_tableIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ShopsTable _branchIdTable(_$AppDatabase db) =>
+      db.shops.createAlias('dine_orders__branch_id__shops__id');
+
+  $$ShopsTableProcessedTableManager? get branchId {
+    final $_column = $_itemColumn<String>('branch_id');
+    if ($_column == null) return null;
+    final manager = $$ShopsTableTableManager(
+      $_db,
+      $_db.shops,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_branchIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $StaffTable _staffIdTable(_$AppDatabase db) =>
+      db.staff.createAlias('dine_orders__staff_id__staff__id');
+
+  $$StaffTableProcessedTableManager? get staffId {
+    final $_column = $_itemColumn<String>('staff_id');
+    if ($_column == null) return null;
+    final manager = $$StaffTableTableManager(
+      $_db,
+      $_db.staff,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_staffIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $SalesTable _saleIdTable(_$AppDatabase db) =>
+      db.sales.createAlias('dine_orders__sale_id__sales__id');
+
+  $$SalesTableProcessedTableManager? get saleId {
+    final $_column = $_itemColumn<String>('sale_id');
+    if ($_column == null) return null;
+    final manager = $$SalesTableTableManager(
+      $_db,
+      $_db.sales,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_saleIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$DineOrderItemsTable, List<DineOrderItem>>
+  _dineOrderItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.dineOrderItems,
+    aliasName: 'dine_orders__id__dine_order_items__order_id',
+  );
+
+  $$DineOrderItemsTableProcessedTableManager get dineOrderItemsRefs {
+    final manager = $$DineOrderItemsTableTableManager(
+      $_db,
+      $_db.dineOrderItems,
+    ).filter((f) => f.orderId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_dineOrderItemsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$DineOrdersTableFilterComposer
+    extends Composer<_$AppDatabase, $DineOrdersTable> {
+  $$DineOrdersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<OrderType, OrderType, String> get orderType =>
+      $composableBuilder(
+        column: $table.orderType,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<OrderStatus, OrderStatus, String> get status =>
+      $composableBuilder(
+        column: $table.status,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get customerName => $composableBuilder(
+    column: $table.customerName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customerPhone => $composableBuilder(
+    column: $table.customerPhone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$DiningTablesTableFilterComposer get tableId {
+    final $$DiningTablesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tableId,
+      referencedTable: $db.diningTables,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DiningTablesTableFilterComposer(
+            $db: $db,
+            $table: $db.diningTables,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ShopsTableFilterComposer get branchId {
+    final $$ShopsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.branchId,
+      referencedTable: $db.shops,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ShopsTableFilterComposer(
+            $db: $db,
+            $table: $db.shops,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$StaffTableFilterComposer get staffId {
+    final $$StaffTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.staffId,
+      referencedTable: $db.staff,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StaffTableFilterComposer(
+            $db: $db,
+            $table: $db.staff,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SalesTableFilterComposer get saleId {
+    final $$SalesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.saleId,
+      referencedTable: $db.sales,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SalesTableFilterComposer(
+            $db: $db,
+            $table: $db.sales,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> dineOrderItemsRefs(
+    Expression<bool> Function($$DineOrderItemsTableFilterComposer f) f,
+  ) {
+    final $$DineOrderItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.dineOrderItems,
+      getReferencedColumn: (t) => t.orderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DineOrderItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.dineOrderItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$DineOrdersTableOrderingComposer
+    extends Composer<_$AppDatabase, $DineOrdersTable> {
+  $$DineOrdersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orderType => $composableBuilder(
+    column: $table.orderType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customerName => $composableBuilder(
+    column: $table.customerName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customerPhone => $composableBuilder(
+    column: $table.customerPhone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$DiningTablesTableOrderingComposer get tableId {
+    final $$DiningTablesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tableId,
+      referencedTable: $db.diningTables,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DiningTablesTableOrderingComposer(
+            $db: $db,
+            $table: $db.diningTables,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ShopsTableOrderingComposer get branchId {
+    final $$ShopsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.branchId,
+      referencedTable: $db.shops,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ShopsTableOrderingComposer(
+            $db: $db,
+            $table: $db.shops,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$StaffTableOrderingComposer get staffId {
+    final $$StaffTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.staffId,
+      referencedTable: $db.staff,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StaffTableOrderingComposer(
+            $db: $db,
+            $table: $db.staff,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SalesTableOrderingComposer get saleId {
+    final $$SalesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.saleId,
+      referencedTable: $db.sales,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SalesTableOrderingComposer(
+            $db: $db,
+            $table: $db.sales,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DineOrdersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DineOrdersTable> {
+  $$DineOrdersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<OrderType, String> get orderType =>
+      $composableBuilder(column: $table.orderType, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<OrderStatus, String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get customerName => $composableBuilder(
+    column: $table.customerName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get customerPhone => $composableBuilder(
+    column: $table.customerPhone,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$DiningTablesTableAnnotationComposer get tableId {
+    final $$DiningTablesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tableId,
+      referencedTable: $db.diningTables,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DiningTablesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.diningTables,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ShopsTableAnnotationComposer get branchId {
+    final $$ShopsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.branchId,
+      referencedTable: $db.shops,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ShopsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.shops,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$StaffTableAnnotationComposer get staffId {
+    final $$StaffTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.staffId,
+      referencedTable: $db.staff,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StaffTableAnnotationComposer(
+            $db: $db,
+            $table: $db.staff,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SalesTableAnnotationComposer get saleId {
+    final $$SalesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.saleId,
+      referencedTable: $db.sales,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SalesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.sales,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> dineOrderItemsRefs<T extends Object>(
+    Expression<T> Function($$DineOrderItemsTableAnnotationComposer a) f,
+  ) {
+    final $$DineOrderItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.dineOrderItems,
+      getReferencedColumn: (t) => t.orderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DineOrderItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.dineOrderItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$DineOrdersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DineOrdersTable,
+          DineOrder,
+          $$DineOrdersTableFilterComposer,
+          $$DineOrdersTableOrderingComposer,
+          $$DineOrdersTableAnnotationComposer,
+          $$DineOrdersTableCreateCompanionBuilder,
+          $$DineOrdersTableUpdateCompanionBuilder,
+          (DineOrder, $$DineOrdersTableReferences),
+          DineOrder,
+          PrefetchHooks Function({
+            bool tableId,
+            bool branchId,
+            bool staffId,
+            bool saleId,
+            bool dineOrderItemsRefs,
+          })
+        > {
+  $$DineOrdersTableTableManager(_$AppDatabase db, $DineOrdersTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DineOrdersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DineOrdersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DineOrdersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                Value<String?> tableId = const Value.absent(),
+                Value<OrderType> orderType = const Value.absent(),
+                Value<OrderStatus> status = const Value.absent(),
+                Value<String?> branchId = const Value.absent(),
+                Value<String?> staffId = const Value.absent(),
+                Value<String?> customerName = const Value.absent(),
+                Value<String?> customerPhone = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String?> saleId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DineOrdersCompanion(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                deviceId: deviceId,
+                tableId: tableId,
+                orderType: orderType,
+                status: status,
+                branchId: branchId,
+                staffId: staffId,
+                customerName: customerName,
+                customerPhone: customerPhone,
+                note: note,
+                saleId: saleId,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                Value<String?> tableId = const Value.absent(),
+                required OrderType orderType,
+                Value<OrderStatus> status = const Value.absent(),
+                Value<String?> branchId = const Value.absent(),
+                Value<String?> staffId = const Value.absent(),
+                Value<String?> customerName = const Value.absent(),
+                Value<String?> customerPhone = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String?> saleId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DineOrdersCompanion.insert(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                deviceId: deviceId,
+                tableId: tableId,
+                orderType: orderType,
+                status: status,
+                branchId: branchId,
+                staffId: staffId,
+                customerName: customerName,
+                customerPhone: customerPhone,
+                note: note,
+                saleId: saleId,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$DineOrdersTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                tableId = false,
+                branchId = false,
+                staffId = false,
+                saleId = false,
+                dineOrderItemsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (dineOrderItemsRefs) db.dineOrderItems,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (tableId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.tableId,
+                                    referencedTable: $$DineOrdersTableReferences
+                                        ._tableIdTable(db),
+                                    referencedColumn:
+                                        $$DineOrdersTableReferences
+                                            ._tableIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (branchId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.branchId,
+                                    referencedTable: $$DineOrdersTableReferences
+                                        ._branchIdTable(db),
+                                    referencedColumn:
+                                        $$DineOrdersTableReferences
+                                            ._branchIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (staffId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.staffId,
+                                    referencedTable: $$DineOrdersTableReferences
+                                        ._staffIdTable(db),
+                                    referencedColumn:
+                                        $$DineOrdersTableReferences
+                                            ._staffIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (saleId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.saleId,
+                                    referencedTable: $$DineOrdersTableReferences
+                                        ._saleIdTable(db),
+                                    referencedColumn:
+                                        $$DineOrdersTableReferences
+                                            ._saleIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (dineOrderItemsRefs)
+                        await $_getPrefetchedData<
+                          DineOrder,
+                          $DineOrdersTable,
+                          DineOrderItem
+                        >(
+                          currentTable: table,
+                          referencedTable: $$DineOrdersTableReferences
+                              ._dineOrderItemsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$DineOrdersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).dineOrderItemsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.orderId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$DineOrdersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DineOrdersTable,
+      DineOrder,
+      $$DineOrdersTableFilterComposer,
+      $$DineOrdersTableOrderingComposer,
+      $$DineOrdersTableAnnotationComposer,
+      $$DineOrdersTableCreateCompanionBuilder,
+      $$DineOrdersTableUpdateCompanionBuilder,
+      (DineOrder, $$DineOrdersTableReferences),
+      DineOrder,
+      PrefetchHooks Function({
+        bool tableId,
+        bool branchId,
+        bool staffId,
+        bool saleId,
+        bool dineOrderItemsRefs,
+      })
+    >;
+typedef $$DineOrderItemsTableCreateCompanionBuilder =
+    DineOrderItemsCompanion Function({
+      Value<String> id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> deviceId,
+      required String orderId,
+      Value<String?> productId,
+      required String nameSnapshot,
+      required Qty qty,
+      required Money unitPrice,
+      Value<int> vatRateBp,
+      Value<String?> note,
+      Value<bool> kotSent,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$DineOrderItemsTableUpdateCompanionBuilder =
+    DineOrderItemsCompanion Function({
+      Value<String> id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> deviceId,
+      Value<String> orderId,
+      Value<String?> productId,
+      Value<String> nameSnapshot,
+      Value<Qty> qty,
+      Value<Money> unitPrice,
+      Value<int> vatRateBp,
+      Value<String?> note,
+      Value<bool> kotSent,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+final class $$DineOrderItemsTableReferences
+    extends BaseReferences<_$AppDatabase, $DineOrderItemsTable, DineOrderItem> {
+  $$DineOrderItemsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $DineOrdersTable _orderIdTable(_$AppDatabase db) =>
+      db.dineOrders.createAlias('dine_order_items__order_id__dine_orders__id');
+
+  $$DineOrdersTableProcessedTableManager get orderId {
+    final $_column = $_itemColumn<String>('order_id')!;
+
+    final manager = $$DineOrdersTableTableManager(
+      $_db,
+      $_db.dineOrders,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_orderIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ProductsTable _productIdTable(_$AppDatabase db) =>
+      db.products.createAlias('dine_order_items__product_id__products__id');
+
+  $$ProductsTableProcessedTableManager? get productId {
+    final $_column = $_itemColumn<String>('product_id');
+    if ($_column == null) return null;
+    final manager = $$ProductsTableTableManager(
+      $_db,
+      $_db.products,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_productIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$DineOrderItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $DineOrderItemsTable> {
+  $$DineOrderItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nameSnapshot => $composableBuilder(
+    column: $table.nameSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<Qty, Qty, int> get qty => $composableBuilder(
+    column: $table.qty,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<Money, Money, int> get unitPrice =>
+      $composableBuilder(
+        column: $table.unitPrice,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get vatRateBp => $composableBuilder(
+    column: $table.vatRateBp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get kotSent => $composableBuilder(
+    column: $table.kotSent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$DineOrdersTableFilterComposer get orderId {
+    final $$DineOrdersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.orderId,
+      referencedTable: $db.dineOrders,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DineOrdersTableFilterComposer(
+            $db: $db,
+            $table: $db.dineOrders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ProductsTableFilterComposer get productId {
+    final $$ProductsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.productId,
+      referencedTable: $db.products,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProductsTableFilterComposer(
+            $db: $db,
+            $table: $db.products,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DineOrderItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $DineOrderItemsTable> {
+  $$DineOrderItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nameSnapshot => $composableBuilder(
+    column: $table.nameSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get qty => $composableBuilder(
+    column: $table.qty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get unitPrice => $composableBuilder(
+    column: $table.unitPrice,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get vatRateBp => $composableBuilder(
+    column: $table.vatRateBp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get kotSent => $composableBuilder(
+    column: $table.kotSent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$DineOrdersTableOrderingComposer get orderId {
+    final $$DineOrdersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.orderId,
+      referencedTable: $db.dineOrders,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DineOrdersTableOrderingComposer(
+            $db: $db,
+            $table: $db.dineOrders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ProductsTableOrderingComposer get productId {
+    final $$ProductsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.productId,
+      referencedTable: $db.products,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProductsTableOrderingComposer(
+            $db: $db,
+            $table: $db.products,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DineOrderItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DineOrderItemsTable> {
+  $$DineOrderItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
+
+  GeneratedColumn<String> get nameSnapshot => $composableBuilder(
+    column: $table.nameSnapshot,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<Qty, int> get qty =>
+      $composableBuilder(column: $table.qty, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Money, int> get unitPrice =>
+      $composableBuilder(column: $table.unitPrice, builder: (column) => column);
+
+  GeneratedColumn<int> get vatRateBp =>
+      $composableBuilder(column: $table.vatRateBp, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<bool> get kotSent =>
+      $composableBuilder(column: $table.kotSent, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$DineOrdersTableAnnotationComposer get orderId {
+    final $$DineOrdersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.orderId,
+      referencedTable: $db.dineOrders,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DineOrdersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.dineOrders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ProductsTableAnnotationComposer get productId {
+    final $$ProductsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.productId,
+      referencedTable: $db.products,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProductsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.products,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DineOrderItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DineOrderItemsTable,
+          DineOrderItem,
+          $$DineOrderItemsTableFilterComposer,
+          $$DineOrderItemsTableOrderingComposer,
+          $$DineOrderItemsTableAnnotationComposer,
+          $$DineOrderItemsTableCreateCompanionBuilder,
+          $$DineOrderItemsTableUpdateCompanionBuilder,
+          (DineOrderItem, $$DineOrderItemsTableReferences),
+          DineOrderItem,
+          PrefetchHooks Function({bool orderId, bool productId})
+        > {
+  $$DineOrderItemsTableTableManager(
+    _$AppDatabase db,
+    $DineOrderItemsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DineOrderItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DineOrderItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DineOrderItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                Value<String> orderId = const Value.absent(),
+                Value<String?> productId = const Value.absent(),
+                Value<String> nameSnapshot = const Value.absent(),
+                Value<Qty> qty = const Value.absent(),
+                Value<Money> unitPrice = const Value.absent(),
+                Value<int> vatRateBp = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<bool> kotSent = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DineOrderItemsCompanion(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                deviceId: deviceId,
+                orderId: orderId,
+                productId: productId,
+                nameSnapshot: nameSnapshot,
+                qty: qty,
+                unitPrice: unitPrice,
+                vatRateBp: vatRateBp,
+                note: note,
+                kotSent: kotSent,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                required String orderId,
+                Value<String?> productId = const Value.absent(),
+                required String nameSnapshot,
+                required Qty qty,
+                required Money unitPrice,
+                Value<int> vatRateBp = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<bool> kotSent = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DineOrderItemsCompanion.insert(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                deviceId: deviceId,
+                orderId: orderId,
+                productId: productId,
+                nameSnapshot: nameSnapshot,
+                qty: qty,
+                unitPrice: unitPrice,
+                vatRateBp: vatRateBp,
+                note: note,
+                kotSent: kotSent,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$DineOrderItemsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({orderId = false, productId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (orderId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.orderId,
+                                referencedTable: $$DineOrderItemsTableReferences
+                                    ._orderIdTable(db),
+                                referencedColumn:
+                                    $$DineOrderItemsTableReferences
+                                        ._orderIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+                    if (productId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.productId,
+                                referencedTable: $$DineOrderItemsTableReferences
+                                    ._productIdTable(db),
+                                referencedColumn:
+                                    $$DineOrderItemsTableReferences
+                                        ._productIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$DineOrderItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DineOrderItemsTable,
+      DineOrderItem,
+      $$DineOrderItemsTableFilterComposer,
+      $$DineOrderItemsTableOrderingComposer,
+      $$DineOrderItemsTableAnnotationComposer,
+      $$DineOrderItemsTableCreateCompanionBuilder,
+      $$DineOrderItemsTableUpdateCompanionBuilder,
+      (DineOrderItem, $$DineOrderItemsTableReferences),
+      DineOrderItem,
+      PrefetchHooks Function({bool orderId, bool productId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -19424,4 +23900,10 @@ class $AppDatabaseManager {
       $$ReturnsTableTableManager(_db, _db.returns);
   $$ReturnItemsTableTableManager get returnItems =>
       $$ReturnItemsTableTableManager(_db, _db.returnItems);
+  $$DiningTablesTableTableManager get diningTables =>
+      $$DiningTablesTableTableManager(_db, _db.diningTables);
+  $$DineOrdersTableTableManager get dineOrders =>
+      $$DineOrdersTableTableManager(_db, _db.dineOrders);
+  $$DineOrderItemsTableTableManager get dineOrderItems =>
+      $$DineOrderItemsTableTableManager(_db, _db.dineOrderItems);
 }

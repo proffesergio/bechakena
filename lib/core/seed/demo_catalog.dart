@@ -149,27 +149,90 @@ const _products = [
       vatBp: 500),
 ];
 
-/// Loads the demo catalog. No-op (returns false) if any product exists —
-/// never contaminates a real shop's data.
-Future<bool> seedDemoData(AppDatabase db) async {
-  final existing = await (db.select(db.products)..limit(1)).get();
+/// Restaurant demo menu — common Bangladeshi fast-food / rice-house fare.
+const _restaurantCategories = [
+  _DemoCategory('fastfood', 'Fast Food', 'ফাস্ট ফুড', '#E53935', '🍔'),
+  _DemoCategory('rice', 'Rice & Biryani', 'ভাত ও বিরিয়ানি', '#FB8C00', '🍚'),
+  _DemoCategory('kebab', 'Kebab & Grill', 'কাবাব ও গ্রিল', '#8E24AA', '🍢'),
+  _DemoCategory('curry', 'Curry & Bhuna', 'তরকারি ও ভুনা', '#43A047', '🥘'),
+  _DemoCategory('drinks', 'Beverages', 'পানীয়', '#1E88E5', '🥤'),
+  _DemoCategory('dessert', 'Desserts', 'মিষ্টান্ন', '#D81B60', '🍮'),
+];
+
+const _restaurantProducts = [
+  // Fast food
+  _DemoProduct('fastfood', 'Beef Burger', 'বিফ বার্গার', 25000, '🍔', unit: 'pcs'),
+  _DemoProduct('fastfood', 'Chicken Burger', 'চিকেন বার্গার', 22000, '🍔', unit: 'pcs'),
+  _DemoProduct('fastfood', 'Chicken Sandwich', 'চিকেন স্যান্ডউইচ', 18000, '🥪', unit: 'pcs'),
+  _DemoProduct('fastfood', 'Margherita Pizza', 'মার্গারিটা পিৎজা', 65000, '🍕', unit: 'pcs'),
+  _DemoProduct('fastfood', 'French Fries', 'ফ্রেঞ্চ ফ্রাই', 12000, '🍟', unit: 'plate'),
+  _DemoProduct('fastfood', 'Chicken Fry (2pc)', 'চিকেন ফ্রাই (২ পিস)', 20000, '🍗', unit: 'plate'),
+  _DemoProduct('fastfood', 'Spring Roll', 'স্প্রিং রোল', 10000, '🌯', unit: 'pcs'),
+  // Rice & biryani
+  _DemoProduct('rice', 'Chicken Biryani', 'চিকেন বিরিয়ানি', 22000, '🍛', unit: 'plate'),
+  _DemoProduct('rice', 'Kacchi Biryani', 'কাচ্চি বিরিয়ানি', 35000, '🍛', unit: 'plate'),
+  _DemoProduct('rice', 'Beef Tehari', 'বিফ তেহারি', 20000, '🍚', unit: 'plate'),
+  _DemoProduct('rice', 'Morog Polao', 'মোরগ পোলাও', 25000, '🍚', unit: 'plate'),
+  _DemoProduct('rice', 'Fried Rice', 'ফ্রায়েড রাইস', 18000, '🍚', unit: 'plate'),
+  _DemoProduct('rice', 'Plain Rice', 'সাদা ভাত', 4000, '🍚', unit: 'plate'),
+  // Kebab & grill
+  _DemoProduct('kebab', 'Chicken Kebab', 'চিকেন কাবাব', 18000, '🍢', unit: 'plate'),
+  _DemoProduct('kebab', 'Beef Seekh Kebab', 'বিফ শিক কাবাব', 22000, '🍢', unit: 'plate'),
+  _DemoProduct('kebab', 'Chicken Tikka', 'চিকেন টিক্কা', 20000, '🍗', unit: 'plate'),
+  _DemoProduct('kebab', 'Naan', 'নান', 4000, '🫓', unit: 'pcs'),
+  _DemoProduct('kebab', 'Paratha', 'পরোটা', 3000, '🫓', unit: 'pcs'),
+  // Curry & bhuna
+  _DemoProduct('curry', 'Chicken Curry', 'চিকেন কারি', 18000, '🍲', unit: 'plate'),
+  _DemoProduct('curry', 'Beef Bhuna', 'বিফ ভুনা', 26000, '🥘', unit: 'plate'),
+  _DemoProduct('curry', 'Dal', 'ডাল', 6000, '🍲', unit: 'plate'),
+  _DemoProduct('curry', 'Mixed Vegetable', 'সবজি', 10000, '🥗', unit: 'plate'),
+  // Beverages
+  _DemoProduct('drinks', 'Borhani', 'বোরহানি', 6000, '🥛', unit: 'glass'),
+  _DemoProduct('drinks', 'Lassi', 'লাচ্ছি', 8000, '🥤', unit: 'glass'),
+  _DemoProduct('drinks', 'Fresh Lime', 'ফ্রেশ লেবু', 5000, '🍋', unit: 'glass'),
+  _DemoProduct('drinks', 'Coca-Cola', 'কোকা-কোলা', 4000, '🥤', unit: 'pcs', vatBp: 500),
+  _DemoProduct('drinks', 'Mineral Water', 'পানি', 2000, '💧', unit: 'pcs'),
+  _DemoProduct('drinks', 'Tea', 'চা', 2500, '🍵', unit: 'cup'),
+  _DemoProduct('drinks', 'Coffee', 'কফি', 6000, '☕', unit: 'cup'),
+  // Desserts
+  _DemoProduct('dessert', 'Firni', 'ফিরনি', 8000, '🍮', unit: 'bowl'),
+  _DemoProduct('dessert', 'Roshmalai', 'রসমালাই', 12000, '🍥', unit: 'plate'),
+  _DemoProduct('dessert', 'Ice Cream', 'আইসক্রিম', 9000, '🍨', unit: 'cup'),
+  _DemoProduct('dessert', 'Jorda', 'জর্দা', 7000, '🍚', unit: 'plate'),
+];
+
+/// Loads the demo catalog for one module ('superShop' or 'restaurant'). No-op
+/// (returns false) if that module already has any product — never contaminates
+/// a real shop's data. Rows are tagged with [businessType] so the retail
+/// catalog and the restaurant menu stay separate.
+Future<bool> seedDemoData(AppDatabase db,
+    {String businessType = 'superShop'}) async {
+  final existing = await (db.select(db.products)
+        ..where((p) => p.businessType.equals(businessType))
+        ..limit(1))
+      .get();
   if (existing.isNotEmpty) return false;
+
+  final restaurant = businessType == 'restaurant';
+  final categories = restaurant ? _restaurantCategories : _categories;
+  final products = restaurant ? _restaurantProducts : _products;
 
   await db.transaction(() async {
     final categoryIds = <String, String>{};
-    for (final cat in _categories) {
+    for (final cat in categories) {
       final row = await db.into(db.categories).insertReturning(
             CategoriesCompanion.insert(
               name: cat.en,
               nameBn: Value(cat.bn),
               colorHex: Value(cat.colorHex),
-              sortOrder: Value(_categories.indexOf(cat)),
+              sortOrder: Value(categories.indexOf(cat)),
+              businessType: Value(businessType),
             ),
           );
       categoryIds[cat.key] = row.id;
     }
 
-    for (final item in _products) {
+    for (final item in products) {
       final product = await db.productsDao.insertProduct(
         ProductsCompanion.insert(
           name: item.en,
@@ -181,6 +244,7 @@ Future<bool> seedDemoData(AppDatabase db) async {
           imagePath: Value('emoji:${item.emoji}'),
           barcode: Value(item.barcode),
           lowStockLevel: const Value(Qty(10000)),
+          businessType: Value(businessType),
         ),
       );
       await db.stockDao.addMovement(
@@ -191,10 +255,13 @@ Future<bool> seedDemoData(AppDatabase db) async {
       );
     }
 
-    await db.customersDao.insertCustomer(CustomersCompanion.insert(
-        name: 'করিম মিয়া', phone: const Value('01711-000001')));
-    await db.customersDao.insertCustomer(CustomersCompanion.insert(
-        name: 'রহিমা বেগম', phone: const Value('01812-000002')));
+    // Customers are shared across modules — seed them only with the retail set.
+    if (!restaurant) {
+      await db.customersDao.insertCustomer(CustomersCompanion.insert(
+          name: 'করিম মিয়া', phone: const Value('01711-000001')));
+      await db.customersDao.insertCustomer(CustomersCompanion.insert(
+          name: 'রহিমা বেগম', phone: const Value('01812-000002')));
+    }
   });
   return true;
 }

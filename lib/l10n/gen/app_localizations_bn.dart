@@ -614,4 +614,209 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get branchAdded => 'শাখা যোগ হয়েছে';
+
+  @override
+  String get chooseBusinessType => 'এটি কোন ধরনের ব্যবসা?';
+
+  @override
+  String get chooseBusinessTypeHint =>
+      'এটি আপনার ব্যবসার জন্য সঠিক স্ক্রিন ও টুল সেট করে দেয়।';
+
+  @override
+  String get chooseModule => 'কোন মডিউল খুলতে চান?';
+
+  @override
+  String get chooseModuleHint =>
+      'আজ কোথায় কাজ করবেন বেছে নিন। সুপারশপ ও রেস্টুরেন্টের আলাদা ক্যাটালগ থাকে।';
+
+  @override
+  String get bizSupershop => 'সুপারশপ / খুচরা';
+
+  @override
+  String get bizSupershopDesc => 'পণ্য, বারকোড বিলিং, ইনভেন্টরি ও বাকি খাতা।';
+
+  @override
+  String get bizRestaurant => 'রেস্টুরেন্ট';
+
+  @override
+  String get bizRestaurantDesc => 'মেনু আইটেম, টেবিল ও টেবিল-ভিত্তিক অর্ডার।';
+
+  @override
+  String get tourWelcomeTitle => 'স্বাগতম!';
+
+  @override
+  String get tourWelcomeBody =>
+      'দ্রুত, অফলাইন-ফার্স্ট পয়েন্ট অব সেল। এই ৩০ সেকেন্ডের টুর — যেকোনো সময় স্কিপ করতে পারেন।';
+
+  @override
+  String get tourSellTitle => 'সেকেন্ডেই বিক্রি';
+
+  @override
+  String get tourSellBody =>
+      'বারকোড স্ক্যান করুন, পণ্যে ট্যাপ করুন বা টাইপ করুন। নগদ, বিকাশ, নগদ, কার্ড বা বাকি — খুচরা ও ভাগ পেমেন্টসহ।';
+
+  @override
+  String get tourOrdersTitle => 'দ্রুত অর্ডার নিন';
+
+  @override
+  String get tourOrdersBody =>
+      'অর্ডারে মেনু আইটেম যোগ করুন, টেবিল পরিচালনা করুন এবং সেকেন্ডেই বিল প্রিন্ট করুন।';
+
+  @override
+  String get tourStockTitle => 'নিজে থেকেই আপডেট হওয়া ইনভেন্টরি';
+
+  @override
+  String get tourStockBody =>
+      'প্রতিটি বিক্রয়ে স্টক কমে, প্রতিটি ক্রয়ে বাড়ে। কম-স্টক ও মেয়াদের সতর্কতা — শাখা অনুযায়ী।';
+
+  @override
+  String get tourReportsTitle => 'খাতা ও রিপোর্ট অন্তর্ভুক্ত';
+
+  @override
+  String get tourReportsBody =>
+      'গ্রাহকের বাকি ট্র্যাক করুন, দৈনিক লাভ ও শীর্ষ পণ্য দেখুন এবং ডেটা ব্যাকআপ নিন — সবই অফলাইনে।';
+
+  @override
+  String get skip => 'স্কিপ';
+
+  @override
+  String get next => 'পরবর্তী';
+
+  @override
+  String get getStarted => 'শুরু করুন';
+
+  @override
+  String get navOrders => 'অর্ডার';
+
+  @override
+  String get navMenu => 'মেনু';
+
+  @override
+  String get navTables => 'টেবিল';
+
+  @override
+  String get noTables => 'এখনো কোনো টেবিল নেই — প্রথম টেবিল যোগ করুন';
+
+  @override
+  String get addTable => 'টেবিল যোগ করুন';
+
+  @override
+  String get editTable => 'টেবিল সম্পাদনা';
+
+  @override
+  String get deleteTable => 'টেবিল মুছুন';
+
+  @override
+  String get tableDeleted => 'টেবিল মুছে ফেলা হয়েছে';
+
+  @override
+  String get tableName => 'টেবিলের নাম / নম্বর';
+
+  @override
+  String get tableArea => 'এলাকা (যেমন ছাদ)';
+
+  @override
+  String get tableSeats => 'আসন';
+
+  @override
+  String get orderTypeDineIn => 'টেবিলে';
+
+  @override
+  String get orderTypeTakeaway => 'পার্সেল';
+
+  @override
+  String get orderTypeDelivery => 'ডেলিভারি';
+
+  @override
+  String get newTakeaway => 'নতুন পার্সেল';
+
+  @override
+  String get newDelivery => 'নতুন ডেলিভারি';
+
+  @override
+  String get openOrders => 'চলমান অর্ডার';
+
+  @override
+  String get noOpenOrders =>
+      'কোনো চলমান অর্ডার নেই — টেবিলে ট্যাপ করুন বা পার্সেল শুরু করুন';
+
+  @override
+  String get tableFree => 'খালি';
+
+  @override
+  String get tableOccupied => 'চলছে';
+
+  @override
+  String get manageTables => 'টেবিল পরিচালনা';
+
+  @override
+  String get doneManaging => 'সম্পন্ন';
+
+  @override
+  String get guest => 'অতিথি';
+
+  @override
+  String get guestName => 'অতিথির নাম (ঐচ্ছিক)';
+
+  @override
+  String get guestPhone => 'ফোন (ঐচ্ছিক)';
+
+  @override
+  String get orderPanel => 'অর্ডার';
+
+  @override
+  String get addToOrder => 'অর্ডারে যোগ করুন';
+
+  @override
+  String get noOrderItems => 'এখনো কোনো আইটেম নেই — মেনু থেকে যোগ করুন';
+
+  @override
+  String get sendToKitchen => 'রান্নাঘরে পাঠান';
+
+  @override
+  String get kitchenTicket => 'কিচেন টিকিট';
+
+  @override
+  String get sentToKitchen => 'রান্নাঘরে পাঠানো হয়েছে';
+
+  @override
+  String get nothingNewToSend => 'নতুন কিছু পাঠানোর নেই';
+
+  @override
+  String get settleOrder => 'বিল ও পেমেন্ট';
+
+  @override
+  String orderSettled(String invoiceNo) {
+    return 'অর্ডার সম্পন্ন — $invoiceNo';
+  }
+
+  @override
+  String get cancelOrder => 'অর্ডার বাতিল';
+
+  @override
+  String get cancelOrderConfirm =>
+      'এই অর্ডার বাতিল করবেন? কোনো চার্জ নেওয়া হবে না।';
+
+  @override
+  String get orderCancelled => 'অর্ডার বাতিল হয়েছে';
+
+  @override
+  String itemsCount(String count) {
+    return '$count আইটেম';
+  }
+
+  @override
+  String newItemsToFire(String count) {
+    return '$countটি নতুন পাঠাতে';
+  }
+
+  @override
+  String get switchModule => 'মডিউল পরিবর্তন';
+
+  @override
+  String get switchModuleConfirm =>
+      'অন্য মডিউলে যাবেন? আপনি সাইন আউট হয়ে আবার বেছে নেবেন। প্রতিটি মডিউলের আলাদা ডেটা থাকে।';
+
+  @override
+  String get switchModuleAction => 'পরিবর্তন';
 }

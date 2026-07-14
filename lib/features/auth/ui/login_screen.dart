@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/brand.dart';
+import '../../../app/business_type.dart';
 import '../../../app/providers.dart';
 import '../../../core/db/database.dart';
 import '../../../l10n/gen/app_localizations.dart';
@@ -15,7 +16,9 @@ class LoginScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final hasStaff = ref.watch(hasStaffProvider);
+    final restaurant = ref.watch(isRestaurantProvider);
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -25,12 +28,15 @@ class LoginScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('🛒', style: TextStyle(fontSize: 56))
+                Text(restaurant ? '🍽️' : '🛒',
+                        style: const TextStyle(fontSize: 56))
                     .animate()
                     .scaleXY(begin: 0.6, curve: Curves.easeOutBack),
                 const SizedBox(height: 8),
                 Text(Brand.name,
                     style: Theme.of(context).textTheme.headlineSmall),
+                Text(restaurant ? l10n.bizRestaurant : l10n.bizSupershop,
+                    style: Theme.of(context).textTheme.bodySmall),
                 const SizedBox(height: 24),
                 hasStaff.when(
                   loading: () =>
@@ -39,6 +45,13 @@ class LoginScreen extends ConsumerWidget {
                   error: (e, _) => Text('$e'),
                   data: (exists) =>
                       exists ? const _PinLogin() : const _OwnerSetup(),
+                ),
+                const SizedBox(height: 16),
+                TextButton.icon(
+                  icon: const Icon(Icons.swap_horiz),
+                  label: Text(l10n.switchModule),
+                  onPressed: () =>
+                      ref.read(businessTypeProvider.notifier).clear(),
                 ),
               ],
             ),
@@ -162,7 +175,13 @@ class _PinLoginState extends ConsumerState<_PinLogin> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final staff = ref.watch(staffListProvider).value ?? const <StaffData>[];
-    _staffId ??= staff.isNotEmpty ? staff.first.id : null;
+    // Keep the selection valid against the *current* staff list. After a module
+    // switch the DB (and its staff) changes, so a cached _staffId can point at a
+    // member that no longer exists — feeding the dropdown a value absent from
+    // its items trips a framework assertion. Fall back to the first member.
+    if (_staffId == null || staff.every((s) => s.id != _staffId)) {
+      _staffId = staff.isNotEmpty ? staff.first.id : null;
+    }
 
     return Card(
       child: Padding(

@@ -1231,6 +1231,384 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Branch added'**
   String get branchAdded;
+
+  /// No description provided for @chooseBusinessType.
+  ///
+  /// In en, this message translates to:
+  /// **'What kind of business is this?'**
+  String get chooseBusinessType;
+
+  /// No description provided for @chooseBusinessTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This sets up the right screens and tools for your business.'**
+  String get chooseBusinessTypeHint;
+
+  /// No description provided for @chooseModule.
+  ///
+  /// In en, this message translates to:
+  /// **'Which module do you want to open?'**
+  String get chooseModule;
+
+  /// No description provided for @chooseModuleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick where you\'re working today. Supershop and Restaurant keep separate catalogs.'**
+  String get chooseModuleHint;
+
+  /// No description provided for @bizSupershop.
+  ///
+  /// In en, this message translates to:
+  /// **'Supershop / Retail'**
+  String get bizSupershop;
+
+  /// No description provided for @bizSupershopDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Products, barcode billing, inventory and baki khata.'**
+  String get bizSupershopDesc;
+
+  /// No description provided for @bizRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant'**
+  String get bizRestaurant;
+
+  /// No description provided for @bizRestaurantDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu items, dining tables and table-side orders.'**
+  String get bizRestaurantDesc;
+
+  /// No description provided for @tourWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome!'**
+  String get tourWelcomeTitle;
+
+  /// No description provided for @tourWelcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A fast, offline-first point of sale. Here\'s a 30-second tour — you can skip anytime.'**
+  String get tourWelcomeBody;
+
+  /// No description provided for @tourSellTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sell in seconds'**
+  String get tourSellTitle;
+
+  /// No description provided for @tourSellBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a barcode, tap a product, or type an item. Take cash, bKash, Nagad, card or due — with change and split payments.'**
+  String get tourSellBody;
+
+  /// No description provided for @tourOrdersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Take orders fast'**
+  String get tourOrdersTitle;
+
+  /// No description provided for @tourOrdersBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add menu items to an order, manage dining tables, and print the bill in seconds.'**
+  String get tourOrdersBody;
+
+  /// No description provided for @tourStockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory that maintains itself'**
+  String get tourStockTitle;
+
+  /// No description provided for @tourStockBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every sale reduces stock and every purchase restocks. Low-stock and expiry alerts keep you ahead — per branch.'**
+  String get tourStockBody;
+
+  /// No description provided for @tourReportsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Khata & reports built in'**
+  String get tourReportsTitle;
+
+  /// No description provided for @tourReportsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Track customer due (baki), see daily profit and top products, and back up your data — all offline.'**
+  String get tourReportsBody;
+
+  /// No description provided for @skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skip;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// No description provided for @getStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get getStarted;
+
+  /// No description provided for @navOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders'**
+  String get navOrders;
+
+  /// No description provided for @navMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu'**
+  String get navMenu;
+
+  /// No description provided for @navTables.
+  ///
+  /// In en, this message translates to:
+  /// **'Tables'**
+  String get navTables;
+
+  /// No description provided for @noTables.
+  ///
+  /// In en, this message translates to:
+  /// **'No tables yet — add your first table'**
+  String get noTables;
+
+  /// No description provided for @addTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Add table'**
+  String get addTable;
+
+  /// No description provided for @editTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit table'**
+  String get editTable;
+
+  /// No description provided for @deleteTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete table'**
+  String get deleteTable;
+
+  /// No description provided for @tableDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Table deleted'**
+  String get tableDeleted;
+
+  /// No description provided for @tableName.
+  ///
+  /// In en, this message translates to:
+  /// **'Table name / number'**
+  String get tableName;
+
+  /// No description provided for @tableArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Area (e.g. Rooftop)'**
+  String get tableArea;
+
+  /// No description provided for @tableSeats.
+  ///
+  /// In en, this message translates to:
+  /// **'Seats'**
+  String get tableSeats;
+
+  /// No description provided for @orderTypeDineIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Dine-in'**
+  String get orderTypeDineIn;
+
+  /// No description provided for @orderTypeTakeaway.
+  ///
+  /// In en, this message translates to:
+  /// **'Takeaway'**
+  String get orderTypeTakeaway;
+
+  /// No description provided for @orderTypeDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get orderTypeDelivery;
+
+  /// No description provided for @newTakeaway.
+  ///
+  /// In en, this message translates to:
+  /// **'New takeaway'**
+  String get newTakeaway;
+
+  /// No description provided for @newDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'New delivery'**
+  String get newDelivery;
+
+  /// No description provided for @openOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Open orders'**
+  String get openOrders;
+
+  /// No description provided for @noOpenOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'No open orders — tap a table or start a takeaway'**
+  String get noOpenOrders;
+
+  /// No description provided for @tableFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get tableFree;
+
+  /// No description provided for @tableOccupied.
+  ///
+  /// In en, this message translates to:
+  /// **'Occupied'**
+  String get tableOccupied;
+
+  /// No description provided for @manageTables.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage tables'**
+  String get manageTables;
+
+  /// No description provided for @doneManaging.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get doneManaging;
+
+  /// No description provided for @guest.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get guest;
+
+  /// No description provided for @guestName.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest name (optional)'**
+  String get guestName;
+
+  /// No description provided for @guestPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone (optional)'**
+  String get guestPhone;
+
+  /// No description provided for @orderPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Order'**
+  String get orderPanel;
+
+  /// No description provided for @addToOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to order'**
+  String get addToOrder;
+
+  /// No description provided for @noOrderItems.
+  ///
+  /// In en, this message translates to:
+  /// **'No items yet — add from the menu'**
+  String get noOrderItems;
+
+  /// No description provided for @sendToKitchen.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to kitchen'**
+  String get sendToKitchen;
+
+  /// No description provided for @kitchenTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Kitchen ticket'**
+  String get kitchenTicket;
+
+  /// No description provided for @sentToKitchen.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent to kitchen'**
+  String get sentToKitchen;
+
+  /// No description provided for @nothingNewToSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing new to send'**
+  String get nothingNewToSend;
+
+  /// No description provided for @settleOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Settle & pay'**
+  String get settleOrder;
+
+  /// No description provided for @orderSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Order settled — {invoiceNo}'**
+  String orderSettled(String invoiceNo);
+
+  /// No description provided for @cancelOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel order'**
+  String get cancelOrder;
+
+  /// No description provided for @cancelOrderConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this order? Nothing will be charged.'**
+  String get cancelOrderConfirm;
+
+  /// No description provided for @orderCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Order cancelled'**
+  String get orderCancelled;
+
+  /// No description provided for @itemsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String itemsCount(String count);
+
+  /// No description provided for @newItemsToFire.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} new to fire'**
+  String newItemsToFire(String count);
+
+  /// No description provided for @switchModule.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch module'**
+  String get switchModule;
+
+  /// No description provided for @switchModuleConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to the other module? You\'ll sign out and pick again. Each module keeps its own separate data.'**
+  String get switchModuleConfirm;
+
+  /// No description provided for @switchModuleAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch'**
+  String get switchModuleAction;
 }
 
 class _AppLocalizationsDelegate

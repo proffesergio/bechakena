@@ -10,6 +10,10 @@ class SessionController extends Notifier<StaffData?> {
   StaffData? build() => null;
 
   void login(StaffData staff) => state = staff;
+
+  /// Signs out but keeps the device's module — the login screen for the *same*
+  /// module shows again. Changing module is a separate, explicit "Switch
+  /// module" action ([BusinessTypeController.clear]).
   void logout() => state = null;
 }
 

@@ -28,6 +28,14 @@ enum SmsKind { receipt, dueReminder }
 
 enum SmsStatus { queued, sent, failed }
 
+/// How a restaurant order is served. Dine-in orders attach to a [DiningTables]
+/// row; takeaway/delivery orders carry a customer name instead.
+enum OrderType { dineIn, takeaway, delivery }
+
+/// Lifecycle of a restaurant order. Open orders are the running tabs; settling
+/// converts one into an immutable finalized [Sales] row; cancelling voids it.
+enum OrderStatus { open, settled, cancelled }
+
 class Shops extends Table with SyncColumns {
   TextColumn get name => text()();
   TextColumn get nameBn => text().nullable()();
@@ -50,6 +58,10 @@ class Categories extends Table with SyncColumns {
   TextColumn get nameBn => text().nullable()();
   TextColumn get colorHex => text().nullable()();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+
+  /// 'superShop' or 'restaurant' — keeps each module's categories separate.
+  TextColumn get businessType =>
+      text().withDefault(const Constant('superShop'))();
 }
 
 class Products extends Table with SyncColumns {
@@ -70,6 +82,11 @@ class Products extends Table with SyncColumns {
       integer().map(const QtyConverter()).withDefault(const Constant(0))();
   TextColumn get imagePath => text().nullable()();
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+
+  /// Which module owns this item: 'superShop' or 'restaurant'. Keeps the retail
+  /// catalog and the restaurant menu separate on the same install.
+  TextColumn get businessType =>
+      text().withDefault(const Constant('superShop'))();
 }
 
 /// Append-only. Current stock of a product = SUM(qtyDelta). Never store a
@@ -215,6 +232,58 @@ class SyncOutbox extends Table {
   TextColumn get op => text()();
   TextColumn get payload => text()();
   DateTimeColumn get queuedAt =>
+      dateTime().clientDefault(() => DateTime.now().toUtc())();
+}
+
+/// Restaurant mode: dining tables/seats an order can be attached to. Only used
+/// when the business type is restaurant; harmless (empty) otherwise.
+class DiningTables extends Table with SyncColumns {
+  TextColumn get name => text()();
+  TextColumn get area => text().nullable()();
+  IntColumn get seats => integer().withDefault(const Constant(0))();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+}
+
+/// Restaurant mode: a running order (tab). Dine-in orders point at a table;
+/// takeaway/delivery orders carry a customer name. Stays `open` while items are
+/// being added; settling stamps [saleId] with the finalized sale it became.
+class DineOrders extends Table with SyncColumns {
+  TextColumn get tableId => text().nullable().references(DiningTables, #id)();
+  TextColumn get orderType => textEnum<OrderType>()();
+  TextColumn get status =>
+      textEnum<OrderStatus>().withDefault(const Constant('open'))();
+
+  /// Branch/outlet the order was opened in. Nullable only for legacy rows.
+  TextColumn get branchId => text().nullable().references(Shops, #id)();
+  TextColumn get staffId => text().nullable().references(Staff, #id)();
+
+  /// For takeaway/delivery (dine-in identifies the guest by the table).
+  TextColumn get customerName => text().nullable()();
+  TextColumn get customerPhone => text().nullable()();
+  TextColumn get note => text().nullable()();
+
+  /// The finalized sale this order became on settle; null while open.
+  TextColumn get saleId => text().nullable().references(Sales, #id)();
+  DateTimeColumn get createdAt =>
+      dateTime().clientDefault(() => DateTime.now().toUtc())();
+}
+
+/// A line on a running restaurant order. Mirrors a cart line but is persisted so
+/// tabs survive navigation and restarts. `kotSent` tracks which lines have been
+/// fired to the kitchen so a re-print only sends the new ones.
+class DineOrderItems extends Table with SyncColumns {
+  TextColumn get orderId => text().references(DineOrders, #id)();
+
+  /// Null for manual (off-menu) items typed in at the table.
+  TextColumn get productId => text().nullable().references(Products, #id)();
+  TextColumn get nameSnapshot => text()();
+  IntColumn get qty => integer().map(const QtyConverter())();
+  IntColumn get unitPrice => integer().map(const MoneyConverter())();
+  IntColumn get vatRateBp => integer().withDefault(const Constant(0))();
+  TextColumn get note => text().nullable()();
+  BoolColumn get kotSent => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get createdAt =>
       dateTime().clientDefault(() => DateTime.now().toUtc())();
 }
 

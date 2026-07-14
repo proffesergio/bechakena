@@ -23,6 +23,7 @@ Product product({
     vatRateBp: vatRateBp,
     lowStockLevel: Qty.zero,
     isActive: true,
+    businessType: 'superShop',
   );
 }
 

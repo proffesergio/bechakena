@@ -7,13 +7,16 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../../../app/brand.dart';
+import '../../../app/business_type.dart';
 import '../../../app/providers.dart';
+import '../../../app/widgets/app_loader.dart';
 import '../../../core/db/database.dart';
 import '../../../core/db/open.dart';
 import '../../../core/seed/demo_catalog.dart';
 import '../../../core/printing/print_service.dart';
 import '../../../core/printing/printer_transport.dart';
 import '../../../l10n/gen/app_localizations.dart';
+import '../../auth/logic/permissions.dart';
 import '../../auth/logic/session.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -187,8 +190,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
     );
     if (ok != true) return;
-    // Arm the wipe; the DB file is dropped on next launch.
-    final sentinel = await pendingWipeFile();
+    // Arm the wipe for THIS module only; its DB file is dropped on next launch.
+    final module = ref.read(businessTypeProvider)!.name;
+    final sentinel = await pendingWipeFile(module);
     await sentinel.writeAsString('wipe');
     messenger.showSnackBar(SnackBar(content: Text(l10n.clearDataDone)));
   }
@@ -203,7 +207,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         .toIso8601String()
         .replaceAll(RegExp(r'[:.]'), '-')
         .substring(0, 19);
-    final path = '${dir.path}/BechaKena-backup-$stamp.db';
+    final module = ref.read(businessTypeProvider)!.name;
+    final path = '${dir.path}/BechaKena-$module-backup-$stamp.db';
     // VACUUM INTO writes a clean, consistent single-file snapshot.
     await db.customStatement('VACUUM INTO ?', [path]);
     messenger.showSnackBar(SnackBar(content: Text(l10n.backupSaved(path))));
@@ -216,17 +221,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       const XTypeGroup(label: 'BechaKena backup', extensions: ['db']),
     ]);
     if (picked == null) return;
-    final target = await pendingRestoreFile();
+    // Restore into THIS module's DB only; swapped in on next launch.
+    final module = ref.read(businessTypeProvider)!.name;
+    final target = await pendingRestoreFile(module);
     await picked.saveTo(target.path);
     messenger.showSnackBar(SnackBar(content: Text(l10n.restoreDone)));
+  }
+
+  Future<void> _switchModule() async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dctx) => AlertDialog(
+        title: Text(l10n.switchModule),
+        content: Text(l10n.switchModuleConfirm),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(dctx).pop(false),
+              child: Text(l10n.cancel)),
+          FilledButton(
+              onPressed: () => Navigator.of(dctx).pop(true),
+              child: Text(l10n.switchModuleAction)),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    // Sign out, then clear the module → the picker shows again.
+    ref.read(currentStaffProvider.notifier).logout();
+    await ref.read(businessTypeProvider.notifier).clear();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final locale = ref.watch(localeProvider) ?? Localizations.localeOf(context);
+    final caps = ref.watch(capabilitiesProvider);
     if (!_loaded) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: AppLoader());
     }
 
     return ListView(
@@ -275,10 +306,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ref.read(themeModeProvider.notifier).set(s.first),
           ),
         ),
-        const Divider(height: 32),
-        _buildBranchSection(context, l10n),
-        const Divider(height: 32),
-        Text(l10n.shopSection, style: Theme.of(context).textTheme.titleMedium),
+        if (caps.contains(Capability.manageBranches)) ...[
+          const Divider(height: 32),
+          _buildBranchSection(context, l10n),
+        ],
+        if (caps.contains(Capability.manageShopProfile)) ...[
+          const Divider(height: 32),
+          Text(l10n.shopSection, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
         TextField(
             controller: _shopName,
@@ -373,51 +407,60 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ],
         ),
         const SizedBox(height: 16),
-        FilledButton.icon(
-          icon: const Icon(Icons.save),
-          label: Text(l10n.save),
-          onPressed: _saveAll,
-        ),
-        const Divider(height: 32),
-        Text(l10n.backupSection,
-            style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            OutlinedButton.icon(
-              icon: const Icon(Icons.backup),
-              label: Text(l10n.backupNow),
-              onPressed: _backup,
-            ),
-            const SizedBox(width: 12),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.restore),
-              label: Text(l10n.restoreBackup),
-              onPressed: _restore,
-            ),
-            const SizedBox(width: 12),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.auto_awesome),
-              label: Text(l10n.loadDemo),
-              onPressed: () async {
-                final messenger = ScaffoldMessenger.of(context);
-                final loaded =
-                    await seedDemoData(ref.read(databaseProvider));
-                messenger.showSnackBar(SnackBar(
-                    content:
-                        Text(loaded ? l10n.demoLoaded : l10n.demoSkipped)));
-              },
-            ),
-            const SizedBox(width: 12),
-            OutlinedButton.icon(
-              icon: Icon(Icons.delete_forever,
-                  color: Theme.of(context).colorScheme.error),
-              label: Text(l10n.clearData,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error)),
-              onPressed: _clearData,
-            ),
-          ],
-        ),
+          FilledButton.icon(
+            icon: const Icon(Icons.save),
+            label: Text(l10n.save),
+            onPressed: _saveAll,
+          ),
+        ],
+        if (caps.contains(Capability.backupRestore) ||
+            caps.contains(Capability.manageProducts) ||
+            caps.contains(Capability.clearData)) ...[
+          const Divider(height: 32),
+          Text(l10n.backupSection,
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              if (caps.contains(Capability.backupRestore)) ...[
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.backup),
+                  label: Text(l10n.backupNow),
+                  onPressed: _backup,
+                ),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.restore),
+                  label: Text(l10n.restoreBackup),
+                  onPressed: _restore,
+                ),
+              ],
+              if (caps.contains(Capability.manageProducts))
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.auto_awesome),
+                  label: Text(l10n.loadDemo),
+                  onPressed: () async {
+                    final messenger = ScaffoldMessenger.of(context);
+                    final loaded = await seedDemoData(ref.read(databaseProvider),
+                        businessType: ref.read(catalogScopeProvider));
+                    messenger.showSnackBar(SnackBar(
+                        content:
+                            Text(loaded ? l10n.demoLoaded : l10n.demoSkipped)));
+                  },
+                ),
+              if (caps.contains(Capability.clearData))
+                OutlinedButton.icon(
+                  icon: Icon(Icons.delete_forever,
+                      color: Theme.of(context).colorScheme.error),
+                  label: Text(l10n.clearData,
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.error)),
+                  onPressed: _clearData,
+                ),
+            ],
+          ),
+        ],
         const Divider(height: 32),
         _buildStaffSection(context, l10n),
       ],
@@ -499,9 +542,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildStaffSection(BuildContext context, AppLocalizations l10n) {
     final me = ref.watch(currentStaffProvider);
     final staff = ref.watch(staffListProvider).value ?? const <StaffData>[];
-    // Only owners/managers manage staff.
-    final canManage =
-        me != null && me.role != StaffRole.cashier;
+    final caps = ref.watch(capabilitiesProvider);
+    // Managers can add cashiers; only owners can add managers or delete staff.
+    final canAddStaff = caps.contains(Capability.addCashier);
+    final canManageStaff = caps.contains(Capability.manageStaff);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -511,7 +555,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             Text(l10n.staffSection,
                 style: Theme.of(context).textTheme.titleMedium),
             const Spacer(),
-            if (canManage)
+            if (canAddStaff)
               TextButton.icon(
                 icon: const Icon(Icons.person_add),
                 label: Text(l10n.addStaff),
@@ -528,7 +572,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             leading: const Icon(Icons.badge),
             title: Text(s.name),
             subtitle: Text(_roleLabel(l10n, s.role)),
-            trailing: canManage && s.id != me.id
+            trailing: canManageStaff && s.id != me?.id
                 ? IconButton(
                     icon: const Icon(Icons.delete_outline),
                     onPressed: () async {
@@ -566,6 +610,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 child: Text(l10n.loggedInAs(me.name),
                     style: Theme.of(context).textTheme.bodySmall),
               ),
+            if (caps.contains(Capability.switchModule)) ...[
+              OutlinedButton.icon(
+                icon: const Icon(Icons.swap_horiz),
+                label: Text(l10n.switchModule),
+                onPressed: _switchModule,
+              ),
+              const SizedBox(width: 12),
+            ],
             OutlinedButton.icon(
               icon: const Icon(Icons.logout),
               label: Text(l10n.logout),
@@ -652,6 +704,10 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    // Only full staff managers (owners) can grant the manager role; managers
+    // may add cashiers only.
+    final canAddManager =
+        ref.watch(capabilitiesProvider).contains(Capability.manageStaff);
     return AlertDialog(
       title: Text(l10n.addStaff),
       content: Form(
@@ -684,8 +740,10 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
                 initialValue: _role,
                 decoration: InputDecoration(labelText: l10n.role),
                 items: [
-                  DropdownMenuItem(
-                      value: StaffRole.manager, child: Text(l10n.roleManager)),
+                  if (canAddManager)
+                    DropdownMenuItem(
+                        value: StaffRole.manager,
+                        child: Text(l10n.roleManager)),
                   DropdownMenuItem(
                       value: StaffRole.cashier, child: Text(l10n.roleCashier)),
                 ],

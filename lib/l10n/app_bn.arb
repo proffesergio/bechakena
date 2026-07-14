@@ -209,5 +209,89 @@
   "addBranch": "শাখা যোগ করুন",
   "branchName": "শাখার নাম",
   "branchHint": "এই ডিভাইসের বিক্রয়, ক্রয় ও স্টক এই শাখার অধীনে রেকর্ড হয়।",
-  "branchAdded": "শাখা যোগ হয়েছে"
+  "branchAdded": "শাখা যোগ হয়েছে",
+  "chooseBusinessType": "এটি কোন ধরনের ব্যবসা?",
+  "chooseBusinessTypeHint": "এটি আপনার ব্যবসার জন্য সঠিক স্ক্রিন ও টুল সেট করে দেয়।",
+  "chooseModule": "কোন মডিউল খুলতে চান?",
+  "chooseModuleHint": "আজ কোথায় কাজ করবেন বেছে নিন। সুপারশপ ও রেস্টুরেন্টের আলাদা ক্যাটালগ থাকে।",
+  "bizSupershop": "সুপারশপ / খুচরা",
+  "bizSupershopDesc": "পণ্য, বারকোড বিলিং, ইনভেন্টরি ও বাকি খাতা।",
+  "bizRestaurant": "রেস্টুরেন্ট",
+  "bizRestaurantDesc": "মেনু আইটেম, টেবিল ও টেবিল-ভিত্তিক অর্ডার।",
+  "tourWelcomeTitle": "স্বাগতম!",
+  "tourWelcomeBody": "দ্রুত, অফলাইন-ফার্স্ট পয়েন্ট অব সেল। এই ৩০ সেকেন্ডের টুর — যেকোনো সময় স্কিপ করতে পারেন।",
+  "tourSellTitle": "সেকেন্ডেই বিক্রি",
+  "tourSellBody": "বারকোড স্ক্যান করুন, পণ্যে ট্যাপ করুন বা টাইপ করুন। নগদ, বিকাশ, নগদ, কার্ড বা বাকি — খুচরা ও ভাগ পেমেন্টসহ।",
+  "tourOrdersTitle": "দ্রুত অর্ডার নিন",
+  "tourOrdersBody": "অর্ডারে মেনু আইটেম যোগ করুন, টেবিল পরিচালনা করুন এবং সেকেন্ডেই বিল প্রিন্ট করুন।",
+  "tourStockTitle": "নিজে থেকেই আপডেট হওয়া ইনভেন্টরি",
+  "tourStockBody": "প্রতিটি বিক্রয়ে স্টক কমে, প্রতিটি ক্রয়ে বাড়ে। কম-স্টক ও মেয়াদের সতর্কতা — শাখা অনুযায়ী।",
+  "tourReportsTitle": "খাতা ও রিপোর্ট অন্তর্ভুক্ত",
+  "tourReportsBody": "গ্রাহকের বাকি ট্র্যাক করুন, দৈনিক লাভ ও শীর্ষ পণ্য দেখুন এবং ডেটা ব্যাকআপ নিন — সবই অফলাইনে।",
+  "skip": "স্কিপ",
+  "next": "পরবর্তী",
+  "getStarted": "শুরু করুন",
+  "navOrders": "অর্ডার",
+  "navMenu": "মেনু",
+  "navTables": "টেবিল",
+  "noTables": "এখনো কোনো টেবিল নেই — প্রথম টেবিল যোগ করুন",
+  "addTable": "টেবিল যোগ করুন",
+  "editTable": "টেবিল সম্পাদনা",
+  "deleteTable": "টেবিল মুছুন",
+  "tableDeleted": "টেবিল মুছে ফেলা হয়েছে",
+  "tableName": "টেবিলের নাম / নম্বর",
+  "tableArea": "এলাকা (যেমন ছাদ)",
+  "tableSeats": "আসন",
+  "orderTypeDineIn": "টেবিলে",
+  "orderTypeTakeaway": "পার্সেল",
+  "orderTypeDelivery": "ডেলিভারি",
+  "newTakeaway": "নতুন পার্সেল",
+  "newDelivery": "নতুন ডেলিভারি",
+  "openOrders": "চলমান অর্ডার",
+  "noOpenOrders": "কোনো চলমান অর্ডার নেই — টেবিলে ট্যাপ করুন বা পার্সেল শুরু করুন",
+  "tableFree": "খালি",
+  "tableOccupied": "চলছে",
+  "manageTables": "টেবিল পরিচালনা",
+  "doneManaging": "সম্পন্ন",
+  "guest": "অতিথি",
+  "guestName": "অতিথির নাম (ঐচ্ছিক)",
+  "guestPhone": "ফোন (ঐচ্ছিক)",
+  "orderPanel": "অর্ডার",
+  "addToOrder": "অর্ডারে যোগ করুন",
+  "noOrderItems": "এখনো কোনো আইটেম নেই — মেনু থেকে যোগ করুন",
+  "sendToKitchen": "রান্নাঘরে পাঠান",
+  "kitchenTicket": "কিচেন টিকিট",
+  "sentToKitchen": "রান্নাঘরে পাঠানো হয়েছে",
+  "nothingNewToSend": "নতুন কিছু পাঠানোর নেই",
+  "settleOrder": "বিল ও পেমেন্ট",
+  "orderSettled": "অর্ডার সম্পন্ন — {invoiceNo}",
+  "@orderSettled": {
+    "placeholders": {
+      "invoiceNo": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelOrder": "অর্ডার বাতিল",
+  "cancelOrderConfirm": "এই অর্ডার বাতিল করবেন? কোনো চার্জ নেওয়া হবে না।",
+  "orderCancelled": "অর্ডার বাতিল হয়েছে",
+  "itemsCount": "{count} আইটেম",
+  "@itemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "newItemsToFire": "{count}টি নতুন পাঠাতে",
+  "@newItemsToFire": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "switchModule": "মডিউল পরিবর্তন",
+  "switchModuleConfirm": "অন্য মডিউলে যাবেন? আপনি সাইন আউট হয়ে আবার বেছে নেবেন। প্রতিটি মডিউলের আলাদা ডেটা থাকে।",
+  "switchModuleAction": "পরিবর্তন"
 }

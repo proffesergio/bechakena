@@ -613,4 +613,210 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get branchAdded => 'Branch added';
+
+  @override
+  String get chooseBusinessType => 'What kind of business is this?';
+
+  @override
+  String get chooseBusinessTypeHint =>
+      'This sets up the right screens and tools for your business.';
+
+  @override
+  String get chooseModule => 'Which module do you want to open?';
+
+  @override
+  String get chooseModuleHint =>
+      'Pick where you\'re working today. Supershop and Restaurant keep separate catalogs.';
+
+  @override
+  String get bizSupershop => 'Supershop / Retail';
+
+  @override
+  String get bizSupershopDesc =>
+      'Products, barcode billing, inventory and baki khata.';
+
+  @override
+  String get bizRestaurant => 'Restaurant';
+
+  @override
+  String get bizRestaurantDesc =>
+      'Menu items, dining tables and table-side orders.';
+
+  @override
+  String get tourWelcomeTitle => 'Welcome!';
+
+  @override
+  String get tourWelcomeBody =>
+      'A fast, offline-first point of sale. Here\'s a 30-second tour — you can skip anytime.';
+
+  @override
+  String get tourSellTitle => 'Sell in seconds';
+
+  @override
+  String get tourSellBody =>
+      'Scan a barcode, tap a product, or type an item. Take cash, bKash, Nagad, card or due — with change and split payments.';
+
+  @override
+  String get tourOrdersTitle => 'Take orders fast';
+
+  @override
+  String get tourOrdersBody =>
+      'Add menu items to an order, manage dining tables, and print the bill in seconds.';
+
+  @override
+  String get tourStockTitle => 'Inventory that maintains itself';
+
+  @override
+  String get tourStockBody =>
+      'Every sale reduces stock and every purchase restocks. Low-stock and expiry alerts keep you ahead — per branch.';
+
+  @override
+  String get tourReportsTitle => 'Khata & reports built in';
+
+  @override
+  String get tourReportsBody =>
+      'Track customer due (baki), see daily profit and top products, and back up your data — all offline.';
+
+  @override
+  String get skip => 'Skip';
+
+  @override
+  String get next => 'Next';
+
+  @override
+  String get getStarted => 'Get started';
+
+  @override
+  String get navOrders => 'Orders';
+
+  @override
+  String get navMenu => 'Menu';
+
+  @override
+  String get navTables => 'Tables';
+
+  @override
+  String get noTables => 'No tables yet — add your first table';
+
+  @override
+  String get addTable => 'Add table';
+
+  @override
+  String get editTable => 'Edit table';
+
+  @override
+  String get deleteTable => 'Delete table';
+
+  @override
+  String get tableDeleted => 'Table deleted';
+
+  @override
+  String get tableName => 'Table name / number';
+
+  @override
+  String get tableArea => 'Area (e.g. Rooftop)';
+
+  @override
+  String get tableSeats => 'Seats';
+
+  @override
+  String get orderTypeDineIn => 'Dine-in';
+
+  @override
+  String get orderTypeTakeaway => 'Takeaway';
+
+  @override
+  String get orderTypeDelivery => 'Delivery';
+
+  @override
+  String get newTakeaway => 'New takeaway';
+
+  @override
+  String get newDelivery => 'New delivery';
+
+  @override
+  String get openOrders => 'Open orders';
+
+  @override
+  String get noOpenOrders => 'No open orders — tap a table or start a takeaway';
+
+  @override
+  String get tableFree => 'Free';
+
+  @override
+  String get tableOccupied => 'Occupied';
+
+  @override
+  String get manageTables => 'Manage tables';
+
+  @override
+  String get doneManaging => 'Done';
+
+  @override
+  String get guest => 'Guest';
+
+  @override
+  String get guestName => 'Guest name (optional)';
+
+  @override
+  String get guestPhone => 'Phone (optional)';
+
+  @override
+  String get orderPanel => 'Order';
+
+  @override
+  String get addToOrder => 'Add to order';
+
+  @override
+  String get noOrderItems => 'No items yet — add from the menu';
+
+  @override
+  String get sendToKitchen => 'Send to kitchen';
+
+  @override
+  String get kitchenTicket => 'Kitchen ticket';
+
+  @override
+  String get sentToKitchen => 'Sent to kitchen';
+
+  @override
+  String get nothingNewToSend => 'Nothing new to send';
+
+  @override
+  String get settleOrder => 'Settle & pay';
+
+  @override
+  String orderSettled(String invoiceNo) {
+    return 'Order settled — $invoiceNo';
+  }
+
+  @override
+  String get cancelOrder => 'Cancel order';
+
+  @override
+  String get cancelOrderConfirm =>
+      'Cancel this order? Nothing will be charged.';
+
+  @override
+  String get orderCancelled => 'Order cancelled';
+
+  @override
+  String itemsCount(String count) {
+    return '$count items';
+  }
+
+  @override
+  String newItemsToFire(String count) {
+    return '$count new to fire';
+  }
+
+  @override
+  String get switchModule => 'Switch module';
+
+  @override
+  String get switchModuleConfirm =>
+      'Switch to the other module? You\'ll sign out and pick again. Each module keeps its own separate data.';
+
+  @override
+  String get switchModuleAction => 'Switch';
 }

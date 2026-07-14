@@ -147,10 +147,27 @@ Shop profile + logo, receipt designer (58/80mm preview), printer setup + test
 print, staff & PINs, বাংলা/English toggle, backup/restore file, license &
 Cloud Plan status.
 
-## 6. Non-goals for v1 (roadmap)
-Multi-branch, supplier payables aging, weighing-scale integration, restaurant
-module, web owner dashboard, marketplace integrations, Web3 attestations
-(architecture keeps IDs/receipts signable so this can bolt on later).
+## 6. Modules
+
+The app is a **multi-module POS**. After login the operator picks a module for
+the session (`lib/app/business_type.dart`); the choice scopes the catalog and
+navigation and resets on logout. Products/categories carry a `businessType`
+tag so each module keeps a separate catalog on one install.
+
+- **Supershop / retail** — the flagship POS (§5): grid → cart → split-tender
+  checkout, baki khata, inventory, purchases, reports.
+- **Restaurant** — menu catalog + a **dining floor** (`DiningTables`) with live
+  free/occupied status, and **running orders** (`DineOrders` / `DineOrderItems`)
+  for dine-in, takeaway and delivery. Waiters build a tab that persists across
+  navigation, fire a **Kitchen Order Ticket** (KOT) for the new lines, then
+  settle — which finalizes an immutable `Sales` row through the *same* engine as
+  retail, so restaurant sales flow into history, reports and per-branch stock
+  identically. Free/occupied is derived from open orders; nothing is stored.
+
+### 6.1 Still on the roadmap
+Supplier payables aging, weighing-scale integration, web owner dashboard,
+marketplace integrations, Web3 attestations (architecture keeps IDs/receipts
+signable so this can bolt on later).
 
 ## 7. Quality bar
 - `flutter analyze` clean; unit tests for money math, stock derivation, sync
