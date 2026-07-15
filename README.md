@@ -11,7 +11,7 @@
 [![State: Riverpod](https://img.shields.io/badge/State-Riverpod%203-45C4B0)](https://riverpod.dev)
 [![DB: Drift/SQLite](https://img.shields.io/badge/DB-Drift%20%2F%20SQLite-003B57?logo=sqlite&logoColor=white)](https://drift.simonbinder.eu)
 [![Platforms](https://img.shields.io/badge/Windows%20·%20Android%20·%20iOS-lightgrey?logo=windows)](#-getting-started)
-[![Tests](https://img.shields.io/badge/tests-167%20passing-brightgreen)](#-development)
+[![Tests](https://img.shields.io/badge/tests-170%20passing-brightgreen)](#-development)
 [![Made in Bangladesh](https://img.shields.io/badge/Made%20for-🇧🇩%20Bangladesh-006A4E)](#)
 
 *by **neWell Software***
@@ -183,11 +183,24 @@ flutter run -d linux        # development on Linux
 flutter build apk           # Android release
 ```
 
+### 📦 Building installable apps for clients
+
+To produce an artifact a shop owner can **install and run** — a Windows installer,
+a sideloadable Android APK, a Linux package, or an iOS build — see the full
+per-platform packaging guide: **[`docs/BUILD.md`](docs/BUILD.md)**.
+
+Fastest path: push a `v*` git tag and GitHub Actions builds the **Windows zip +
+Android APK** and attaches them to a Release automatically.
+
+```bash
+git tag v1.0.0 && git push origin v1.0.0    # → Windows .zip + Android .apk on the Releases page
+```
+
 ### Run the test suite
 
 ```bash
 flutter analyze   # must stay clean
-flutter test      # 167 tests: money math, stock, sales, baki, orders/KOT, permissions, widgets
+flutter test      # 170 tests: money math, stock, sales, baki, orders/KOT, permissions, widgets
 ```
 
 ---

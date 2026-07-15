@@ -243,6 +243,7 @@ class _FilterBar extends ConsumerWidget {
             child: DropdownButtonFormField<String?>(
               initialValue: categoryId,
               isDense: true,
+              isExpanded: true, // ellipsize long category names, don't overflow
               decoration: InputDecoration(labelText: l10n.category),
               items: [
                 DropdownMenuItem(value: null, child: Text(l10n.allCategories)),
