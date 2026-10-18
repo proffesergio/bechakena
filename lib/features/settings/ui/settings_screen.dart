@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
@@ -12,6 +11,7 @@ import '../../../app/providers.dart';
 import '../../../app/widgets/app_loader.dart';
 import '../../../core/db/database.dart';
 import '../../../core/db/open.dart';
+import '../../../core/platform/files.dart';
 import '../../../core/seed/demo_catalog.dart';
 import '../../../core/printing/print_service.dart';
 import '../../../core/printing/printer_transport.dart';
@@ -149,6 +149,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _chooseLogo() async {
+    if (kIsWeb) return; // Logo files are a desktop/mobile feature.
     final settings = ref.read(databaseProvider).settingsDao;
     final picked = await openFile(acceptedTypeGroups: [
       const XTypeGroup(
@@ -156,10 +157,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ]);
     if (picked == null) return;
     final dir = await getApplicationSupportDirectory();
-    final dest = File(p.join(dir.path, 'shop_logo.img'));
-    await picked.saveTo(dest.path);
-    await settings.setValue('shop.logoPath', dest.path);
-    if (mounted) setState(() => _logoPath = dest.path);
+    final destPath = p.join(dir.path, 'shop_logo.img');
+    await picked.saveTo(destPath);
+    await settings.setValue('shop.logoPath', destPath);
+    if (mounted) setState(() => _logoPath = destPath);
   }
 
   Future<void> _removeLogo() async {
@@ -192,12 +193,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (ok != true) return;
     // Arm the wipe for THIS module only; its DB file is dropped on next launch.
     final module = ref.read(businessTypeProvider)!.name;
-    final sentinel = await pendingWipeFile(module);
-    await sentinel.writeAsString('wipe');
+    await armWipe(module);
     messenger.showSnackBar(SnackBar(content: Text(l10n.clearDataDone)));
   }
 
   Future<void> _backup() async {
+    if (kIsWeb) return; // Backup files are a desktop/mobile feature.
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final db = ref.read(databaseProvider);
@@ -223,8 +224,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (picked == null) return;
     // Restore into THIS module's DB only; swapped in on next launch.
     final module = ref.read(businessTypeProvider)!.name;
-    final target = await pendingRestoreFile(module);
-    await picked.saveTo(target.path);
+    await stageRestore(module, await picked.readAsBytes());
     messenger.showSnackBar(SnackBar(content: Text(l10n.restoreDone)));
   }
 
@@ -413,9 +413,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onPressed: _saveAll,
           ),
         ],
-        if (caps.contains(Capability.backupRestore) ||
-            caps.contains(Capability.manageProducts) ||
-            caps.contains(Capability.clearData)) ...[
+        if ((caps.contains(Capability.backupRestore) ||
+                caps.contains(Capability.manageProducts) ||
+                caps.contains(Capability.clearData)) &&
+            !(kIsWeb &&
+                !caps.contains(Capability.manageProducts))) ...[
           const Divider(height: 32),
           Text(l10n.backupSection,
               style: Theme.of(context).textTheme.titleMedium),
@@ -424,7 +426,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             spacing: 12,
             runSpacing: 12,
             children: [
-              if (caps.contains(Capability.backupRestore)) ...[
+              if (!kIsWeb && caps.contains(Capability.backupRestore)) ...[
                 OutlinedButton.icon(
                   icon: const Icon(Icons.backup),
                   label: Text(l10n.backupNow),
@@ -449,7 +451,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             Text(loaded ? l10n.demoLoaded : l10n.demoSkipped)));
                   },
                 ),
-              if (caps.contains(Capability.clearData))
+              if (!kIsWeb && caps.contains(Capability.clearData))
                 OutlinedButton.icon(
                   icon: Icon(Icons.delete_forever,
                       color: Theme.of(context).colorScheme.error),
@@ -633,7 +635,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildLogoRow(BuildContext context, AppLocalizations l10n) {
     final hasLogo = _logoPath != null &&
         _logoPath!.isNotEmpty &&
-        File(_logoPath!).existsSync();
+        fileExists(_logoPath!);
     return Row(
       children: [
         Container(
@@ -648,7 +650,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ? ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   // Key on the path so a re-picked logo repaints.
-                  child: Image.file(File(_logoPath!),
+                  child: fileImage(_logoPath!,
                       key: ValueKey(_logoPath), fit: BoxFit.contain),
                 )
               : const Icon(Icons.image_outlined),
@@ -659,12 +661,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               style: Theme.of(context).textTheme.bodySmall),
         ),
         const SizedBox(width: 8),
-        OutlinedButton.icon(
-          icon: const Icon(Icons.upload),
-          label: Text(l10n.chooseLogo),
-          onPressed: _chooseLogo,
-        ),
-        if (hasLogo)
+        if (!kIsWeb)
+          OutlinedButton.icon(
+            icon: const Icon(Icons.upload),
+            label: Text(l10n.chooseLogo),
+            onPressed: _chooseLogo,
+          ),
+        if (hasLogo && !kIsWeb)
           IconButton(
             tooltip: l10n.removeLogo,
             icon: const Icon(Icons.close),

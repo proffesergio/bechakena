@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart' show Value;
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
@@ -15,6 +14,7 @@ import '../../../core/csv/product_csv.dart';
 import '../../../core/db/database.dart';
 import '../../../core/format.dart';
 import '../../../core/money.dart';
+import '../../../core/platform/files.dart';
 import '../../../core/qty.dart';
 import '../../../l10n/gen/app_localizations.dart';
 
@@ -185,9 +185,15 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         openingStock: stock,
       ));
     }
+    final csv = productsToCsv(rows);
+    if (kIsWeb) {
+      final saved = await saveTextFile('products.csv', csv);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.exportDone(saved))));
+      return;
+    }
     final location = await getSaveLocation(suggestedName: 'products.csv');
     if (location == null) return;
-    await File(location.path).writeAsString(productsToCsv(rows));
+    await writeTextToPath(location.path, csv);
     messenger.showSnackBar(
         SnackBar(content: Text(l10n.exportDone(location.path))));
   }
@@ -379,7 +385,7 @@ class _ProductThumb extends StatelessWidget {
         path != null &&
         path.isNotEmpty &&
         !path.startsWith('emoji:') &&
-        File(path).existsSync();
+        fileExists(path);
     return Container(
       width: size,
       height: size,
@@ -390,8 +396,11 @@ class _ProductThumb extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: hasPhoto
-          ? Image.file(File(path),
-              key: ValueKey(path), fit: BoxFit.cover, width: size, height: size)
+          ? fileImage(path,
+              key: ValueKey(path),
+              fit: BoxFit.cover,
+              width: size,
+              height: size)
           : emoji != null
               ? Text(emoji, style: TextStyle(fontSize: size * 0.5))
               : const Icon(Icons.inventory_2_outlined),
@@ -687,9 +696,8 @@ class _ProductEditDialogState extends ConsumerState<ProductEditDialog> {
       );
 
   Widget _imageRow(BuildContext context, AppLocalizations l10n) {
-    final hasPhoto = _imagePath != null &&
-        _imagePath!.isNotEmpty &&
-        File(_imagePath!).existsSync();
+    final hasPhoto =
+        _imagePath != null && _imagePath!.isNotEmpty && fileExists(_imagePath!);
     return Row(
       children: [
         Container(
@@ -702,7 +710,7 @@ class _ProductEditDialogState extends ConsumerState<ProductEditDialog> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: hasPhoto
-              ? Image.file(File(_imagePath!),
+              ? fileImage(_imagePath!,
                   key: ValueKey(_imagePath), fit: BoxFit.cover)
               : const Icon(Icons.image_outlined),
         ),
@@ -712,12 +720,13 @@ class _ProductEditDialogState extends ConsumerState<ProductEditDialog> {
               style: Theme.of(context).textTheme.bodySmall),
         ),
         const SizedBox(width: 8),
-        OutlinedButton.icon(
-          icon: const Icon(Icons.upload),
-          label: Text(l10n.chooseImage),
-          onPressed: _pickImage,
-        ),
-        if (hasPhoto)
+        if (!kIsWeb)
+          OutlinedButton.icon(
+            icon: const Icon(Icons.upload),
+            label: Text(l10n.chooseImage),
+            onPressed: _pickImage,
+          ),
+        if (hasPhoto && !kIsWeb)
           IconButton(
             tooltip: l10n.removeImage,
             icon: const Icon(Icons.close),
@@ -728,16 +737,17 @@ class _ProductEditDialogState extends ConsumerState<ProductEditDialog> {
   }
 
   Future<void> _pickImage() async {
+    if (kIsWeb) return; // Product photos are stored as files — desktop only.
     final picked = await openFile(acceptedTypeGroups: [
       const XTypeGroup(
           label: 'Image', extensions: ['png', 'jpg', 'jpeg', 'bmp', 'webp']),
     ]);
     if (picked == null) return;
     final dir = await getApplicationSupportDirectory();
-    final dest = File(
-        p.join(dir.path, 'product_${DateTime.now().microsecondsSinceEpoch}.img'));
-    await picked.saveTo(dest.path);
-    if (mounted) setState(() => _imagePath = dest.path);
+    final destPath = p.join(
+        dir.path, 'product_${DateTime.now().microsecondsSinceEpoch}.img');
+    await picked.saveTo(destPath);
+    if (mounted) setState(() => _imagePath = destPath);
   }
 
   Future<void> _save() async {

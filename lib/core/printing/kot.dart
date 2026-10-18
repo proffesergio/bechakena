@@ -40,7 +40,11 @@ String _formatDateTime(DateTime dt) {
       '${two(dt.hour)}:${two(dt.minute)}';
 }
 
-String _fit(String s, int width) => s.length <= width ? s : s.substring(0, width);
+// Unicode is wrapped by the rasterizer after shaping, never cut mid-conjunct.
+String _fit(String s, int width) =>
+    s.codeUnits.any((unit) => unit > 0x7f) || s.length <= width
+    ? s
+    : s.substring(0, width);
 
 String _center(String s, int width) {
   final pad = (width - s.length) ~/ 2;

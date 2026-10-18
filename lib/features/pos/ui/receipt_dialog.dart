@@ -49,7 +49,12 @@ class _ReceiptDialogState extends ConsumerState<ReceiptDialog> {
           child: SingleChildScrollView(
             child: SelectableText(
               widget.text,
-              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+              style: const TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 12,
+                  // Bangla item names fall back to the bundled font (CanvasKit
+                  // has no system monospace with Bengali glyphs).
+                  fontFamilyFallback: ['NotoSansBengali']),
             ),
           ),
         ),

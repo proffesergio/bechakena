@@ -1,5 +1,5 @@
 /// Minimal ESC/POS encoding: init, optional cash-drawer kick, optional raster
-/// logo header, ASCII body, feed and partial cut. Works on any 58/80 mm
+/// logo header, text/raster body, feed and partial cut. Works on any 58/80 mm
 /// thermal printer.
 ///
 /// [rasterHeader], when supplied, is a pre-encoded GS v 0 raster bitmap (see
@@ -9,6 +9,7 @@ List<int> escPosBytes(
   String text, {
   bool kickDrawer = false,
   List<int>? rasterHeader,
+  List<int>? encodedBody,
 }) {
   final bytes = <int>[
     0x1B, 0x40, // ESC @ — initialize
@@ -20,13 +21,14 @@ List<int> escPosBytes(
       0x0A,
     ],
   ];
-  for (final unit in text.codeUnits) {
+  for (final unit in encodedBody == null ? text.codeUnits : <int>[]) {
     if (unit == 0x0A || (unit >= 0x20 && unit <= 0x7E)) {
       bytes.add(unit);
     } else {
       bytes.add(0x3F); // '?' — never send multi-byte glyphs the printer lacks
     }
   }
+  if (encodedBody != null) bytes.addAll(encodedBody);
   bytes.addAll([0x0A, 0x0A, 0x0A, 0x0A]); // feed clear of the tear bar
   bytes.addAll([0x1D, 0x56, 0x42, 0x00]); // GS V 66 0 — partial cut
   return bytes;

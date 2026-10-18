@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,6 +10,7 @@ import 'app/theme.dart';
 import 'app/widgets/app_loader.dart';
 import 'core/db/device_store.dart';
 import 'core/db/open.dart';
+import 'core/platform/files.dart';
 import 'features/auth/logic/session.dart';
 import 'features/auth/ui/login_screen.dart';
 import 'features/onboarding/ui/module_picker_screen.dart';
@@ -17,6 +19,9 @@ import 'l10n/gen/app_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Browser demo: `?fresh=1` wipes this visitor's IndexedDB + localStorage and
+  // reloads clean (the web equivalent of Settings → Clear local data).
+  if (kIsWeb) await maybeHandleFreshReset();
   // Retire any pre-split single database so both modules start clean, then load
   // the device-level store (module choice + theme) before the app builds.
   await archiveLegacyDatabase();

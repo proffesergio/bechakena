@@ -16,7 +16,7 @@ ThemeData _base(Brightness brightness) {
     dynamicSchemeVariant: DynamicSchemeVariant.vibrant,
   );
   final light = brightness == Brightness.light;
-  return ThemeData(
+  final theme = ThemeData(
     colorScheme: scheme,
     useMaterial3: true,
     visualDensity: VisualDensity.comfortable,
@@ -54,5 +54,13 @@ ThemeData _base(Brightness brightness) {
     dialogTheme: DialogThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     ),
+  );
+  // Bundled Bengali fallback — CanvasKit (web) has no system fonts and some
+  // Windows installs lack a Bengali face, so বাংলা must ship with the app.
+  return theme.copyWith(
+    textTheme: theme.textTheme
+        .apply(fontFamilyFallback: const ['NotoSansBengali']),
+    primaryTextTheme: theme.primaryTextTheme
+        .apply(fontFamilyFallback: const ['NotoSansBengali']),
   );
 }

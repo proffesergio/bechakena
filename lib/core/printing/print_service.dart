@@ -1,24 +1,17 @@
-import 'dart:io';
-
 import '../db/database.dart';
 import '../money.dart';
+import '../platform/files.dart';
 import 'escpos.dart';
 import 'logo_raster.dart';
 import 'printer_transport.dart';
 import 'receipt.dart';
+import 'text_raster.dart';
 
 /// Sends raw ESC/POS bytes to a LAN thermal printer (RAW/JetDirect, port 9100).
 /// Used by the LAN transport; USB/Bluetooth go through [PrinterBackend].
-Future<void> printToNetwork(String host, int port, List<int> bytes) async {
-  final socket = await Socket.connect(host, port,
-      timeout: const Duration(seconds: 5));
-  try {
-    socket.add(bytes);
-    await socket.flush();
-  } finally {
-    await socket.close();
-  }
-}
+/// Implementation is platform-split: real sockets on native, a clear
+/// "desktop-only" error in the browser demo.
+export '../platform/lan_print.dart' show printToNetwork;
 
 /// Encodes [text] into ESC/POS bytes, prepending the shop logo raster (if one
 /// is configured and decodable) sized for [widthDots]. A missing or broken
@@ -32,17 +25,22 @@ Future<List<int>> composeReceiptBytes({
   List<int>? raster;
   final logoPath = await settings.getValue('shop.logoPath');
   if (logoPath != null && logoPath.isNotEmpty) {
-    final file = File(logoPath);
-    if (await file.exists()) {
+    final logoBytes = await readLocalFileBytes(logoPath);
+    if (logoBytes != null) {
       try {
-        raster = tryEscPosRasterFromImage(await file.readAsBytes(),
-            maxWidthDots: widthDots);
+        raster = tryEscPosRasterFromImage(logoBytes, maxWidthDots: widthDots);
       } catch (_) {
         raster = null;
       }
     }
   }
-  return escPosBytes(text, kickDrawer: kickDrawer, rasterHeader: raster);
+  final body = await receiptTextBody(text, widthDots: widthDots);
+  return escPosBytes(
+    text,
+    kickDrawer: kickDrawer,
+    rasterHeader: raster,
+    encodedBody: body,
+  );
 }
 
 /// Composes the receipt (with logo) and prints it over the configured

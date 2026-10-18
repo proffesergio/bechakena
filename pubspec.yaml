@@ -29,6 +29,7 @@ dependencies:
   crypto: ^3.0.7
   image: ^4.5.4
   pdf: ^3.11.1
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
@@ -38,7 +39,15 @@ dev_dependencies:
   build_runner: ^2.15.1
   drift_dev: ^2.34.0
   riverpod_generator: ^4.0.4
+  sqlite3: ^3.5.2
 
 flutter:
   generate: true
   uses-material-design: true
+  fonts:
+    # Bengali glyph fallback — CanvasKit on the web has no system fonts, and
+    # cheap Windows installs may lack a Bengali face. Bundled so বাংলা renders
+    # everywhere (also listed as fallback in the app theme).
+    - family: NotoSansBengali
+      fonts:
+        - asset: assets/fonts/NotoSansBengali.ttf

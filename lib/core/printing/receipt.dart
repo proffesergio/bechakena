@@ -52,28 +52,27 @@ class ReceiptData {
   final String? footer;
 
   ReceiptData copyWith({Money? paid, Money? due, Money? change}) => ReceiptData(
-        shopName: shopName,
-        address: address,
-        phone: phone,
-        invoiceNo: invoiceNo,
-        dateTime: dateTime,
-        items: items,
-        subtotal: subtotal,
-        discount: discount,
-        vat: vat,
-        total: total,
-        paid: paid ?? this.paid,
-        due: due ?? this.due,
-        change: change ?? this.change,
-        footer: footer,
-      );
+    shopName: shopName,
+    address: address,
+    phone: phone,
+    invoiceNo: invoiceNo,
+    dateTime: dateTime,
+    items: items,
+    subtotal: subtotal,
+    discount: discount,
+    vat: vat,
+    total: total,
+    paid: paid ?? this.paid,
+    due: due ?? this.due,
+    change: change ?? this.change,
+    footer: footer,
+  );
 }
 
 /// Renders the monospaced receipt body. [width] is characters per line:
 /// 32 for 58 mm paper, 48 for 80 mm.
 ///
-/// Amounts print as "Tk" — cheap thermal printers have no ৳ glyph; Bangla
-/// text on receipts arrives with bitmap rendering (roadmap).
+/// Amounts print as "Tk". The print service shapes Unicode lines as bitmaps.
 String renderReceiptText(ReceiptData data, {int width = 32}) {
   final lines = <String>[];
   void center(String s) => lines.add(_center(_fit(s, width), width));
@@ -114,7 +113,10 @@ String _formatDateTime(DateTime dt) {
       '${two(dt.hour)}:${two(dt.minute)}';
 }
 
-String _fit(String s, int width) => s.length <= width ? s : s.substring(0, width);
+String _fit(String s, int width) =>
+    s.codeUnits.any((unit) => unit > 0x7f) || s.length <= width
+    ? s
+    : s.substring(0, width);
 
 String _center(String s, int width) {
   final pad = (width - s.length) ~/ 2;
@@ -124,6 +126,9 @@ String _center(String s, int width) {
 String _pair(String left, String right, int width) {
   final space = width - left.length - right.length;
   if (space < 1) {
+    if (left.codeUnits.any((unit) => unit > 0x7f) || right.length >= width) {
+      return '$left\n${right.padLeft(width)}';
+    }
     final trimmed = _fit(left, width - right.length - 1);
     return '$trimmed${' ' * (width - trimmed.length - right.length)}$right';
   }
