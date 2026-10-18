@@ -6,7 +6,7 @@
 
 **Sell fast. Track baki. Fire the kitchen. Never lose a sale to load-shedding.**
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.44-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
+[![Flutter](https://img.shields.io/badge/Flutter-3.47-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.12-0175C2?logo=dart&logoColor=white)](https://dart.dev)
 [![State: Riverpod](https://img.shields.io/badge/State-Riverpod%203-45C4B0)](https://riverpod.dev)
 [![DB: Drift/SQLite](https://img.shields.io/badge/DB-Drift%20%2F%20SQLite-003B57?logo=sqlite&logoColor=white)](https://drift.simonbinder.eu)
@@ -174,7 +174,7 @@ flowchart TB
 
 | Layer | Technology |
 |---|---|
-| UI / App | Flutter 3.44 (one codebase → Windows, Android, iOS) |
+| UI / App | Flutter 3.47 (one codebase → Windows, Android, iOS) |
 | State | Riverpod 3 |
 | Routing | go_router (capability-guarded routes) |
 | Local database | Drift (SQLite) — 21 tables, schema v6, per-module files |
@@ -187,7 +187,7 @@ flowchart TB
 ## 🏁 Getting Started
 
 ### Prerequisites
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) ≥ 3.44 (stable)
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) ≥ 3.47.7 (stable)
 - **Windows:** Visual Studio with *Desktop development with C++*
 - **Linux (dev):** `sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev`
 - **Android:** Android Studio / SDK

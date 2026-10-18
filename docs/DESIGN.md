@@ -30,7 +30,7 @@ owner's remote mobile app.
 
 | Layer | Choice | Why |
 |---|---|---|
-| UI/app | Flutter 3.44 (Dart) | One codebase → Windows/Android/iOS; best animation tooling |
+| UI/app | Flutter 3.47 (Dart) | One codebase → Windows/Android/iOS; best animation tooling |
 | State | Riverpod | Compile-safe DI + reactive state, testable |
 | Routing | go_router | Declarative, deep-link ready |
 | Local DB | Drift (SQLite) | Typed schema, reactive queries, offline source of truth |

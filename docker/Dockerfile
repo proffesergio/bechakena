@@ -13,7 +13,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Stage 1: Flutter web demo ────────────────────────────────────────────────
-FROM ghcr.io/cirruslabs/flutter:3.44.0 AS flutter-build
+FROM ghcr.io/cirruslabs/flutter:3.47.7 AS flutter-build
 
 WORKDIR /app
 COPY pubspec.yaml pubspec.lock l10n.yaml analysis_options.yaml ./

@@ -19,7 +19,7 @@ network access; the cloud (Supabase) is optional and configured at build time.
 
 | Tool | Version | Needed for |
 |---|---|---|
-| Flutter SDK | 3.44+ (stable) | A, B, C, D |
+| Flutter SDK | 3.47.7+ (stable) | A, B, C, D |
 | Node.js + npm | 22+ | A, B (showcase landing page) |
 | Python 3 | 3.10+ | A, B (packaging check only) |
 | nginx | 1.24+ | A |

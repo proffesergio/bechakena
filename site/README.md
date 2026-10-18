@@ -11,7 +11,7 @@ npm run typecheck
 
 Run these commands from `site/`. `npm run build` exports the site to `out/`. Serve that directory as static files; `next start` does not serve a static export. For local development, the landing page needs actual product captures in `public/media/`: `pos-en.png`, `pos-bn.png`, `restaurant.png`, `reports.png`, `receipt.png`, and `showcase.webm`. Capture the real app with sample records. Do not substitute fabricated shop results.
 
-To package the complete deployment, run from the repository root with Flutter 3.44, Node.js 22, npm, and Python 3 available:
+To package the complete deployment, run from the repository root with Flutter 3.47, Node.js 22, npm, and Python 3 available:
 
 ```sh
 flutter pub get
