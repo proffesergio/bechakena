@@ -41,11 +41,16 @@ export default function Showcase() {
   const [currency, setCurrency] = useState(0);
   const [numberLanguage, setNumberLanguage] = useState<Locale>("en");
   const [videoOpen, setVideoOpen] = useState(false);
+  const [enquiry, setEnquiry] = useState({ name: "", contact: "", message: "" });
   const reduced = useReducedMotion();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const t = copy[locale];
+  const enquiryBody = [enquiry.message.trim(), enquiry.name.trim() ? `${t.contactFormName}: ${enquiry.name.trim()}` : "", enquiry.contact.trim() ? `${t.contactFormContact}: ${enquiry.contact.trim()}` : ""].filter(Boolean).join("\n\n");
+  const canSend = enquiry.message.trim().length > 0;
+  const waHref = `${WA}?text=${encodeURIComponent(enquiryBody)}`;
+  const mailHref = `${EMAIL}?subject=${encodeURIComponent(t.contactFormSubject)}&body=${encodeURIComponent(enquiryBody)}`;
   const tabId = useId();
   const brand = locale === "bn" ? "বেচাকেনা" : "BechaKena";
   const imagePaths = [locale === "bn" ? "/media/pos-bn.png" : "/media/pos-en.png", "/media/restaurant.png", "/media/reports.png", "/media/receipt.png"];
@@ -127,7 +132,7 @@ export default function Showcase() {
 
       <section className="section faq-section container" aria-labelledby="faq-title"><Reveal><Eyebrow>{t.faqEyebrow}</Eyebrow><h2 id="faq-title">{t.faqTitle}</h2></Reveal><div className="faq-list">{t.faqs.map((faq, i) => <details key={i}><summary>{faq.q}<span className="faq-plus" aria-hidden="true">+</span></summary><p>{faq.a}</p></details>)}</div></section>
 
-      <section className="contact-section" id="contact" aria-labelledby="contact-title"><div className="contact-glow" aria-hidden="true" /><Reveal className="container contact-content"><Eyebrow>{t.contactEyebrow}</Eyebrow><h2 id="contact-title">{t.contactTitle}<br /><span>{t.contactAccent}</span></h2><p>{t.contactBody}</p><div className="button-row"><a className="button button-primary" href={WA} target="_blank" rel="noopener noreferrer">{t.whatsapp}<Arrow diagonal /></a><a className="button button-outline" href={EMAIL}>{t.email}<Arrow /></a></div><p className="micro">{t.contactNote}</p></Reveal></section>
+      <section className="contact-section" id="contact" aria-labelledby="contact-title"><div className="contact-glow" aria-hidden="true" /><Reveal className="container contact-content"><Eyebrow>{t.contactEyebrow}</Eyebrow><h2 id="contact-title">{t.contactTitle}<br /><span>{t.contactAccent}</span></h2><p>{t.contactBody}</p><div className="button-row"><a className="button button-primary" href={WA} target="_blank" rel="noopener noreferrer">{t.whatsapp}<Arrow diagonal /></a><a className="button button-outline" href={EMAIL}>{t.email}<Arrow /></a></div><form className="contact-form" onSubmit={event => event.preventDefault()}><h3>{t.contactFormTitle}</h3><label>{t.contactFormName}<input name="name" type="text" autoComplete="name" value={enquiry.name} onChange={event => setEnquiry(previous => ({ ...previous, name: event.target.value }))} /></label><label>{t.contactFormContact}<input name="contact" type="text" autoComplete="email" value={enquiry.contact} onChange={event => setEnquiry(previous => ({ ...previous, contact: event.target.value }))} /></label><label>{t.contactFormMessage}<textarea name="message" required placeholder={t.contactFormPlaceholder} value={enquiry.message} onChange={event => setEnquiry(previous => ({ ...previous, message: event.target.value }))} /></label><div className="contact-form-actions"><button className="button button-primary" type="button" disabled={!canSend} onClick={() => window.open(waHref, "_blank", "noopener,noreferrer")}>{t.contactFormWhatsapp}<Arrow diagonal /></button><button className="button button-outline" type="button" disabled={!canSend} onClick={() => { window.location.href = mailHref; }}>{t.contactFormEmail}<Arrow /></button></div><p className="micro">{t.contactFormNote}</p></form><p className="micro">{t.contactNote}</p></Reveal></section>
     </main>
 
     <footer className="container footer"><div className="footer-main"><a className="brand" href="#top"><Mark /><span>{brand}<small>neWell Software</small></span></a><p>{t.footerLine}</p><a className="inline-link" href="#top">{t.backTop}<span className="back-arrow"><Arrow /></span></a></div><div className="footer-bottom"><span>{t.rights}</span><span>{t.company}</span><a href="/demo/">{t.demoNote}</a></div></footer>

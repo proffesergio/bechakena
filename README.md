@@ -12,6 +12,7 @@
 [![DB: Drift/SQLite](https://img.shields.io/badge/DB-Drift%20%2F%20SQLite-003B57?logo=sqlite&logoColor=white)](https://drift.simonbinder.eu)
 [![Platforms](https://img.shields.io/badge/Windows%20·%20Android%20·%20iOS-lightgrey?logo=windows)](#-getting-started)
 [![Tests](https://img.shields.io/badge/tests-175%20passing-brightgreen)](#-development)
+[![Live demo](https://img.shields.io/badge/live%20demo-bkpos.vercel.app-45C4B0)](https://bkpos.vercel.app/)
 [![Made in Bangladesh](https://img.shields.io/badge/Made%20for-🇧🇩%20Bangladesh-006A4E)](#)
 
 *by **neWell Software***
