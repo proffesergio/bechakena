@@ -1,0 +1,109 @@
+name: Showcase deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: "Vercel deployment target (production updates bkpos.vercel.app)"
+        type: choice
+        options: [production, preview, none]
+        default: production
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: showcase-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PRODUCTION_URL: https://bkpos.vercel.app/
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  showcase:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: stable
+          cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: flutter pub get
+      - run: flutter gen-l10n
+      - run: dart run build_runner build --delete-conflicting-outputs
+      - run: flutter build web --release --base-href /demo/ --no-web-resources-cdn
+      - name: Build static showcase with committed product captures
+        working-directory: site
+        run: |
+          npm ci
+          npm run build
+          npm run typecheck
+      - name: Validate and package public output
+        run: python3 scripts/prepare_vercel.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bechakena-showcase-vercel
+          path: .vercel/output/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+      - name: Resolve deployment target
+        id: target
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "target=production" >> "$GITHUB_OUTPUT"
+          else
+            echo "target=${{ inputs.deploy }}" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Check deployment secrets
+        if: steps.target.outputs.target != 'none'
+        run: |
+          for name in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Missing repository secret: $name (see HowToSetup.md > CI/CD)"
+              exit 1
+            fi
+          done
+      - name: Record deployment start
+        if: steps.target.outputs.target == 'production'
+        id: deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          payload=$(printf '{"ref":"%s","environment":"production","description":"Vercel production deploy","auto_merge":false,"required_contexts":[]}' "$GITHUB_SHA")
+          id=$(gh api "repos/$GITHUB_REPOSITORY/deployments" --input - --jq .id <<< "$payload")
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+      - name: Deploy to Vercel
+        if: steps.target.outputs.target != 'none'
+        env:
+          TARGET: ${{ steps.target.outputs.target }}
+        run: |
+          args=(deploy --prebuilt --yes --token "$VERCEL_TOKEN")
+          if [ "$TARGET" = "production" ]; then args+=(--prod); fi
+          npx --yes vercel@64.2.0 "${args[@]}"
+      - name: Record deployment success
+        if: steps.target.outputs.target == 'production'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          payload=$(printf '{"state":"success","environment_url":"%s","log_url":"%s"}' "$PRODUCTION_URL" "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID")
+          gh api "repos/$GITHUB_REPOSITORY/deployments/${{ steps.deployment.outputs.id }}/statuses" --input - --jq .environment_url <<< "$payload"
+      - name: Record deployment failure
+        if: failure() && steps.deployment.outputs.id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          payload=$(printf '{"state":"failure","log_url":"%s"}' "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID")
+          gh api "repos/$GITHUB_REPOSITORY/deployments/${{ steps.deployment.outputs.id }}/statuses" --input - --jq .state <<< "$payload"

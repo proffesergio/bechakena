@@ -1,0 +1,20 @@
+# Never send to the Docker daemon: build outputs, local state and caches.
+.git
+.github
+.vercel
+.idea
+.claude
+.dart_tool
+build
+graphify-out
+pyenv
+site/node_modules
+site/.next
+site/out
+android
+ios
+linux
+macos
+windows
+test
+*.iml

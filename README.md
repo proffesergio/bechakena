@@ -11,10 +11,15 @@
 [![State: Riverpod](https://img.shields.io/badge/State-Riverpod%203-45C4B0)](https://riverpod.dev)
 [![DB: Drift/SQLite](https://img.shields.io/badge/DB-Drift%20%2F%20SQLite-003B57?logo=sqlite&logoColor=white)](https://drift.simonbinder.eu)
 [![Platforms](https://img.shields.io/badge/Windows%20·%20Android%20·%20iOS-lightgrey?logo=windows)](#-getting-started)
-[![Tests](https://img.shields.io/badge/tests-170%20passing-brightgreen)](#-development)
+[![Tests](https://img.shields.io/badge/tests-175%20passing-brightgreen)](#-development)
 [![Made in Bangladesh](https://img.shields.io/badge/Made%20for-🇧🇩%20Bangladesh-006A4E)](#)
 
 *by **neWell Software***
+
+> **Live demo:** [bkpos.vercel.app/demo](https://bkpos.vercel.app/demo/) —
+> the full POS running in your browser, with demo data that stays on your
+> device. Pick a module, then sign in as **Demo Owner / PIN 1234**.
+> Setup for every target: **[`HowToSetup.md`](HowToSetup.md)**.
 
 </div>
 
@@ -80,6 +85,22 @@ catalog, sales and reports), so a device is never confused about what it's selli
 
 ---
 
+## 📸 Screenshots
+
+| Retail POS — English | Retail POS — বাংলা |
+|---|---|
+| ![Retail checkout in English](site/public/media/pos-en.png) | ![Retail checkout in Bangla](site/public/media/pos-bn.png) |
+
+| Receipt | Reports |
+|---|---|
+| ![Thermal receipt preview](site/public/media/receipt.png) | ![Reports dashboard](site/public/media/reports.png) |
+
+| Restaurant floor | Live tour |
+|---|---|
+| ![Restaurant tables and running tabs](site/public/media/restaurant.png) | [▶ 22-second walkthrough](site/public/media/showcase.webm) — or [run it in your browser](https://bkpos.vercel.app/demo/) |
+
+---
+
 ## 🚀 Features
 
 ### 🧾 Point of Sale (retail)
@@ -124,6 +145,7 @@ catalog, sales and reports), so a device is never confused about what it's selli
 - 🧾 **Finalized sales are immutable** — corrections happen via returns/adjustments, so your books are audit-proof
 - 🔄 Every record is **sync-ready** (UUIDv7 + device id) for the multi-device Cloud Plan
 - 🌐 Every screen ships in **বাংলা and English** from day one
+- 🔐 **Nothing exposed on the network** — the POS has no HTTP endpoints; every data mutation is local and gated by the signed-in role's capability matrix
 
 ---
 
@@ -200,8 +222,22 @@ git tag v1.0.0 && git push origin v1.0.0    # → Windows .zip + Android .apk on
 
 ```bash
 flutter analyze   # must stay clean
-flutter test      # 170 tests: money math, stock, sales, baki, orders/KOT, permissions, widgets
+flutter test      # money math, stock, sales, baki, orders/KOT, permissions, widgets, schema/seed scripts
 ```
+
+### 📚 Documentation
+
+| Guide | What's inside |
+|---|---|
+| [`HowToSetup.md`](HowToSetup.md) | Step-by-step install (VPS, Docker, Windows, Android), database setup, first admin login, branding |
+| [`database/README.md`](database/README.md) | The shipped `schema.sql` / `seed.sql` and how they stay correct |
+| [`docs/BUILD.md`](docs/BUILD.md) | Building installable apps per platform |
+| [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | Day-to-day operations, printing, the optional Cloud Plan |
+| [`docs/DESIGN.md`](docs/DESIGN.md) | Architecture, data model, feature spec |
+| [`CHANGELOG.md`](CHANGELOG.md) | Version history |
+| [`.env.example`](.env.example) | Every configuration variable, with placeholders and comments |
+| [`docs/VIBE96.md`](docs/VIBE96.md) | Marketplace submission notes: description, category, archive layout |
+| [`LICENSE-NOTE.md`](LICENSE-NOTE.md) | Licence terms for the software and its bundled third-party components |
 
 ---
 
@@ -271,6 +307,8 @@ flutter test      # 170 tests: money math, stock, sales, baki, orders/KOT, permi
 ### License & Cloud Plan *(rolling out)*
 - One-time license per shop, verified fully offline (signed key bound to the machine).
 - Optional Cloud Plan adds encrypted backup, multi-device sync, and the owner's remote app. If it lapses, the POS keeps working locally — **it never locks you out.**
+
+> Full licence terms for the software and its bundled components: [`LICENSE-NOTE.md`](LICENSE-NOTE.md).
 
 ---
 

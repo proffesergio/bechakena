@@ -28,7 +28,7 @@ flutter pub get
 dart run build_runner build --delete-conflicting-outputs   # Drift/Riverpod codegen
 flutter gen-l10n                                            # bn/en localizations
 flutter analyze                                             # must be clean
-flutter test                                                # 167 passing
+flutter test                                                # 175 passing
 ```
 
 Bump the version before a client build — edit `pubspec.yaml`:

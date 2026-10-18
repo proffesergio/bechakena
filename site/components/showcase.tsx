@@ -1,0 +1,137 @@
+"use client";
+
+import { AnimatePresence, MotionConfig, motion, useReducedMotion } from "framer-motion";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { copy, type Locale } from "./copy";
+
+const WA = "https://wa.me/8801842168117";
+const EMAIL = "mailto:fabrything@gmail.com";
+const currencies = ["BDT", "USD", "INR", "EUR", "NGN"] as const;
+const numberLocales = ["en-BD", "en-US", "en-IN", "en-IE", "en-NG"];
+
+function Arrow({ diagonal = false }: { diagonal?: boolean }) {
+  return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="arrow"><path d={diagonal ? "M6 18 18 6M6 6h12v12" : "M4 12h15m-6-6 6 6-6 6"} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+}
+
+function Mark() {
+  return <svg className="brand-mark" aria-hidden="true" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="12" fill="currentColor" /><path d="M11 13h6.5a5 5 0 0 1 0 10H11V13Zm0 10h10a4 4 0 0 1 0 8H11V13m16-4v11" stroke="#080e0c" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /><path d="M23 14h8" stroke="#080e0c" strokeWidth="3" strokeLinecap="round" /></svg>;
+}
+
+function Icon({ kind }: { kind: "wallet" | "stock" | "money" | "offline" | "check" }) {
+  const paths = {
+    wallet: <><path d="M4 7h15v14H4zM4 7V4h13v3" /><path d="M14 12h7v5h-7z" /></>,
+    stock: <><path d="m12 3 9 5-9 5-9-5 9-5ZM3 8v9l9 5 9-5V8M12 13v9M7 5l9 5" /></>,
+    money: <><rect x="3" y="5" width="18" height="14" rx="2" /><circle cx="12" cy="12" r="3" /><path d="M6 12h.01M18 12h.01" /></>,
+    offline: <><path d="M4 9a13 13 0 0 1 16 0M7 13a8 8 0 0 1 10 0M10 17a3 3 0 0 1 4 0" /><circle cx="12" cy="20" r=".5" /><path d="m3 3 18 18" /></>,
+    check: <path d="m5 12 4 4L19 6" />,
+  };
+  return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">{paths[kind]}</svg>;
+}
+
+function Reveal({ children, className = "", delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
+  const reduced = useReducedMotion();
+  return <motion.div className={className} initial={reduced ? false : { opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}>{children}</motion.div>;
+}
+
+function Eyebrow({ children }: { children: ReactNode }) { return <p className="eyebrow">{children}</p>; }
+
+export default function Showcase() {
+  const [locale, setLocale] = useState<Locale>("en");
+  const [tab, setTab] = useState(0);
+  const [currency, setCurrency] = useState(0);
+  const [numberLanguage, setNumberLanguage] = useState<Locale>("en");
+  const [videoOpen, setVideoOpen] = useState(false);
+  const reduced = useReducedMotion();
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const t = copy[locale];
+  const tabId = useId();
+  const brand = locale === "bn" ? "বেচাকেনা" : "BechaKena";
+  const imagePaths = [locale === "bn" ? "/media/pos-bn.png" : "/media/pos-en.png", "/media/restaurant.png", "/media/reports.png", "/media/receipt.png"];
+  const formatted = new Intl.NumberFormat(numberLanguage === "bn" ? "bn-BD" : numberLocales[currency], { style: "currency", currency: currencies[currency], minimumFractionDigits: 2 }).format(123456.78);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("bechakena.site.locale");
+      if (saved === "en" || saved === "bn") setLocale(saved);
+    } catch { /* Storage is optional for the presentation. */ }
+  }, []);
+
+  useEffect(() => { document.documentElement.lang = locale; }, [locale]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (videoOpen) {
+      dialog.showModal();
+      document.body.style.overflow = "hidden";
+    } else {
+      dialog.close();
+      videoRef.current?.pause();
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [videoOpen]);
+
+  function changeLocale(next: Locale) {
+    setLocale(next);
+    try { localStorage.setItem("bechakena.site.locale", next); } catch { /* No storage requirement. */ }
+  }
+
+  return <MotionConfig reducedMotion="user"><div className={`site locale-${locale}`}>
+    <a className="skip-link" href="#main">{t.skip}</a>
+    <header className="header" id="top"><div className="container nav">
+      <a className="brand" href="#top" aria-label={brand}><Mark /><span>{brand}<small>neWell Software</small></span></a>
+      <nav className="nav-links" aria-label={t.menu}><a href="#product">{t.product}</a><a href="#modules">{t.modules}</a><a href="#ownership">{t.pricing}</a></nav>
+      <div className="nav-actions"><div className="language-switch" role="group" aria-label={t.languageLabel}><button lang="en" aria-pressed={locale === "en"} onClick={() => changeLocale("en")}>EN</button><button lang="bn" aria-pressed={locale === "bn"} onClick={() => changeLocale("bn")}>বাংলা</button></div><a className="nav-demo" href="/demo/">{t.tryDemo}<Arrow diagonal /></a></div>
+    </div></header>
+
+    <main id="main">
+      <section className="hero container" aria-labelledby="hero-title">
+        <div className="hero-intro"><motion.div initial={false} animate={{ opacity: 1 }}><Eyebrow><span className="status-dot" />{t.eyebrow}</Eyebrow><h1 id="hero-title">{t.heroFirst}<br /><span>{t.heroSecond}</span></h1></motion.div><div className="hero-copy"><p>{t.heroBody}</p><div className="button-row"><a className="button button-primary" href="/demo/">{t.tryDemo}<Arrow diagonal /></a><button className="text-button" onClick={() => setVideoOpen(true)}><span className="play-icon" aria-hidden="true">▷</span>{t.heroSecondary}</button></div><p className="micro hero-note">{t.localNote}</p></div></div>
+        <motion.div className="hero-product" initial={reduced ? false : { opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
+          <div className="product-glow" aria-hidden="true" /><div className="device-frame"><div className="device-top"><span className="window-dots" aria-hidden="true"><i /><i /><i /></span><span>{brand} / {t.tabs[0].short}</span><span className="device-status"><i />{t.offlineBadge}</span></div><img className="hero-screen" src={imagePaths[0]} alt={t.heroImageAlt} width="1440" height="1000" fetchPriority="high" /></div>
+          <div className="floating-note"><span className="note-icon"><Icon kind="offline" /></span><div><strong>{t.offlineBadge}</strong><span>{t.offlineBadgeBody}</span></div><i className="status-dot" /></div>
+          <div className="capture-label"><span className="tiny-square" aria-hidden="true" />{t.heroCaption}</div>
+        </motion.div>
+        <div className="proof-strip">{t.proof.map((item, i) => <span key={i}><Icon kind="check" />{item}</span>)}</div>
+      </section>
+
+      <section className="section container product-section" id="product" aria-labelledby="tour-title">
+        <Reveal className="section-heading"><div><Eyebrow>{t.tourEyebrow}</Eyebrow><h2 id="tour-title">{t.tourTitle}<br /><span className="muted-heading">{t.tourAccent}</span></h2></div><p className="section-lede">{t.tourBody}</p></Reveal>
+        <Reveal><div className="tour-tabs" role="tablist" aria-label={t.product}>{t.tabs.map((item, i) => <button key={i} ref={el => { tabRefs.current[i] = el; }} type="button" role="tab" aria-selected={tab === i} aria-controls={`${tabId}-panel-${i}`} id={`${tabId}-tab-${i}`} tabIndex={tab === i ? 0 : -1} onClick={() => setTab(i)} onKeyDown={event => {
+          let next = tab;
+          if (event.key === "ArrowRight") next = (tab + 1) % 4;
+          else if (event.key === "ArrowLeft") next = (tab + 3) % 4;
+          else if (event.key === "Home") next = 0;
+          else if (event.key === "End") next = 3;
+          else return;
+          event.preventDefault(); setTab(next); tabRefs.current[next]?.focus();
+        }}><span className="tab-number">0{i + 1}</span>{item.short}<span className="tab-indicator" aria-hidden="true" /></button>)}</div></Reveal>
+        <div className="tour-panels">{t.tabs.map((item, i) => <div key={i} role="tabpanel" hidden={tab !== i} id={`${tabId}-panel-${i}`} aria-labelledby={`${tabId}-tab-${i}`} tabIndex={0}><div className="tour-panel"><AnimatePresence mode="wait"><motion.div key={`${i}-${locale}`} className="tour-description" initial={reduced ? false : { opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}><span className="large-index" aria-hidden="true">0{i + 1}</span><h3>{item.title}</h3><p>{item.description}</p><p className="micro detail-note">{item.detail}</p><a className="inline-link" href="/demo/">{t.tryDemo}<Arrow /></a></motion.div></AnimatePresence><div className={`tour-image-wrap ${i === 3 ? "receipt-image" : ""}`}><img src={imagePaths[i]} alt={item.alt} width="1440" height="1000" loading="lazy" /></div></div></div>)}</div>
+        <p className="micro capture-footnote">{t.captureNote}</p>
+      </section>
+
+      <section className="section foundations container" aria-labelledby="foundations-title"><Reveal><Eyebrow>{t.foundationsEyebrow}</Eyebrow><h2 id="foundations-title">{t.foundationTitle}<br /><span className="muted-heading">{t.foundationAccent}</span></h2></Reveal><div className="foundation-grid">{t.foundations.map((item, i) => <Reveal className="foundation" key={i} delay={i * 0.08}><div className="feature-icon"><Icon kind={(["wallet", "stock", "money"] as const)[i]} /></div><span className="eyebrow small-eyebrow">{item.label}</span><h3>{item.title}</h3><p>{item.text}</p></Reveal>)}</div></section>
+
+      <section className="offline-section" aria-labelledby="offline-title"><div className="container offline-layout"><Reveal><Eyebrow><span className="status-dot" />{t.offlineEyebrow}</Eyebrow><h2 id="offline-title">{t.offlineTitle}<br /><span>{t.offlineAccent}</span></h2><p className="offline-body">{t.offlineBody}</p></Reveal><Reveal className="offline-diagram"><div className="offline-orbit" aria-hidden="true"><div className="orbit orbit-one" /><div className="orbit orbit-two" /><div className="orbit orbit-three" /><div className="orbit-center"><Mark /></div><span className="orbit-node node-one"><Icon kind="stock" /></span><span className="orbit-node node-two"><Icon kind="wallet" /></span><span className="orbit-node node-three"><Icon kind="money" /></span></div><ol className="offline-steps">{t.offlineFlow.map((step, i) => <li key={i}><Icon kind="check" /><span>{step}</span></li>)}</ol></Reveal><p className="micro offline-foot">{t.offlineFoot}</p></div></section>
+
+      <section className="section container" id="modules" aria-labelledby="modules-title"><Reveal className="section-heading"><div><Eyebrow>{t.moduleEyebrow}</Eyebrow><h2 id="modules-title">{t.moduleTitle}<br /><span className="muted-heading">{t.moduleAccent}</span></h2></div><p className="section-lede">{t.moduleBody}</p></Reveal><div className="module-grid"><Reveal className="module-card retail-card"><div className="module-copy"><Eyebrow>{t.retailTag}</Eyebrow><h3>{t.retailTitle}</h3><p>{t.retailText}</p><a className="inline-link" href="/demo/">{t.moduleLink}<Arrow diagonal /></a></div><div className="module-image"><img src={imagePaths[0]} alt={t.tabs[0].alt} width="1440" height="1000" loading="lazy" /></div></Reveal><Reveal className="module-card restaurant-card" delay={0.1}><div className="module-copy"><Eyebrow>{t.restaurantTag}</Eyebrow><h3>{t.restaurantTitle}</h3><p>{t.restaurantText}</p><a className="inline-link" href="/demo/">{t.moduleLink}<Arrow diagonal /></a></div><div className="module-image"><img src="/media/restaurant.png" alt={t.tabs[1].alt} width="1440" height="1000" loading="lazy" /></div></Reveal></div></section>
+
+      <section className="section how-section container" aria-labelledby="how-title"><Reveal><Eyebrow>{t.howEyebrow}</Eyebrow><h2 id="how-title">{t.howTitle}</h2></Reveal><div className="how-grid">{t.howSteps.map((item, i) => <Reveal key={i} delay={i * 0.08}><span className="step-number">0{i + 1}</span><h3>{item.title}</h3><p>{item.text}</p></Reveal>)}</div></section>
+
+      <section className="global-section" id="global" aria-labelledby="global-title"><div className="container global-layout"><Reveal className="global-copy"><Eyebrow>{t.globalEyebrow}</Eyebrow><h2 id="global-title">{t.globalTitle}<br /><span className="muted-heading">{t.globalAccent}</span></h2><p>{t.globalBody}</p><div className="customization"><h3>{t.customizationTitle}</h3><p>{t.customizationText}</p><div className="chips">{t.customizationChips.map(chip => <span key={chip}>{chip}</span>)}</div><p className="micro">{t.customizationExamples}</p></div></Reveal><Reveal className="format-preview"><div className="preview-top"><span className="status-dot" /><Eyebrow>{t.previewLabel}</Eyebrow><span className="preview-symbol" aria-hidden="true">৳</span></div><label htmlFor="currency">{t.currencyLabel}</label><select id="currency" value={currency} onChange={e => setCurrency(Number(e.target.value))}>{t.countries.map((country, i) => <option value={i} key={country}>{country}</option>)}</select><fieldset className="format-languages"><legend>{t.formatLanguage}</legend><button type="button" aria-pressed={numberLanguage === "en"} onClick={() => setNumberLanguage("en")}>{t.englishFormat}</button><button type="button" aria-pressed={numberLanguage === "bn"} onClick={() => setNumberLanguage("bn")}>{t.banglaFormat}</button></fieldset><div className="format-result" aria-live="polite" aria-atomic="true"><span>{t.sampleTotal}</span><strong lang={numberLanguage === "bn" ? "bn" : "en"}>{formatted}</strong><div><span>{t.sampleAmount}</span><span>{numberLanguage === "bn" ? "১২৩৪৫৬.৭৮" : "123456.78"} · {currencies[currency]}</span></div></div><p className="micro">{t.formatNote}</p></Reveal></div></section>
+
+      <section className="section container" id="ownership" aria-labelledby="ownership-title"><Reveal className="ownership-heading"><Eyebrow>{t.ownershipEyebrow}</Eyebrow><h2 id="ownership-title">{t.ownershipTitle}<br /><span className="muted-heading">{t.ownershipAccent}</span></h2><p>{t.ownershipBody}</p></Reveal><div className="plan-grid"><Reveal className="plan local-plan"><div className="plan-tag"><span className="status-dot" />{t.localPlanTag}</div><h3>{t.localPlan}</h3><p>{t.localPlanBody}</p><ul>{t.localPlanFeatures.map(feature => <li key={feature}><Icon kind="check" />{feature}</li>)}</ul><a className="button button-primary" href={WA} target="_blank" rel="noopener noreferrer">{t.localPlanCta}<Arrow diagonal /></a><p className="micro">{t.noPrice}</p></Reveal><Reveal className="plan cloud-plan" delay={0.08}><div className="plan-tag">{t.cloudTag}</div><h3>{t.cloudPlan}</h3><p>{t.cloudPlanBody}</p><ul>{t.cloudPlanFeatures.map(feature => <li key={feature}><span className="planned-dot" />{feature}</li>)}</ul><a className="button button-outline" href={EMAIL}>{t.cloudCta}<Arrow /></a><p className="micro">{t.cloudFoot}</p></Reveal></div></section>
+
+      <section className="section faq-section container" aria-labelledby="faq-title"><Reveal><Eyebrow>{t.faqEyebrow}</Eyebrow><h2 id="faq-title">{t.faqTitle}</h2></Reveal><div className="faq-list">{t.faqs.map((faq, i) => <details key={i}><summary>{faq.q}<span className="faq-plus" aria-hidden="true">+</span></summary><p>{faq.a}</p></details>)}</div></section>
+
+      <section className="contact-section" id="contact" aria-labelledby="contact-title"><div className="contact-glow" aria-hidden="true" /><Reveal className="container contact-content"><Eyebrow>{t.contactEyebrow}</Eyebrow><h2 id="contact-title">{t.contactTitle}<br /><span>{t.contactAccent}</span></h2><p>{t.contactBody}</p><div className="button-row"><a className="button button-primary" href={WA} target="_blank" rel="noopener noreferrer">{t.whatsapp}<Arrow diagonal /></a><a className="button button-outline" href={EMAIL}>{t.email}<Arrow /></a></div><p className="micro">{t.contactNote}</p></Reveal></section>
+    </main>
+
+    <footer className="container footer"><div className="footer-main"><a className="brand" href="#top"><Mark /><span>{brand}<small>neWell Software</small></span></a><p>{t.footerLine}</p><a className="inline-link" href="#top">{t.backTop}<span className="back-arrow"><Arrow /></span></a></div><div className="footer-bottom"><span>{t.rights}</span><span>{t.company}</span><a href="/demo/">{t.demoNote}</a></div></footer>
+
+    <dialog ref={dialogRef} className="video-dialog" aria-label={t.playVideo} onCancel={() => setVideoOpen(false)} onClick={event => { if (event.target === event.currentTarget) setVideoOpen(false); }}><div className="video-dialog-top"><p>{t.videoCaption}</p><button type="button" onClick={() => setVideoOpen(false)} aria-label={t.close}>{t.close}<span aria-hidden="true">×</span></button></div>{videoOpen && <video ref={videoRef} controls playsInline preload="metadata" poster={imagePaths[0]} aria-label={t.playVideo}><source src="/media/showcase.webm" type="video/webm" /></video>}<p className="micro">{t.demoNote}</p></dialog>
+  </div></MotionConfig>;
+}

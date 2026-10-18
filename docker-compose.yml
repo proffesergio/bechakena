@@ -1,0 +1,14 @@
+# BechaKena showcase — landing page at / and the browser POS at /demo/.
+#
+#   docker compose up -d --build
+#
+# Copy .env.example to .env to change the published port (DEMO_PORT).
+services:
+  showcase:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: bechakena-showcase:latest
+    ports:
+      - "${DEMO_PORT:-8080}:80"
+    restart: unless-stopped

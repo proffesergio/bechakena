@@ -50,3 +50,20 @@ app.*.map.json
 /package.json
 /package-lock.json
 /venv/
+
+# Vercel project metadata and compiled deployment output
+/.vercel/
+.vercel
+.env*
+!.env.example
+
+# Submission packaging output (scripts/make_submission_zip.sh)
+/dist/
+*.zip
+
+# Local knowledge-graph tooling output (not part of the product)
+graphify-out/
+
+# Stray Python venv — excluded from the archive; untrack with:
+#   git rm -r --cached pyenv
+pyenv/
