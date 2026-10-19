@@ -6,7 +6,11 @@ import 'package:crypto/crypto.dart';
 
 /// Staff PIN hashing — salted, iterated SHA-256 (PBKDF2-style), verified fully
 /// offline. Stored form: `pbkdf2sha256$<iterations>$<saltB64>$<digestB64>`.
-const _iterations = 12000;
+///
+/// New hashes use OWASP's 600,000 PBKDF2-HMAC-SHA256 work factor. The DAO
+/// performs the work through Isolate.run() on native platforms. Legacy hashes
+/// remain readable and are upgraded after successful authentication.
+const pinIterations = 600000;
 final _rng = Random.secure();
 
 String hashPin(String pin) {
@@ -14,16 +18,18 @@ String hashPin(String pin) {
     throw ArgumentError.value(pin, 'pin', 'PIN must not be empty');
   }
   final salt = Uint8List.fromList(
-      List<int>.generate(16, (_) => _rng.nextInt(256)));
-  final digest = _pbkdf2(pin, salt, _iterations);
-  return 'pbkdf2sha256\$$_iterations\$${base64.encode(salt)}\$${base64.encode(digest)}';
+    List<int>.generate(16, (_) => _rng.nextInt(256)),
+  );
+  final digest = _pbkdf2(pin, salt, pinIterations);
+  return 'pbkdf2sha256\$$pinIterations\$${base64.encode(salt)}\$${base64.encode(digest)}';
 }
 
 bool verifyPin(String pin, String storedHash) {
   final parts = storedHash.split(r'$');
   if (parts.length != 4 || parts[0] != 'pbkdf2sha256') return false;
   final iterations = int.tryParse(parts[1]);
-  if (iterations == null) return false;
+  if (iterations == null || iterations < 1 || iterations > 2000000)
+    return false;
   Uint8List salt;
   Uint8List expected;
   try {
@@ -32,9 +38,22 @@ bool verifyPin(String pin, String storedHash) {
   } on FormatException {
     return false;
   }
+  if (salt.length < 8 || salt.length > 64 || expected.length != 32)
+    return false;
   final actual = _pbkdf2(pin, salt, iterations);
   return _constantTimeEquals(actual, expected);
 }
+
+bool pinHashNeedsUpgrade(String storedHash) {
+  final parts = storedHash.split(r'$');
+  return parts.length == 4 &&
+      parts[0] == 'pbkdf2sha256' &&
+      (int.tryParse(parts[1]) ?? 0) < pinIterations;
+}
+
+/// Top-level compute callback; only the candidate and hash cross the isolate.
+bool verifyPinRequest(List<String> request) =>
+    verifyPin(request[0], request[1]);
 
 /// PBKDF2-HMAC-SHA256, single output block (32 bytes ≥ our needs).
 Uint8List _pbkdf2(String password, Uint8List salt, int iterations) {

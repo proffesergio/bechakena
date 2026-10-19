@@ -77,11 +77,19 @@ class PurchasesDao extends DatabaseAccessor<AppDatabase>
     });
   }
 
-  Future<List<PurchaseItem>> itemsOf(String purchaseId) =>
-      (select(purchaseItems)..where((i) => i.purchaseId.equals(purchaseId)))
-          .get();
+  Future<List<PurchaseItem>> itemsOf(String purchaseId) => (select(purchaseItems)
+        ..where((i) => i.purchaseId.equals(purchaseId) & i.deletedAt.isNull()))
+      .get();
 
-  Stream<List<Purchase>> watchRecent({int limit = 100}) => (select(purchases)
+  /// Recent purchases, newest first. [branchId] scopes the list to one outlet
+  /// (staff read scope); null means every branch (owner / head office).
+  Stream<List<Purchase>> watchRecent({int limit = 100, String? branchId}) =>
+      (select(purchases)
+        ..where((p) =>
+            p.deletedAt.isNull() &
+            (branchId == null
+                ? const Constant(true)
+                : p.branchId.equals(branchId)))
         ..orderBy([(p) => OrderingTerm.desc(p.createdAt)])
         ..limit(limit))
       .watch();

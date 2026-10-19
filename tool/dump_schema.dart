@@ -56,7 +56,7 @@ int _tableCount(List<QueryRow> rows) =>
     rows.where((row) => row.read<String>('type') == 'table').length;
 
 const _header = '''-- ─────────────────────────────────────────────────────────────────────────────
--- BechaKena — complete SQLite schema, schema version 6.
+-- BechaKena — complete SQLite schema (version declared below).
 --
 -- This file creates the database from scratch. It is generated from the Drift
 -- table definitions in lib/core/db/tables.dart, which remain the source of
@@ -70,7 +70,7 @@ const _header = '''-- ───────────────────�
 --   • `dart run tool/dump_schema.dart` regenerates this file.
 --
 -- Conventions you can rely on:
---   • Money columns are INTEGER paisa (1 BDT = 100 paisa); never floats.
+--   • Money columns are INTEGER minor units (100 per configured currency); never floats.
 --   • Quantity columns are INTEGER milli-units (1 pc = 1000; 250 g = 250 kg).
 --   • Stock is derived: stock = SUM(stock_movements.qty_delta) per product
 --     and branch. There is no stored stock column anywhere.

@@ -9,11 +9,28 @@ import '../core/db/device_store.dart';
 import '../core/db/open.dart';
 import '../core/money.dart';
 import '../core/qty.dart';
+import '../core/currency.dart';
+import '../features/settings/data/business_settings.dart';
+
+final businessSettingsStoreProvider = Provider<BusinessSettingsStore>(
+  (ref) => BusinessSettingsStore(ref.watch(databaseProvider)),
+);
+
+final businessSettingsProvider = StreamProvider<BusinessSettings>(
+  (ref) => ref.watch(businessSettingsStoreProvider).watch(),
+);
+
+/// Fail closed while loading: rendering or parsing in a guessed currency can
+/// misrepresent persisted amounts. UI hosts show their usual loading/error UI.
+final shopCurrencyProvider = Provider<ShopCurrency>(
+  (ref) => ref.watch(businessSettingsProvider).requireValue.currency,
+);
 
 /// Device-level settings store (module choice, theme). Loaded once before the
 /// app starts and injected via an override in `main()`.
 final deviceStoreProvider = Provider<DeviceStore>(
-    (ref) => throw StateError('deviceStoreProvider must be overridden'));
+  (ref) => throw StateError('deviceStoreProvider must be overridden'),
+);
 
 /// The active module's database. Each module gets its own SQLite file, so
 /// switching modules disposes one DB and opens the other — data never crosses
@@ -28,24 +45,35 @@ final databaseProvider = Provider<AppDatabase>((ref) {
   return db;
 });
 
-/// null = follow the system locale. Persisted per-shop in settings (v1.1).
+/// null = follow the system locale. Shared device-level language preference.
 class LocaleController extends Notifier<Locale?> {
   @override
-  Locale? build() => null;
+  Locale? build() {
+    final code = ref.read(deviceStoreProvider).get('locale');
+    return code == 'bn' || code == 'en' ? Locale(code!) : null;
+  }
 
-  void set(Locale? locale) => state = locale;
+  Future<void> set(Locale? locale) async {
+    if (locale != null && !{'bn', 'en'}.contains(locale.languageCode)) {
+      throw ArgumentError.value(locale, 'locale');
+    }
+    await ref
+        .read(deviceStoreProvider)
+        .set('locale', locale?.languageCode ?? '');
+    state = locale;
+  }
 }
 
-final localeProvider =
-    NotifierProvider<LocaleController, Locale?>(LocaleController.new);
+final localeProvider = NotifierProvider<LocaleController, Locale?>(
+  LocaleController.new,
+);
 
 /// App theme mode (system / light / dark), persisted **device-level** (in the
 /// device store, not a module DB) under `themeMode` so the app can paint before
 /// any module database is open and the choice is shared across modules.
 class ThemeModeController extends Notifier<ThemeMode> {
   @override
-  ThemeMode build() =>
-      _decode(ref.read(deviceStoreProvider).get('themeMode'));
+  ThemeMode build() => _decode(ref.read(deviceStoreProvider).get('themeMode'));
 
   Future<void> set(ThemeMode mode) async {
     state = mode;
@@ -53,20 +81,21 @@ class ThemeModeController extends Notifier<ThemeMode> {
   }
 
   static ThemeMode _decode(String? raw) => switch (raw) {
-        'light' => ThemeMode.light,
-        'dark' => ThemeMode.dark,
-        _ => ThemeMode.system,
-      };
+    'light' => ThemeMode.light,
+    'dark' => ThemeMode.dark,
+    _ => ThemeMode.system,
+  };
 
   static String _encode(ThemeMode mode) => switch (mode) {
-        ThemeMode.light => 'light',
-        ThemeMode.dark => 'dark',
-        ThemeMode.system => 'system',
-      };
+    ThemeMode.light => 'light',
+    ThemeMode.dark => 'dark',
+    ThemeMode.system => 'system',
+  };
 }
 
-final themeModeProvider =
-    NotifierProvider<ThemeModeController, ThemeMode>(ThemeModeController.new);
+final themeModeProvider = NotifierProvider<ThemeModeController, ThemeMode>(
+  ThemeModeController.new,
+);
 
 /// The branch/outlet this device is currently operating as. Persisted under
 /// the `app.branchId` settings key; the DB guarantees it points at a real
@@ -79,8 +108,10 @@ class CurrentBranchController extends Notifier<String?> {
   }
 
   Future<void> _load() async {
-    final v =
-        await ref.read(databaseProvider).settingsDao.getValue('app.branchId');
+    final v = await ref
+        .read(databaseProvider)
+        .settingsDao
+        .getValue('app.branchId');
     if (v != state) state = v;
   }
 
@@ -95,7 +126,8 @@ class CurrentBranchController extends Notifier<String?> {
 
 final currentBranchProvider =
     NotifierProvider<CurrentBranchController, String?>(
-        CurrentBranchController.new);
+      CurrentBranchController.new,
+    );
 
 /// All branches (outlets) for the branch picker and head-office views.
 final branchesProvider = StreamProvider<List<Shop>>((ref) {
@@ -130,12 +162,13 @@ final diningTablesProvider = StreamProvider<List<DiningTable>>((ref) {
 /// All open restaurant orders (running tabs) across dine-in, takeaway and
 /// delivery. Drives the Orders hub and each table's free/occupied status.
 final openOrdersProvider = StreamProvider<List<DineOrder>>(
-    (ref) => ref.watch(databaseProvider).ordersDao.watchOpenOrders());
+  (ref) => ref.watch(databaseProvider).ordersDao.watchOpenOrders(),
+);
 
 /// Line items of one running order, live.
-final orderItemsProvider =
-    StreamProvider.family<List<DineOrderItem>, String>((ref, orderId) =>
-        ref.watch(databaseProvider).ordersDao.watchItems(orderId));
+final orderItemsProvider = StreamProvider.family<List<DineOrderItem>, String>(
+  (ref, orderId) => ref.watch(databaseProvider).ordersDao.watchItems(orderId),
+);
 
 final stockProvider = StreamProvider.family<Qty, String>((ref, productId) {
   final branchId = ref.watch(currentBranchProvider);
@@ -156,18 +189,13 @@ final categoriesProvider = StreamProvider<List<Category>>((ref) {
       .watch();
 });
 
-final customersProvider = StreamProvider<List<Customer>>(
-    (ref) => ref.watch(databaseProvider).customersDao.watchAll());
-
+/// The branch/role-scoped customer list lives in
+/// `features/auth/logic/access.dart` (`scopedCustomersProvider`) so read-path
+/// ownership checks sit next to the access policy.
 final customerDueProvider = FutureProvider.family<Money, String>(
-    (ref, customerId) =>
-        ref.watch(databaseProvider).customersDao.dueFor(customerId));
-
-final todaySalesProvider = StreamProvider<List<Sale>>((ref) =>
-    ref.watch(databaseProvider).salesDao.watchSalesOn(DateTime.now().toUtc()));
-
-final recentSalesProvider = StreamProvider<List<Sale>>(
-    (ref) => ref.watch(databaseProvider).salesDao.watchRecent());
+  (ref, customerId) =>
+      ref.watch(databaseProvider).customersDao.dueFor(customerId),
+);
 
 final lowStockProvider = FutureProvider<List<LowStockRow>>((ref) {
   final branchId = ref.watch(currentBranchProvider);
@@ -179,6 +207,8 @@ final lowStockProvider = FutureProvider<List<LowStockRow>>((ref) {
 
 final expiringSoonProvider = FutureProvider<List<ExpiringBatch>>((ref) {
   final branchId = ref.watch(currentBranchProvider);
-  return ref.watch(databaseProvider).stockDao.expiringSoon(
-      within: const Duration(days: 14), branchId: branchId);
+  return ref
+      .watch(databaseProvider)
+      .stockDao
+      .expiringSoon(within: const Duration(days: 14), branchId: branchId);
 });

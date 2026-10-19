@@ -1,4 +1,5 @@
 import 'qty.dart';
+import 'currency.dart';
 
 /// Integer-paisa money type. All monetary values in the app are [Money];
 /// doubles are never used for money (hard rule — see docs/DESIGN.md).
@@ -13,16 +14,27 @@ extension type const Money(int paisa) {
 
   /// Parses user input: "125", "125.5", "৳1,250.50", Bangla digits "১২৫.৫০".
   /// Throws [FormatException] on anything that is not a money amount.
-  factory Money.parse(String input) {
+  factory Money.parse(String input, {ShopCurrency currency = ShopCurrency.bdt}) {
     var s = input
         .trim()
-        .replaceAll('৳', '')
-        .replaceAll(',', '')
-        .replaceAll(' ', '')
         .replaceAllMapped(
           RegExp('[০-৯]'),
           (m) => String.fromCharCode(m[0]!.codeUnitAt(0) - 0x09E6 + 0x30),
         );
+    // Accept only the selected currency's prefix, never another currency's
+    // symbol. Bare decimal input remains convenient for every shop currency.
+    for (final prefix in [currency.code, currency.symbol.trim()]) {
+      if (s.startsWith(prefix)) s = s.substring(prefix.length).trim();
+      if (s.startsWith('-$prefix')) s = '-${s.substring(prefix.length + 1).trim()}';
+    }
+    // Validate grouping before removing it; "1,25" must not become 125.
+    if (s.contains(',')) {
+      final grouped = currency.lakhGrouping
+          ? RegExp(r'^-?(?:\d{1,3}(?:,\d{3})|\d{1,2}(?:,\d{2})*,\d{3})(?:\.\d{1,2})?$')
+          : RegExp(r'^-?\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?$');
+      if (!grouped.hasMatch(s)) throw FormatException('Not a money amount', input);
+      s = s.replaceAll(',', '');
+    }
     final match = RegExp(r'^(-?)(\d+)(?:\.(\d{1,2}))?$').firstMatch(s);
     if (match == null) {
       throw FormatException('Not a money amount', input);

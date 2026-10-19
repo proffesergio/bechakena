@@ -33,9 +33,9 @@ class OrdersDao extends DatabaseAccessor<AppDatabase> with _$OrdersDaoMixin {
         ..limit(1))
       .getSingleOrNull();
 
-  Future<DineOrder?> byId(String orderId) =>
-      (select(dineOrders)..where((o) => o.id.equals(orderId)))
-          .getSingleOrNull();
+  Future<DineOrder?> byId(String orderId) => (select(dineOrders)
+        ..where((o) => o.id.equals(orderId) & o.deletedAt.isNull()))
+      .getSingleOrNull();
 
   /// Opens a new tab. For dine-in pass [tableId]; for takeaway/delivery pass a
   /// [customerName]. Branch defaults to this device's current branch.

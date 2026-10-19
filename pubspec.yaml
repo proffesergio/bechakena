@@ -1,5 +1,5 @@
 name: bechakena
-description: "Offline-first supermarket POS & inventory for Bangladesh."
+description: "Offline-first retail and restaurant POS with configurable shop currency."
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -22,7 +22,6 @@ dependencies:
   uuid: ^4.5.3
   path_provider: ^2.1.6
   path: ^1.9.1
-  sqlite3_flutter_libs: ^0.6.0+eol
   file_selector: ^1.1.0
   flutter_animate: ^4.5.2
   fl_chart: ^1.2.0

@@ -44,26 +44,26 @@ class PrinterConfig {
   int get widthDots => width >= 48 ? 576 : 384;
 
   static PrinterTransportType parseType(String? raw) => switch (raw) {
-        'usb' => PrinterTransportType.usb,
-        'bluetooth' => PrinterTransportType.bluetooth,
-        _ => PrinterTransportType.lan,
-      };
+    'usb' => PrinterTransportType.usb,
+    'bluetooth' => PrinterTransportType.bluetooth,
+    _ => PrinterTransportType.lan,
+  };
 
   static String encodeType(PrinterTransportType type) => switch (type) {
-        PrinterTransportType.usb => 'usb',
-        PrinterTransportType.bluetooth => 'bluetooth',
-        PrinterTransportType.lan => 'lan',
-      };
+    PrinterTransportType.usb => 'usb',
+    PrinterTransportType.bluetooth => 'bluetooth',
+    PrinterTransportType.lan => 'lan',
+  };
 }
 
 /// Builds a [PrinterConfig] from raw settings values (pure — easy to test).
 PrinterConfig printerConfigFromMap(Map<String, String?> m) => PrinterConfig(
-      type: PrinterConfig.parseType(m['printer.transport']),
-      host: m['printer.host'] ?? '',
-      port: int.tryParse(m['printer.port'] ?? '') ?? 9100,
-      width: int.tryParse(m['printer.width'] ?? '') ?? 32,
-      device: m['printer.device'] ?? '',
-    );
+  type: PrinterConfig.parseType(m['printer.transport']),
+  host: m['printer.host'] ?? '',
+  port: int.tryParse(m['printer.port'] ?? '') ?? 9100,
+  width: int.tryParse(m['printer.width'] ?? '') ?? 32,
+  device: m['printer.device'] ?? '',
+);
 
 /// Reads the saved printer configuration.
 Future<PrinterConfig> loadPrinterConfig(SettingsDao settings) async {
@@ -114,9 +114,12 @@ class DefaultPrinterBackend implements PrinterBackend {
 
   @override
   Future<void> send(
-          PrinterTransportType type, String device, List<int> bytes) async =>
-      throw const PrinterUnavailable(
-          'USB/Bluetooth printing is not enabled on this build');
+    PrinterTransportType type,
+    String device,
+    List<int> bytes,
+  ) async => throw const PrinterUnavailable(
+    'USB/Bluetooth printing is not enabled on this build',
+  );
 }
 
 /// The active backend. Swap this out (once) in `main()` to plug in a real

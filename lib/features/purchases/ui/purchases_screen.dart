@@ -1,3 +1,5 @@
+import '../../auth/logic/permissions.dart';
+import '../../settings/ui/business_settings_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,18 +9,28 @@ import '../../../core/format.dart';
 import '../../../core/money.dart';
 import '../../../core/qty.dart';
 import '../../../l10n/gen/app_localizations.dart';
+import '../../auth/logic/access.dart';
 
+/// Purchases readable under the current branch/role scope — staff see their
+/// outlet's purchases; owners see every branch.
 final purchasesProvider = StreamProvider<List<Purchase>>(
-    (ref) => ref.watch(databaseProvider).purchasesDao.watchRecent());
+  (ref) => ref
+      .watch(databaseProvider)
+      .purchasesDao
+      .watchRecent(branchId: ref.watch(readScopeBranchProvider)),
+);
 
 final suppliersProvider = StreamProvider<List<Supplier>>(
-    (ref) => ref.watch(databaseProvider).purchasesDao.watchSuppliers());
+  (ref) => ref.watch(databaseProvider).purchasesDao.watchSuppliers(),
+);
 
 class PurchasesScreen extends ConsumerWidget {
   const PurchasesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).languageCode;
     final purchases = ref.watch(purchasesProvider);
@@ -36,10 +48,19 @@ class PurchasesScreen extends ConsumerWidget {
                   final p = all[i];
                   return ListTile(
                     leading: const Icon(Icons.local_shipping),
-                    title: Text(p.invoiceRef ?? p.createdAt.toLocal().toString().substring(0, 16)),
-                    subtitle: Text(p.createdAt.toLocal().toString().substring(0, 16)),
+                    title: Text(
+                      p.invoiceRef ??
+                          p.createdAt.toLocal().toString().substring(0, 16),
+                    ),
+                    subtitle: Text(
+                      p.createdAt.toLocal().toString().substring(0, 16),
+                    ),
                     trailing: Text(
-                      formatTaka(p.totalCost, locale: locale),
+                      formatTaka(
+                        p.totalCost,
+                        locale: locale,
+                        currency: ref.read(shopCurrencyProvider),
+                      ),
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   );
@@ -99,7 +120,10 @@ class _NewPurchaseDialogState extends ConsumerState<NewPurchaseDialog> {
       if (row.productId == null) return null;
       try {
         final qty = Qty.parse(row.qty.text);
-        final cost = Money.parse(row.cost.text);
+        final cost = Money.parse(
+          row.cost.text,
+          currency: ref.read(shopCurrencyProvider),
+        );
         DateTime? expiry;
         final expiryText = row.expiry.text.trim();
         if (expiryText.isNotEmpty) {
@@ -107,11 +131,14 @@ class _NewPurchaseDialogState extends ConsumerState<NewPurchaseDialog> {
           if (expiry == null) return null;
         }
         if (qty.isZero || qty.isNegative || cost.isNegative) return null;
-        items.add(PurchaseDraftItem(
+        items.add(
+          PurchaseDraftItem(
             productId: row.productId!,
             qty: qty,
             unitCost: cost,
-            expiryDate: expiry));
+            expiryDate: expiry,
+          ),
+        );
       } on FormatException {
         return null;
       }
@@ -121,6 +148,8 @@ class _NewPurchaseDialogState extends ConsumerState<NewPurchaseDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final products = ref.watch(productsProvider).value ?? const <Product>[];
     final suppliers = ref.watch(suppliersProvider).value ?? const <Supplier>[];
@@ -147,10 +176,14 @@ class _NewPurchaseDialogState extends ConsumerState<NewPurchaseDialog> {
                       decoration: InputDecoration(labelText: l10n.supplier),
                       items: [
                         DropdownMenuItem<String?>(
-                            value: null, child: Text('—')),
+                          value: null,
+                          child: Text('—'),
+                        ),
                         for (final s in suppliers)
                           DropdownMenuItem<String?>(
-                              value: s.id, child: Text(s.name)),
+                            value: s.id,
+                            child: Text(s.name),
+                          ),
                       ],
                       onChanged: (v) => setState(() => _supplierId = v),
                     ),
@@ -179,7 +212,7 @@ class _NewPurchaseDialogState extends ConsumerState<NewPurchaseDialog> {
               ),
               const SizedBox(height: 8),
               Text(
-                '${l10n.total}: ${formatTaka(total)}',
+                '${l10n.total}: ${formatTaka(total, currency: ref.read(shopCurrencyProvider))}',
                 textAlign: TextAlign.end,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
@@ -290,9 +323,14 @@ class _NewPurchaseDialogState extends ConsumerState<NewPurchaseDialog> {
   }
 
   Future<void> _save(List<PurchaseDraftItem> items) async {
+    if (!ref.read(canProvider(Capability.managePurchases))) return;
+
     final navigator = Navigator.of(context);
     final invoiceRef = _invoiceRef.text.trim();
-    await ref.read(databaseProvider).purchasesDao.createPurchase(
+    await ref
+        .read(databaseProvider)
+        .purchasesDao
+        .createPurchase(
           supplierId: _supplierId,
           invoiceRef: invoiceRef.isEmpty ? null : invoiceRef,
           items: items,

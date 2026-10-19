@@ -9,6 +9,20 @@ void main() {
   tearDown(() async => db.close());
 
   group('StaffDao', () {
+    test('persisted lockout blocks valid PIN then upgrades a legacy hash after expiry', () async {
+      final created = await db.into(db.staff).insertReturning(StaffCompanion.insert(
+        name: 'Legacy', role: StaffRole.cashier,
+        pinHash: r'pbkdf2sha256$1$c2FsdHNhbHQ=$cnodo4POYzHowTVUDQWUh+jBDYuoM7zPsnOdQf74gN8=',
+      ));
+      await db.settingsDao.setValue('auth.failures.${created.id}', '4');
+      expect(await db.staffDao.verifyPin(created.id, '0000'), isNull);
+      expect(await StaffDao(db).verifyPin(created.id, '1234'), isNull);
+      await db.settingsDao.setValue('auth.lock.${created.id}', '0');
+      final upgraded = await db.staffDao.verifyPin(created.id, '1234');
+      expect(upgraded, isNotNull);
+      expect(upgraded!.pinHash, startsWith(r'pbkdf2sha256$600000$'));
+      expect(await db.settingsDao.getValue('auth.failures.${created.id}'), '0');
+    });
     test('empty shop has no staff', () async {
       expect(await db.staffDao.hasAnyStaff(), isFalse);
     });

@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 
-import '../../invoice_number.dart';
+import '../../sales/sale_finalizer.dart';
 import '../../money.dart';
 import '../../qty.dart';
 import '../database.dart';
@@ -46,117 +46,44 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
     Money billDiscount = Money.zero,
     DateTime? now,
     String? branchId,
-  }) {
-    if (items.isEmpty) {
-      throw StateError('Cannot finalize a sale with no items');
-    }
-    final at = (now ?? DateTime.now()).toUtc();
+  }) => SaleFinalizer(attachedDatabase).finalize(
+      invoicePrefix: invoicePrefix, deviceNo: deviceNo, staffId: staffId,
+      customerId: customerId, items: items, tenders: tenders,
+      billDiscount: billDiscount, now: now, branchId: branchId);
 
-    var subtotal = Money.zero;
-    var vat = Money.zero;
-    for (final item in items) {
-      subtotal += item.lineTotal;
-      vat += item.vatPortion;
-    }
-    final total = subtotal - billDiscount;
-    var tendered = Money.zero;
-    for (final tender in tenders) {
-      tendered += tender.amount;
-    }
-    final due = tendered < total ? total - tendered : Money.zero;
-    final paid = total - due;
-    if (!due.isZero && customerId == null) {
-      throw ArgumentError(
-          'A sale with due (baki) must be attached to a customer');
-    }
+  Future<Sale?> byId(String saleId) => (select(sales)
+        ..where((s) => s.id.equals(saleId) & s.deletedAt.isNull()))
+      .getSingleOrNull();
 
-    return transaction(() async {
-      final branch = branchId ?? await attachedDatabase.currentBranchId();
-      final seq = await _nextSeqForDay(at);
-      final sale = await into(sales).insertReturning(SalesCompanion.insert(
-        invoiceNo: formatInvoiceNo(
-            prefix: invoicePrefix, date: at, seq: seq, deviceNo: deviceNo),
-        branchId: Value(branch),
-        staffId: Value(staffId),
-        customerId: Value(customerId),
-        subtotal: subtotal,
-        discount: Value(billDiscount),
-        vat: Value(vat),
-        total: total,
-        paid: paid,
-        due: Value(due),
-        status: SaleStatus.finalized,
-        createdAt: at,
-      ));
+  Future<Sale?> findByInvoiceNo(String invoiceNo) => (select(sales)
+        ..where((s) => s.invoiceNo.equals(invoiceNo) & s.deletedAt.isNull()))
+      .getSingleOrNull();
 
-      for (final item in items) {
-        await into(saleItems).insert(SaleItemsCompanion.insert(
-          saleId: sale.id,
-          productId: Value(item.productId),
-          nameSnapshot: item.nameSnapshot,
-          qty: item.qty,
-          unitPrice: item.unitPrice,
-          lineDiscount: Value(item.lineDiscount),
-          vatRateBp: Value(item.vatRateBp),
-          lineTotal: item.lineTotal,
-        ));
-        if (item.productId != null) {
-          await into(stockMovements).insert(StockMovementsCompanion.insert(
-            productId: item.productId!,
-            branchId: Value(branch),
-            qtyDelta: -item.qty,
-            type: MovementType.sale,
-            refId: Value(sale.id),
-            createdAt: Value(at),
-          ));
-        }
-      }
+  Future<List<SaleItem>> itemsOf(String saleId) => (select(saleItems)
+        ..where((i) => i.saleId.equals(saleId) & i.deletedAt.isNull()))
+      .get();
 
-      for (final tender in tenders) {
-        await into(salePayments).insert(SalePaymentsCompanion.insert(
-          saleId: sale.id,
-          method: tender.method,
-          amount: tender.amount,
-          refNo: Value(tender.refNo),
-        ));
-      }
+  Future<List<SalePayment>> paymentsOf(String saleId) => (select(salePayments)
+        ..where((p) => p.saleId.equals(saleId) & p.deletedAt.isNull()))
+      .get();
 
-      return sale;
-    });
-  }
-
-  Future<Sale?> byId(String saleId) =>
-      (select(sales)..where((s) => s.id.equals(saleId))).getSingleOrNull();
-
-  Future<Sale?> findByInvoiceNo(String invoiceNo) =>
-      (select(sales)..where((s) => s.invoiceNo.equals(invoiceNo)))
-          .getSingleOrNull();
-
-  Future<List<SaleItem>> itemsOf(String saleId) =>
-      (select(saleItems)..where((i) => i.saleId.equals(saleId))).get();
-
-  Future<List<SalePayment>> paymentsOf(String saleId) =>
-      (select(salePayments)..where((p) => p.saleId.equals(saleId))).get();
-
-  Stream<List<Sale>> watchRecent({int limit = 100}) => (select(sales)
+  /// Recent sales, newest first. [branchId] scopes the list to one outlet
+  /// (staff read scope); null means every branch (owner / head office).
+  Stream<List<Sale>> watchRecent({int limit = 100, String? branchId}) =>
+      (select(sales)
+        ..where((s) =>
+            s.deletedAt.isNull() &
+            (branchId == null
+                ? const Constant(true)
+                : s.branchId.equals(branchId)))
         ..orderBy([(s) => OrderingTerm.desc(s.createdAt)])
         ..limit(limit))
       .watch();
 
-  Stream<List<Sale>> watchSalesOn(DateTime day) {
-    final start = DateTime.utc(day.year, day.month, day.day);
-    final end = start.add(const Duration(days: 1));
-    return (select(sales)
-          ..where((s) =>
-              s.createdAt.isBiggerOrEqualValue(start) &
-              s.createdAt.isSmallerThanValue(end))
-          ..orderBy([(s) => OrderingTerm.desc(s.createdAt)]))
-        .watch();
-  }
-
   Expression<bool> _inRange(DateTime start, DateTime end) =>
       sales.createdAt.isBiggerOrEqualValue(start) &
-      sales.createdAt.isSmallerThanValue(end);
+      sales.createdAt.isSmallerThanValue(end) &
+      sales.deletedAt.isNull();
 
   /// Per-day sales totals in [start, end) — days without sales are omitted.
   Future<List<DailyTotal>> dailyTotals(
@@ -188,7 +115,7 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
     final query = selectOnly(saleItems).join(
         [innerJoin(sales, sales.id.equalsExp(saleItems.saleId))])
       ..addColumns([saleItems.nameSnapshot, revenue, qtySum])
-      ..where(_inRange(start, end))
+      ..where(_inRange(start, end) & saleItems.deletedAt.isNull())
       ..groupBy([saleItems.nameSnapshot])
       ..orderBy([OrderingTerm.desc(revenue)])
       ..limit(limit);
@@ -236,17 +163,4 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
     };
   }
 
-  /// Sales are immutable and never deleted, so "count so far today + 1" is a
-  /// stable daily sequence on a single device.
-  Future<int> _nextSeqForDay(DateTime at) async {
-    final start = DateTime.utc(at.year, at.month, at.day);
-    final end = start.add(const Duration(days: 1));
-    final count = countAll();
-    final query = selectOnly(sales)
-      ..addColumns([count])
-      ..where(sales.createdAt.isBiggerOrEqualValue(start) &
-          sales.createdAt.isSmallerThanValue(end));
-    final row = await query.getSingle();
-    return (row.read(count) ?? 0) + 1;
-  }
 }

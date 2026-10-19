@@ -55,9 +55,11 @@ class StockDao extends DatabaseAccessor<AppDatabase> with _$StockDaoMixin {
   JoinedSelectStatement<dynamic, dynamic> _stockQuery(String productId,
       {String? branchId}) {
     final where = branchId == null
-        ? stockMovements.productId.equals(productId)
+        ? stockMovements.productId.equals(productId) &
+            stockMovements.deletedAt.isNull()
         : stockMovements.productId.equals(productId) &
-            stockMovements.branchId.equals(branchId);
+            stockMovements.branchId.equals(branchId) &
+            stockMovements.deletedAt.isNull();
     return selectOnly(stockMovements)
       ..addColumns([_deltaSum])
       ..where(where);
@@ -81,9 +83,11 @@ class StockDao extends DatabaseAccessor<AppDatabase> with _$StockDaoMixin {
         [stockMovements.qtyDelta.sum(), const Constant<int>(0)]);
     // Scope the movement join to the branch so stock reflects this outlet.
     final joinOn = branchId == null
-        ? stockMovements.productId.equalsExp(products.id)
+        ? stockMovements.productId.equalsExp(products.id) &
+            stockMovements.deletedAt.isNull()
         : stockMovements.productId.equalsExp(products.id) &
-            stockMovements.branchId.equals(branchId);
+            stockMovements.branchId.equals(branchId) &
+            stockMovements.deletedAt.isNull();
     final query = select(products).join([
       leftOuterJoin(stockMovements, joinOn),
     ])
@@ -118,6 +122,7 @@ class StockDao extends DatabaseAccessor<AppDatabase> with _$StockDaoMixin {
       ..where(stockMovements.expiryDate.isNotNull() &
           stockMovements.expiryDate.isSmallerOrEqualValue(cutoff) &
           branchFilter &
+          stockMovements.deletedAt.isNull() &
           products.deletedAt.isNull())
       ..orderBy([OrderingTerm.asc(stockMovements.expiryDate)]);
     final rows = await query.get();

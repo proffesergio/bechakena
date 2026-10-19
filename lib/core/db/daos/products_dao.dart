@@ -14,8 +14,9 @@ class ProductsDao extends DatabaseAccessor<AppDatabase> with _$ProductsDaoMixin 
   Future<void> updateProduct(Product product) => update(products).replace(
       product.copyWith(updatedAt: DateTime.now().toUtc()));
 
-  Future<Product?> byId(String id) =>
-      (select(products)..where((p) => p.id.equals(id))).getSingleOrNull();
+  Future<Product?> byId(String id) => (select(products)
+        ..where((p) => p.id.equals(id) & p.deletedAt.isNull()))
+      .getSingleOrNull();
 
   Future<Product?> byBarcode(String barcode) => (select(products)
         ..where((p) =>

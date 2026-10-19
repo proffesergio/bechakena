@@ -11,6 +11,7 @@ import '../../../app/providers.dart';
 import '../../../app/widgets/app_loader.dart';
 import '../../../core/db/database.dart';
 import '../../../core/db/open.dart';
+import '../../../core/currency.dart';
 import '../../../core/platform/files.dart';
 import '../../../core/seed/demo_catalog.dart';
 import '../../../core/printing/print_service.dart';
@@ -18,6 +19,7 @@ import '../../../core/printing/printer_transport.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../auth/logic/permissions.dart';
 import '../../auth/logic/session.dart';
+import '../data/business_settings.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -31,6 +33,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _shopPhone = TextEditingController();
   final _shopAddress = TextEditingController();
   final _footer = TextEditingController();
+  final _taxLabel = TextEditingController();
+  final _taxId = TextEditingController();
+  ShopCurrency _currency = ShopCurrency.bdt;
+  bool _currencyLocked = true;
+  bool _saving = false;
+  bool _loadFailed = false;
   final _printerHost = TextEditingController();
   final _printerPort = TextEditingController();
   String _paperWidth = '32';
@@ -47,20 +55,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _load() async {
-    final settings = ref.read(databaseProvider).settingsDao;
-    _shopName.text = await settings.getValue('shop.name') ?? '';
-    _shopPhone.text = await settings.getValue('shop.phone') ?? '';
-    _shopAddress.text = await settings.getValue('shop.address') ?? '';
-    _footer.text = await settings.getValue('receipt.footer') ?? '';
-    _printerHost.text = await settings.getValue('printer.host') ?? '';
-    _printerPort.text = await settings.getValue('printer.port') ?? '9100';
-    _paperWidth = await settings.getValue('printer.width') ?? '32';
-    _transport =
-        PrinterConfig.parseType(await settings.getValue('printer.transport'));
-    _device = await settings.getValue('printer.device') ?? '';
-    _deviceName = await settings.getValue('printer.deviceName') ?? _device;
-    _logoPath = await settings.getValue('shop.logoPath');
-    if (mounted) setState(() => _loaded = true);
+    try {
+      final settings = ref.read(databaseProvider).settingsDao;
+      final store = ref.read(businessSettingsStoreProvider);
+      final business = await store.load();
+      _currency = business.currency;
+      _taxLabel.text = business.taxLabel;
+      _taxId.text = business.taxId;
+      _currencyLocked = await store.currencyLocked();
+      _shopName.text = await settings.getValue('shop.name') ?? '';
+      _shopPhone.text = await settings.getValue('shop.phone') ?? '';
+      _shopAddress.text = await settings.getValue('shop.address') ?? '';
+      _footer.text = await settings.getValue('receipt.footer') ?? '';
+      _printerHost.text = await settings.getValue('printer.host') ?? '';
+      _printerPort.text = await settings.getValue('printer.port') ?? '9100';
+      _paperWidth = await settings.getValue('printer.width') ?? '32';
+      _transport = PrinterConfig.parseType(
+        await settings.getValue('printer.transport'),
+      );
+      _device = await settings.getValue('printer.device') ?? '';
+      _deviceName = await settings.getValue('printer.deviceName') ?? _device;
+      _logoPath = await settings.getValue('shop.logoPath');
+      if (mounted) setState(() => _loaded = true);
+    } catch (_) {
+      if (mounted)
+        setState(() {
+          _loaded = true;
+          _loadFailed = true;
+        });
+    }
   }
 
   @override
@@ -69,36 +92,92 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _shopPhone.dispose();
     _shopAddress.dispose();
     _footer.dispose();
+    _taxLabel.dispose();
+    _taxId.dispose();
     _printerHost.dispose();
     _printerPort.dispose();
     super.dispose();
   }
 
   Future<void> _saveAll() async {
+    if (_saving || !_allow(Capability.manageShopProfile)) return;
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final settings = ref.read(databaseProvider).settingsDao;
-    await settings.setValue('shop.name', _shopName.text.trim());
-    await settings.setValue('shop.phone', _shopPhone.text.trim());
-    await settings.setValue('shop.address', _shopAddress.text.trim());
-    await settings.setValue('receipt.footer', _footer.text.trim());
-    await settings.setValue('printer.host', _printerHost.text.trim());
-    await settings.setValue('printer.port', _printerPort.text.trim());
-    await settings.setValue('printer.width', _paperWidth);
-    await settings.setValue(
-        'printer.transport', PrinterConfig.encodeType(_transport));
-    await settings.setValue('printer.device', _device);
-    await settings.setValue('printer.deviceName', _deviceName);
-    messenger.showSnackBar(SnackBar(content: Text(l10n.saved)));
+    setState(() => _saving = true);
+    try {
+      final db = ref.read(databaseProvider);
+      await db.transaction(() async {
+        await ref
+            .read(businessSettingsStoreProvider)
+            .save(
+              BusinessSettings(
+                currency: _currency,
+                taxLabel: _taxLabel.text,
+                taxId: _taxId.text,
+              ),
+              canManage: () => ref
+                  .read(capabilitiesProvider)
+                  .contains(Capability.manageShopProfile),
+            );
+        final settings = ref.read(databaseProvider).settingsDao;
+        await settings.setValue('shop.name', _shopName.text.trim());
+        await settings.setValue('shop.phone', _shopPhone.text.trim());
+        await settings.setValue('shop.address', _shopAddress.text.trim());
+        await settings.setValue('receipt.footer', _footer.text.trim());
+        await settings.setValue('printer.host', _printerHost.text.trim());
+        await settings.setValue('printer.port', _printerPort.text.trim());
+        await settings.setValue('printer.width', _paperWidth);
+        await settings.setValue(
+          'printer.transport',
+          PrinterConfig.encodeType(_transport),
+        );
+        await settings.setValue('printer.device', _device);
+        await settings.setValue('printer.deviceName', _deviceName);
+        if (!ref
+            .read(capabilitiesProvider)
+            .contains(Capability.manageShopProfile)) {
+          throw const BusinessSettingsException(
+            BusinessSettingsError.forbidden,
+          );
+        }
+      });
+      _currencyLocked = await ref
+          .read(businessSettingsStoreProvider)
+          .currencyLocked();
+      messenger.showSnackBar(SnackBar(content: Text(l10n.saved)));
+    } on BusinessSettingsException catch (e) {
+      final message = switch (e.reason) {
+        BusinessSettingsError.forbidden => l10n.globalPermissionDenied,
+        BusinessSettingsError.currencyLocked => l10n.globalCurrencyLocked,
+        BusinessSettingsError.invalidTaxDetails => l10n.globalInvalidTaxDetails,
+      };
+      messenger.showSnackBar(SnackBar(content: Text(message)));
+    } catch (_) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.globalSettingsSaveFailed)),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  bool _allow(Capability capability) {
+    if (ref.read(capabilitiesProvider).contains(capability)) return true;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context).globalPermissionDenied),
+      ),
+    );
+    return false;
   }
 
   PrinterConfig get _currentConfig => PrinterConfig(
-        type: _transport,
-        host: _printerHost.text.trim(),
-        port: int.tryParse(_printerPort.text.trim()) ?? 9100,
-        width: int.tryParse(_paperWidth) ?? 32,
-        device: _device,
-      );
+    type: _transport,
+    host: _printerHost.text.trim(),
+    port: int.tryParse(_printerPort.text.trim()) ?? 9100,
+    width: int.tryParse(_paperWidth) ?? 32,
+    device: _device,
+  );
 
   Future<void> _testPrint() async {
     final l10n = AppLocalizations.of(context);
@@ -149,27 +228,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _chooseLogo() async {
+    if (!_allow(Capability.manageShopProfile)) return;
     if (kIsWeb) return; // Logo files are a desktop/mobile feature.
     final settings = ref.read(databaseProvider).settingsDao;
-    final picked = await openFile(acceptedTypeGroups: [
-      const XTypeGroup(
-          label: 'Image', extensions: ['png', 'jpg', 'jpeg', 'bmp']),
-    ]);
+    final picked = await openFile(
+      acceptedTypeGroups: [
+        const XTypeGroup(
+          label: 'Image',
+          extensions: ['png', 'jpg', 'jpeg', 'bmp'],
+        ),
+      ],
+    );
     if (picked == null) return;
+    if (!mounted || !_allow(Capability.manageShopProfile)) return;
     final dir = await getApplicationSupportDirectory();
     final destPath = p.join(dir.path, 'shop_logo.img');
     await picked.saveTo(destPath);
+    if (!mounted || !_allow(Capability.manageShopProfile)) return;
     await settings.setValue('shop.logoPath', destPath);
     if (mounted) setState(() => _logoPath = destPath);
   }
 
   Future<void> _removeLogo() async {
+    if (!_allow(Capability.manageShopProfile)) return;
     final settings = ref.read(databaseProvider).settingsDao;
     await settings.setValue('shop.logoPath', '');
     if (mounted) setState(() => _logoPath = null);
   }
 
   Future<void> _clearData() async {
+    if (!_allow(Capability.clearData)) return;
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final ok = await showDialog<bool>(
@@ -179,11 +267,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         content: Text(l10n.clearDataWarning),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(dctx).pop(false),
-              child: Text(l10n.cancel)),
+            onPressed: () => Navigator.of(dctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
           FilledButton(
             style: FilledButton.styleFrom(
-                backgroundColor: Theme.of(dctx).colorScheme.error),
+              backgroundColor: Theme.of(dctx).colorScheme.error,
+            ),
             onPressed: () => Navigator.of(dctx).pop(true),
             child: Text(l10n.clearData),
           ),
@@ -191,6 +281,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
     );
     if (ok != true) return;
+    if (!mounted || !_allow(Capability.clearData)) return;
     // Arm the wipe for THIS module only; its DB file is dropped on next launch.
     final module = ref.read(businessTypeProvider)!.name;
     await armWipe(module);
@@ -198,11 +289,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _backup() async {
+    if (!_allow(Capability.backupRestore)) return;
     if (kIsWeb) return; // Backup files are a desktop/mobile feature.
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final db = ref.read(databaseProvider);
-    final dir = await getDownloadsDirectory() ??
+    final dir =
+        await getDownloadsDirectory() ??
         await getApplicationDocumentsDirectory();
     final stamp = DateTime.now()
         .toIso8601String()
@@ -216,12 +309,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _restore() async {
+    if (!_allow(Capability.backupRestore)) return;
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final picked = await openFile(acceptedTypeGroups: [
-      const XTypeGroup(label: 'BechaKena backup', extensions: ['db']),
-    ]);
+    final picked = await openFile(
+      acceptedTypeGroups: [
+        const XTypeGroup(label: 'BechaKena backup', extensions: ['db']),
+      ],
+    );
     if (picked == null) return;
+    if (!mounted || !_allow(Capability.backupRestore)) return;
     // Restore into THIS module's DB only; swapped in on next launch.
     final module = ref.read(businessTypeProvider)!.name;
     await stageRestore(module, await picked.readAsBytes());
@@ -229,6 +326,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _switchModule() async {
+    if (!_allow(Capability.switchModule)) return;
     final l10n = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
@@ -237,15 +335,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         content: Text(l10n.switchModuleConfirm),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(dctx).pop(false),
-              child: Text(l10n.cancel)),
+            onPressed: () => Navigator.of(dctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
           FilledButton(
-              onPressed: () => Navigator.of(dctx).pop(true),
-              child: Text(l10n.switchModuleAction)),
+            onPressed: () => Navigator.of(dctx).pop(true),
+            child: Text(l10n.switchModuleAction),
+          ),
         ],
       ),
     );
     if (ok != true) return;
+    if (!mounted || !_allow(Capability.switchModule)) return;
     // Sign out, then clear the module → the picker shows again.
     ref.read(currentStaffProvider.notifier).logout();
     await ref.read(businessTypeProvider.notifier).clear();
@@ -259,6 +360,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (!_loaded) {
       return const Center(child: AppLoader());
     }
+    if (_loadFailed) return Center(child: Text(l10n.globalSettingsLoadFailed));
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -277,9 +379,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ButtonSegment(value: 'en', label: Text('English')),
             ],
             selected: {locale.languageCode},
-            onSelectionChanged: (selection) => ref
-                .read(localeProvider.notifier)
-                .set(Locale(selection.first)),
+            onSelectionChanged: (selection) =>
+                ref.read(localeProvider.notifier).set(Locale(selection.first)),
           ),
         ),
         ListTile(
@@ -288,17 +389,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           trailing: SegmentedButton<ThemeMode>(
             segments: [
               ButtonSegment(
-                  value: ThemeMode.system,
-                  icon: const Icon(Icons.brightness_auto),
-                  tooltip: l10n.themeSystem),
+                value: ThemeMode.system,
+                icon: const Icon(Icons.brightness_auto),
+                tooltip: l10n.themeSystem,
+              ),
               ButtonSegment(
-                  value: ThemeMode.light,
-                  icon: const Icon(Icons.light_mode),
-                  tooltip: l10n.themeLight),
+                value: ThemeMode.light,
+                icon: const Icon(Icons.light_mode),
+                tooltip: l10n.themeLight,
+              ),
               ButtonSegment(
-                  value: ThemeMode.dark,
-                  icon: const Icon(Icons.dark_mode),
-                  tooltip: l10n.themeDark),
+                value: ThemeMode.dark,
+                icon: const Icon(Icons.dark_mode),
+                tooltip: l10n.themeDark,
+              ),
             ],
             selected: {ref.watch(themeModeProvider)},
             showSelectedIcon: false,
@@ -312,115 +416,164 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ],
         if (caps.contains(Capability.manageShopProfile)) ...[
           const Divider(height: 32),
-          Text(l10n.shopSection, style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 12),
-        TextField(
+          Text(
+            l10n.shopSection,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<ShopCurrency>(
+            initialValue: _currency,
+            decoration: InputDecoration(labelText: l10n.globalCurrency),
+            items: [
+              for (final currency in ShopCurrency.values)
+                DropdownMenuItem(value: currency, child: Text(currency.code)),
+            ],
+            onChanged: _currencyLocked || _saving
+                ? null
+                : (value) {
+                    if (value != null) setState(() => _currency = value);
+                  },
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _currencyLocked
+                ? l10n.globalCurrencyLocked
+                : l10n.globalCurrencyHelp,
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _taxLabel,
+            maxLength: 32,
+            decoration: InputDecoration(labelText: l10n.globalTaxLabel),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _taxId,
+            maxLength: 80,
+            decoration: InputDecoration(labelText: l10n.globalTaxId),
+          ),
+          Text(l10n.globalTaxHelp),
+          const SizedBox(height: 12),
+          TextField(
             controller: _shopName,
-            decoration: InputDecoration(labelText: l10n.shopNameLabel)),
-        const SizedBox(height: 12),
-        TextField(
+            decoration: InputDecoration(labelText: l10n.shopNameLabel),
+          ),
+          const SizedBox(height: 12),
+          TextField(
             controller: _shopPhone,
-            decoration: InputDecoration(labelText: l10n.shopPhone)),
-        const SizedBox(height: 12),
-        TextField(
+            decoration: InputDecoration(labelText: l10n.shopPhone),
+          ),
+          const SizedBox(height: 12),
+          TextField(
             controller: _shopAddress,
-            decoration: InputDecoration(labelText: l10n.shopAddress)),
-        const SizedBox(height: 12),
-        TextField(
+            decoration: InputDecoration(labelText: l10n.shopAddress),
+          ),
+          const SizedBox(height: 12),
+          TextField(
             controller: _footer,
-            decoration: InputDecoration(labelText: l10n.receiptFooterLabel)),
-        const SizedBox(height: 16),
-        _buildLogoRow(context, l10n),
-        const Divider(height: 32),
-        Text(l10n.printerSection,
-            style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 12),
-        SegmentedButton<PrinterTransportType>(
-          segments: [
-            ButtonSegment(
+            decoration: InputDecoration(labelText: l10n.receiptFooterLabel),
+          ),
+          const SizedBox(height: 16),
+          _buildLogoRow(context, l10n),
+          const Divider(height: 32),
+          Text(
+            l10n.printerSection,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 12),
+          SegmentedButton<PrinterTransportType>(
+            segments: [
+              ButtonSegment(
                 value: PrinterTransportType.lan,
                 icon: const Icon(Icons.lan),
-                label: Text(l10n.transportLan)),
-            ButtonSegment(
+                label: Text(l10n.transportLan),
+              ),
+              ButtonSegment(
                 value: PrinterTransportType.usb,
                 icon: const Icon(Icons.usb),
-                label: Text(l10n.transportUsb)),
-            ButtonSegment(
+                label: Text(l10n.transportUsb),
+              ),
+              ButtonSegment(
                 value: PrinterTransportType.bluetooth,
                 icon: const Icon(Icons.bluetooth),
-                label: Text(l10n.transportBt)),
-          ],
-          selected: {_transport},
-          onSelectionChanged: (s) => setState(() => _transport = s.first),
-        ),
-        const SizedBox(height: 12),
-        if (_transport == PrinterTransportType.lan)
-          Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: TextField(
-                    controller: _printerHost,
-                    decoration: InputDecoration(labelText: l10n.printerHost)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                    controller: _printerPort,
-                    decoration: InputDecoration(labelText: l10n.printerPort)),
+                label: Text(l10n.transportBt),
               ),
             ],
-          )
-        else
+            selected: {_transport},
+            onSelectionChanged: (s) => setState(() => _transport = s.first),
+          ),
+          const SizedBox(height: 12),
+          if (_transport == PrinterTransportType.lan)
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: TextField(
+                    controller: _printerHost,
+                    decoration: InputDecoration(labelText: l10n.printerHost),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _printerPort,
+                    decoration: InputDecoration(labelText: l10n.printerPort),
+                  ),
+                ),
+              ],
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _deviceName.isEmpty ? l10n.noDeviceSelected : _deviceName,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.search),
+                  label: Text(l10n.selectDevice),
+                  onPressed: _selectDevice,
+                ),
+              ],
+            ),
+          const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(
-                child: Text(
-                  _deviceName.isEmpty ? l10n.noDeviceSelected : _deviceName,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+              SegmentedButton<String>(
+                segments: const [
+                  ButtonSegment(value: '32', label: Text('58mm')),
+                  ButtonSegment(value: '48', label: Text('80mm')),
+                ],
+                selected: {_paperWidth},
+                onSelectionChanged: (s) =>
+                    setState(() => _paperWidth = s.first),
               ),
+              const SizedBox(width: 12),
               OutlinedButton.icon(
-                icon: const Icon(Icons.search),
-                label: Text(l10n.selectDevice),
-                onPressed: _selectDevice,
+                icon: const Icon(Icons.print),
+                label: Text(l10n.testPrint),
+                onPressed: _testPrint,
               ),
             ],
           ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            SegmentedButton<String>(
-              segments: const [
-                ButtonSegment(value: '32', label: Text('58mm')),
-                ButtonSegment(value: '48', label: Text('80mm')),
-              ],
-              selected: {_paperWidth},
-              onSelectionChanged: (s) => setState(() => _paperWidth = s.first),
-            ),
-            const SizedBox(width: 12),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.print),
-              label: Text(l10n.testPrint),
-              onPressed: _testPrint,
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
           FilledButton.icon(
             icon: const Icon(Icons.save),
             label: Text(l10n.save),
-            onPressed: _saveAll,
+            onPressed: _saving ? null : _saveAll,
           ),
         ],
         if ((caps.contains(Capability.backupRestore) ||
                 caps.contains(Capability.manageProducts) ||
                 caps.contains(Capability.clearData)) &&
-            !(kIsWeb &&
-                !caps.contains(Capability.manageProducts))) ...[
+            !(kIsWeb && !caps.contains(Capability.manageProducts))) ...[
           const Divider(height: 32),
-          Text(l10n.backupSection,
-              style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            l10n.backupSection,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 12),
           Wrap(
             spacing: 12,
@@ -443,21 +596,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   icon: const Icon(Icons.auto_awesome),
                   label: Text(l10n.loadDemo),
                   onPressed: () async {
+                    if (!_allow(Capability.manageProducts)) return;
                     final messenger = ScaffoldMessenger.of(context);
-                    final loaded = await seedDemoData(ref.read(databaseProvider),
-                        businessType: ref.read(catalogScopeProvider));
-                    messenger.showSnackBar(SnackBar(
-                        content:
-                            Text(loaded ? l10n.demoLoaded : l10n.demoSkipped)));
+                    final loaded = await seedDemoData(
+                      ref.read(databaseProvider),
+                      businessType: ref.read(catalogScopeProvider),
+                    );
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          loaded ? l10n.demoLoaded : l10n.demoSkipped,
+                        ),
+                      ),
+                    );
                   },
                 ),
               if (!kIsWeb && caps.contains(Capability.clearData))
                 OutlinedButton.icon(
-                  icon: Icon(Icons.delete_forever,
-                      color: Theme.of(context).colorScheme.error),
-                  label: Text(l10n.clearData,
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.error)),
+                  icon: Icon(
+                    Icons.delete_forever,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  label: Text(
+                    l10n.clearData,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
                   onPressed: _clearData,
                 ),
             ],
@@ -472,13 +637,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildBranchSection(BuildContext context, AppLocalizations l10n) {
     final branches = ref.watch(branchesProvider).value ?? const <Shop>[];
     final current = ref.watch(currentBranchProvider);
-    final value =
-        (current != null && branches.any((b) => b.id == current)) ? current : null;
+    final value = (current != null && branches.any((b) => b.id == current))
+        ? current
+        : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(l10n.branchSection,
-            style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          l10n.branchSection,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         ListTile(
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.store_mall_directory),
@@ -491,6 +659,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 DropdownMenuItem(value: b.id, child: Text(b.name)),
             ],
             onChanged: (id) {
+              if (!_allow(Capability.manageBranches)) return;
               if (id != null) {
                 ref.read(currentBranchProvider.notifier).set(id);
               }
@@ -510,6 +679,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _addBranch() async {
+    if (!_allow(Capability.manageBranches)) return;
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final controller = TextEditingController();
@@ -525,8 +695,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(dctx).pop(),
-              child: Text(l10n.cancel)),
+            onPressed: () => Navigator.of(dctx).pop(),
+            child: Text(l10n.cancel),
+          ),
           FilledButton(
             onPressed: () => Navigator.of(dctx).pop(controller.text.trim()),
             child: Text(l10n.save),
@@ -536,6 +707,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
     controller.dispose();
     if (name == null || name.isEmpty) return;
+    if (!mounted || !_allow(Capability.manageBranches)) return;
     final db = ref.read(databaseProvider);
     await db.into(db.shops).insert(ShopsCompanion.insert(name: name));
     messenger.showSnackBar(SnackBar(content: Text(l10n.branchAdded)));
@@ -554,8 +726,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       children: [
         Row(
           children: [
-            Text(l10n.staffSection,
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              l10n.staffSection,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const Spacer(),
             if (canAddStaff)
               TextButton.icon(
@@ -584,17 +758,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           content: Text(l10n.removeStaff(s.name)),
                           actions: [
                             TextButton(
-                                onPressed: () =>
-                                    Navigator.of(dctx).pop(false),
-                                child: Text(l10n.cancel)),
+                              onPressed: () => Navigator.of(dctx).pop(false),
+                              child: Text(l10n.cancel),
+                            ),
                             FilledButton(
-                                onPressed: () =>
-                                    Navigator.of(dctx).pop(true),
-                                child: Text(l10n.remove)),
+                              onPressed: () => Navigator.of(dctx).pop(true),
+                              child: Text(l10n.remove),
+                            ),
                           ],
                         ),
                       );
                       if (ok ?? false) {
+                        if (!mounted || !_allow(Capability.manageStaff)) return;
                         await ref
                             .read(databaseProvider)
                             .staffDao
@@ -609,8 +784,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           children: [
             if (me != null)
               Expanded(
-                child: Text(l10n.loggedInAs(me.name),
-                    style: Theme.of(context).textTheme.bodySmall),
+                child: Text(
+                  l10n.loggedInAs(me.name),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ),
             if (caps.contains(Capability.switchModule)) ...[
               OutlinedButton.icon(
@@ -623,8 +800,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             OutlinedButton.icon(
               icon: const Icon(Icons.logout),
               label: Text(l10n.logout),
-              onPressed: () =>
-                  ref.read(currentStaffProvider.notifier).logout(),
+              onPressed: () => ref.read(currentStaffProvider.notifier).logout(),
             ),
           ],
         ),
@@ -633,9 +809,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildLogoRow(BuildContext context, AppLocalizations l10n) {
-    final hasLogo = _logoPath != null &&
-        _logoPath!.isNotEmpty &&
-        fileExists(_logoPath!);
+    final hasLogo =
+        _logoPath != null && _logoPath!.isNotEmpty && fileExists(_logoPath!);
     return Row(
       children: [
         Container(
@@ -650,15 +825,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ? ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   // Key on the path so a re-picked logo repaints.
-                  child: fileImage(_logoPath!,
-                      key: ValueKey(_logoPath), fit: BoxFit.contain),
+                  child: fileImage(
+                    _logoPath!,
+                    key: ValueKey(_logoPath),
+                    fit: BoxFit.contain,
+                  ),
                 )
               : const Icon(Icons.image_outlined),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(l10n.shopLogoHint,
-              style: Theme.of(context).textTheme.bodySmall),
+          child: Text(
+            l10n.shopLogoHint,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         ),
         const SizedBox(width: 8),
         if (!kIsWeb)
@@ -678,10 +858,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   String _roleLabel(AppLocalizations l10n, StaffRole role) => switch (role) {
-        StaffRole.owner => l10n.roleOwner,
-        StaffRole.manager => l10n.roleManager,
-        StaffRole.cashier => l10n.roleCashier,
-      };
+    StaffRole.owner => l10n.roleOwner,
+    StaffRole.manager => l10n.roleManager,
+    StaffRole.cashier => l10n.roleCashier,
+  };
 }
 
 class _AddStaffDialog extends ConsumerStatefulWidget {
@@ -709,8 +889,9 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
     final l10n = AppLocalizations.of(context);
     // Only full staff managers (owners) can grant the manager role; managers
     // may add cashiers only.
-    final canAddManager =
-        ref.watch(capabilitiesProvider).contains(Capability.manageStaff);
+    final canAddManager = ref
+        .watch(capabilitiesProvider)
+        .contains(Capability.manageStaff);
     return AlertDialog(
       title: Text(l10n.addStaff),
       content: Form(
@@ -724,9 +905,8 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
                 controller: _name,
                 autofocus: true,
                 decoration: InputDecoration(labelText: l10n.staffName),
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? l10n.requiredField
-                    : null,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? l10n.requiredField : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -745,10 +925,13 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
                 items: [
                   if (canAddManager)
                     DropdownMenuItem(
-                        value: StaffRole.manager,
-                        child: Text(l10n.roleManager)),
+                      value: StaffRole.manager,
+                      child: Text(l10n.roleManager),
+                    ),
                   DropdownMenuItem(
-                      value: StaffRole.cashier, child: Text(l10n.roleCashier)),
+                    value: StaffRole.cashier,
+                    child: Text(l10n.roleCashier),
+                  ),
                 ],
                 onChanged: (v) => setState(() => _role = v ?? _role),
               ),
@@ -764,8 +947,20 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
         FilledButton(
           onPressed: () async {
             if (!_formKey.currentState!.validate()) return;
+            final requiredCapability = _role == StaffRole.cashier
+                ? Capability.addCashier
+                : Capability.manageStaff;
+            if (!ref.read(capabilitiesProvider).contains(requiredCapability)) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.globalPermissionDenied)),
+              );
+              return;
+            }
             final navigator = Navigator.of(context);
-            await ref.read(databaseProvider).staffDao.createStaff(
+            await ref
+                .read(databaseProvider)
+                .staffDao
+                .createStaff(
                   name: _name.text.trim(),
                   pin: _pin.text.trim(),
                   role: _role,

@@ -1,3 +1,5 @@
+import '../../settings/data/business_settings.dart';
+import '../../settings/ui/business_settings_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,9 +12,19 @@ import '../../../core/qty.dart';
 import '../../../core/printing/print_service.dart';
 import '../../../core/printing/receipt.dart';
 import '../../../l10n/gen/app_localizations.dart';
+import '../../auth/logic/access.dart';
 import '../../auth/logic/permissions.dart';
 import '../../auth/logic/session.dart';
 import '../../pos/ui/receipt_dialog.dart';
+
+/// Sales readable under the current branch/role scope — staff see their
+/// outlet's history; owners see every branch.
+final _recentSalesProvider = StreamProvider<List<Sale>>(
+  (ref) => ref
+      .watch(databaseProvider)
+      .salesDao
+      .watchRecent(branchId: ref.watch(readScopeBranchProvider)),
+);
 
 /// Recent sales with reprint and the return/refund flow (the correction path
 /// for immutable finalized sales).
@@ -21,9 +33,11 @@ class HistoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).languageCode;
-    final sales = ref.watch(recentSalesProvider);
+    final sales = ref.watch(_recentSalesProvider);
 
     return sales.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -39,10 +53,17 @@ class HistoryScreen extends ConsumerWidget {
                   leading: const Icon(Icons.receipt_long),
                   title: Text(s.invoiceNo),
                   subtitle: Text(
-                      '${s.createdAt.toLocal().toString().substring(0, 16)}'
-                      '${s.due > Money.zero ? ' · ${l10n.dueLabel} ${formatTaka(s.due, locale: locale)}' : ''}'),
-                  trailing: Text(formatTaka(s.total, locale: locale),
-                      style: Theme.of(context).textTheme.titleMedium),
+                    '${s.createdAt.toLocal().toString().substring(0, 16)}'
+                    '${s.due > Money.zero ? ' · ${l10n.dueLabel} ${formatTaka(s.due, locale: locale, currency: ref.read(shopCurrencyProvider))}' : ''}',
+                  ),
+                  trailing: Text(
+                    formatTaka(
+                      s.total,
+                      locale: locale,
+                      currency: ref.read(shopCurrencyProvider),
+                    ),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   onTap: () => showDialog<void>(
                     context: context,
                     builder: (_) => _SaleDetailDialog(sale: s),
@@ -61,8 +82,25 @@ class _SaleDetailDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).languageCode;
+    // Ownership guard: the dialog re-checks the record's branch against the
+    // session's read scope, so a sale id from outside the scope can never
+    // render its details.
+    if (!canViewBranch(ref.watch(readScopeBranchProvider), sale.branchId)) {
+      return AlertDialog(
+        title: Text(l10n.saleDetail(sale.invoiceNo)),
+        content: Text(l10n.accessRestricted),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.close),
+          ),
+        ],
+      );
+    }
     final itemsAsync = ref.watch(_saleItemsProvider(sale.id));
 
     return AlertDialog(
@@ -71,8 +109,9 @@ class _SaleDetailDialog extends ConsumerWidget {
         width: 420,
         child: itemsAsync.when(
           loading: () => const Padding(
-              padding: EdgeInsets.all(24),
-              child: Center(child: CircularProgressIndicator())),
+            padding: EdgeInsets.all(24),
+            child: Center(child: CircularProgressIndicator()),
+          ),
           error: (e, _) => Text('$e'),
           data: (items) => Column(
             mainAxisSize: MainAxisSize.min,
@@ -82,18 +121,32 @@ class _SaleDetailDialog extends ConsumerWidget {
                   dense: true,
                   title: Text(it.nameSnapshot),
                   subtitle: Text(
-                      '${it.qty.display} × ${formatTaka(it.unitPrice, locale: locale)}'),
-                  trailing:
-                      Text(formatTaka(it.lineTotal, locale: locale)),
+                    '${it.qty.display} × ${formatTaka(it.unitPrice, locale: locale, currency: ref.read(shopCurrencyProvider))}',
+                  ),
+                  trailing: Text(
+                    formatTaka(
+                      it.lineTotal,
+                      locale: locale,
+                      currency: ref.read(shopCurrencyProvider),
+                    ),
+                  ),
                 ),
               const Divider(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(l10n.total,
-                      style: Theme.of(context).textTheme.titleMedium),
-                  Text(formatTaka(sale.total, locale: locale),
-                      style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    l10n.total,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  Text(
+                    formatTaka(
+                      sale.total,
+                      locale: locale,
+                      currency: ref.read(shopCurrencyProvider),
+                    ),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ],
               ),
             ],
@@ -134,14 +187,17 @@ class _SaleDetailDialog extends ConsumerWidget {
     final db = ref.read(databaseProvider);
     final settings = db.settingsDao;
     final items = await db.salesDao.itemsOf(sale.id);
+    final business = await BusinessSettingsStore(db).load();
     final receipt = receiptFromSale(
+      business: business,
       sale: sale,
       items: items,
       shopName: await settings.getValue('shop.name') ?? Brand.name,
       address: await settings.getValue('shop.address'),
       phone: await settings.getValue('shop.phone'),
       footer:
-          await settings.getValue('receipt.footer') ?? 'Powered by ${Brand.name}',
+          await settings.getValue('receipt.footer') ??
+          'Powered by ${Brand.name}',
     );
     final width =
         int.tryParse(await settings.getValue('printer.width') ?? '') ?? 32;
@@ -156,9 +212,9 @@ class _SaleDetailDialog extends ConsumerWidget {
 }
 
 /// Per-sale items, fetched once for the detail dialog.
-final _saleItemsProvider =
-    FutureProvider.family<List<SaleItem>, String>((ref, saleId) =>
-        ref.watch(databaseProvider).salesDao.itemsOf(saleId));
+final _saleItemsProvider = FutureProvider.family<List<SaleItem>, String>(
+  (ref, saleId) => ref.watch(databaseProvider).salesDao.itemsOf(saleId),
+);
 
 class _ReturnDialog extends ConsumerStatefulWidget {
   const _ReturnDialog({required this.sale, required this.items});
@@ -172,8 +228,7 @@ class _ReturnDialog extends ConsumerStatefulWidget {
 
 class _ReturnDialogState extends ConsumerState<_ReturnDialog> {
   // Return quantity per item index, in milli-units.
-  late final List<int> _returnMilli =
-      List<int>.filled(widget.items.length, 0);
+  late final List<int> _returnMilli = List<int>.filled(widget.items.length, 0);
 
   /// Proportional refund for a partial return of a line.
   Money _refundFor(SaleItem item, int returnMilli) {
@@ -191,6 +246,8 @@ class _ReturnDialogState extends ConsumerState<_ReturnDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).languageCode;
     final canConfirm = _returnMilli.any((m) => m > 0);
@@ -209,10 +266,18 @@ class _ReturnDialogState extends ConsumerState<_ReturnDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(l10n.refundTotal,
-                      style: Theme.of(context).textTheme.titleMedium),
-                  Text(formatTaka(_refundTotal, locale: locale),
-                      style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    l10n.refundTotal,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  Text(
+                    formatTaka(
+                      _refundTotal,
+                      locale: locale,
+                      currency: ref.read(shopCurrencyProvider),
+                    ),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ],
               ),
             ],
@@ -245,8 +310,10 @@ class _ReturnDialogState extends ConsumerState<_ReturnDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(item.nameSnapshot),
-                Text('${item.qty.display} × ${formatTaka(item.unitPrice, locale: locale)}',
-                    style: Theme.of(context).textTheme.bodySmall),
+                Text(
+                  '${item.qty.display} × ${formatTaka(item.unitPrice, locale: locale, currency: ref.read(shopCurrencyProvider))}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ],
             ),
           ),
@@ -254,16 +321,20 @@ class _ReturnDialogState extends ConsumerState<_ReturnDialog> {
             icon: const Icon(Icons.remove_circle_outline),
             onPressed: current <= 0
                 ? null
-                : () => setState(() =>
-                    _returnMilli[i] = (current - 1000).clamp(0, soldMilli)),
+                : () => setState(
+                    () =>
+                        _returnMilli[i] = (current - 1000).clamp(0, soldMilli),
+                  ),
           ),
           Text(Qty(current).display),
           IconButton(
             icon: const Icon(Icons.add_circle_outline),
             onPressed: current >= soldMilli
                 ? null
-                : () => setState(() =>
-                    _returnMilli[i] = (current + 1000).clamp(0, soldMilli)),
+                : () => setState(
+                    () =>
+                        _returnMilli[i] = (current + 1000).clamp(0, soldMilli),
+                  ),
           ),
         ],
       ),
@@ -271,6 +342,13 @@ class _ReturnDialogState extends ConsumerState<_ReturnDialog> {
   }
 
   Future<void> _confirm() async {
+    if (!ref.read(canProvider(Capability.processReturns)) ||
+        !canViewBranch(
+          ref.read(readScopeBranchProvider),
+          widget.sale.branchId,
+        )) {
+      return;
+    }
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).languageCode;
     final messenger = ScaffoldMessenger.of(context);
@@ -282,12 +360,14 @@ class _ReturnDialogState extends ConsumerState<_ReturnDialog> {
       final milli = _returnMilli[i];
       if (milli <= 0) continue;
       final item = widget.items[i];
-      drafts.add(ReturnDraftItem(
-        productId: item.productId,
-        nameSnapshot: item.nameSnapshot,
-        qty: Qty(milli),
-        refundAmount: _refundFor(item, milli),
-      ));
+      drafts.add(
+        ReturnDraftItem(
+          productId: item.productId,
+          nameSnapshot: item.nameSnapshot,
+          qty: Qty(milli),
+          refundAmount: _refundFor(item, milli),
+        ),
+      );
     }
     final refund = _refundTotal;
     await db.returnsDao.createReturn(
@@ -297,7 +377,18 @@ class _ReturnDialogState extends ConsumerState<_ReturnDialog> {
     );
     if (!mounted) return;
     navigator.pop();
-    messenger.showSnackBar(SnackBar(
-        content: Text(l10n.returnDone(formatTaka(refund, locale: locale)))));
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          l10n.returnDone(
+            formatTaka(
+              refund,
+              locale: locale,
+              currency: ref.read(shopCurrencyProvider),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

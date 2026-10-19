@@ -1,8 +1,29 @@
 import 'package:bechakena/core/money.dart';
+import 'package:bechakena/core/currency.dart';
 import 'package:bechakena/core/sms/templates.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('international SMS amounts use the saved accounting currency', () {
+    final reminder = renderDueReminderSms(
+      shopName: 'Shop',
+      customerName: 'A',
+      due: const Money(123456789),
+      currency: ShopCurrency.usd,
+    );
+    expect(reminder, contains('USD 1,234,567.89'));
+    expect(reminder, isNot(contains('Tk')));
+    final receipt = renderReceiptSms(
+      shopName: 'Shop',
+      invoiceNo: '1',
+      total: const Money(1250),
+      due: const Money(250),
+      currency: ShopCurrency.aed,
+      locale: 'bn',
+    );
+    expect(receipt, contains('AED ১২.৫০'));
+    expect(receipt, contains('AED ২.৫০'));
+  });
   group('renderDueReminderSms', () {
     test('en: names the customer, shop and amount', () {
       final sms = renderDueReminderSms(

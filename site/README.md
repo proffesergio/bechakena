@@ -7,6 +7,7 @@ npm ci
 npm run dev
 npm run build
 npm run typecheck
+npm test
 ```
 
 Run these commands from `site/`. `npm run build` exports the site to `out/`. Serve that directory as static files; `next start` does not serve a static export. For local development, the landing page needs actual product captures in `public/media/`: `pos-en.png`, `pos-bn.png`, `restaurant.png`, `reports.png`, `receipt.png`, and `showcase.webm`. Capture the real app with sample records. Do not substitute fabricated shop results.
@@ -30,4 +31,4 @@ The generated Vercel Build Output API configuration redirects `/demo` to `/demo/
 
 The `Showcase package and deployment` GitHub Actions workflow builds and uploads the validated package on relevant pushes to `main`. It requires the captures above to be committed. A manual run defaults to packaging only; choose `preview` or `production` to deploy that package with Vercel CLI. Configure repository secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` for the intended Vercel project before deploying. The workflow does not create or configure the Vercel project. To deploy an already packaged local build, run `vercel deploy --prebuilt` from the repository root with the intended project linked (add `--prod` for production).
 
-No analytics, contact backend, sign-in or payment collection is installed. Contact links open WhatsApp or email. The locale and formatting controls run in the visitor’s browser. Currency previews illustrate formatting and do not imply additional POS currencies or country integrations.
+No analytics, contact backend, sign-in or payment collection is installed. Contact links open WhatsApp or email. The locale, sample receipt and replenishment controls run in the visitor’s browser without writing POS settings. The receipt preview uses two-decimal currency examples and integer minor-unit tax calculations; it does not convert money or certify a local tax setup. The replenishment scenario illustrates 28-day demand with configurable lead and cover days, clearly separate from live inventory. The actual POS supports English and Bengali; cloud backup and sync remain roadmap items. Sample calculations have focused tests (Node.js 22.18+ or 24 recommended).

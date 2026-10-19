@@ -4,7 +4,8 @@ import '../platform/files.dart';
 import 'escpos.dart';
 import 'logo_raster.dart';
 import 'printer_transport.dart';
-import 'receipt.dart';
+import 'receipt_data.dart';
+import '../../features/settings/data/business_settings.dart';
 import 'text_raster.dart';
 
 /// Sends raw ESC/POS bytes to a LAN thermal printer (RAW/JetDirect, port 9100).
@@ -28,7 +29,8 @@ Future<List<int>> composeReceiptBytes({
     final logoBytes = await readLocalFileBytes(logoPath);
     if (logoBytes != null) {
       try {
-        raster = tryEscPosRasterFromImage(logoBytes, maxWidthDots: widthDots);
+        final bitmap = tryRasterFromImage(logoBytes, maxWidthDots: widthDots);
+        raster = bitmap == null ? null : escPosRasterBytes(bitmap);
       } catch (_) {
         raster = null;
       }
@@ -69,9 +71,13 @@ ReceiptData receiptFromSale({
   String? phone,
   String? footer,
   Money change = Money.zero,
+  BusinessSettings business = const BusinessSettings(),
 }) {
   return ReceiptData(
     shopName: shopName,
+    currency: business.currency,
+    taxLabel: business.taxLabel,
+    taxId: business.taxId,
     address: address,
     phone: phone,
     invoiceNo: sale.invoiceNo,

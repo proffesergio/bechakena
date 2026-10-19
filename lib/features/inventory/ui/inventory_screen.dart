@@ -6,6 +6,7 @@ import '../../../app/providers.dart';
 import '../../../core/db/database.dart';
 import '../../../core/format.dart';
 import '../../../l10n/gen/app_localizations.dart';
+import 'widgets/replenishment_panel.dart';
 
 /// Inventory alerts: products at/below their low-stock level, and purchase
 /// batches expiring within 14 days (already-expired included).
@@ -26,10 +27,13 @@ class InventoryScreen extends ConsumerWidget {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          const ReplenishmentPanel(),
+          const SizedBox(height: 24),
           _SectionHeader(
-              icon: Icons.production_quantity_limits,
-              title: l10n.lowStockTitle,
-              color: Theme.of(context).colorScheme.error),
+            icon: Icons.production_quantity_limits,
+            title: l10n.lowStockTitle,
+            color: Theme.of(context).colorScheme.error,
+          ),
           const SizedBox(height: 8),
           low.when(
             loading: () => const LinearProgressIndicator(),
@@ -42,9 +46,10 @@ class InventoryScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
           _SectionHeader(
-              icon: Icons.event_busy,
-              title: l10n.expiringSoonTitle,
-              color: Theme.of(context).colorScheme.tertiary),
+            icon: Icons.event_busy,
+            title: l10n.expiringSoonTitle,
+            color: Theme.of(context).colorScheme.tertiary,
+          ),
           const SizedBox(height: 8),
           expiring.when(
             loading: () => const LinearProgressIndicator(),
@@ -62,8 +67,11 @@ class InventoryScreen extends ConsumerWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader(
-      {required this.icon, required this.title, required this.color});
+  const _SectionHeader({
+    required this.icon,
+    required this.title,
+    required this.color,
+  });
 
   final IconData icon;
   final String title;
@@ -87,11 +95,11 @@ class _EmptyLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-        child: ListTile(
-          leading: const Icon(Icons.check_circle_outline),
-          title: Text(text),
-        ),
-      );
+    child: ListTile(
+      leading: const Icon(Icons.check_circle_outline),
+      title: Text(text),
+    ),
+  );
 }
 
 class _LowStockTile extends StatelessWidget {
@@ -139,10 +147,13 @@ class _ExpiringTile extends StatelessWidget {
         title: Text(batch.product.name),
         subtitle: Text(batch.qty.display),
         trailing: Chip(
-          label: Text(expired
-              ? l10n.expired
-              : l10n.expiresOn(
-                  locale == 'bn' ? toBanglaDigits(dateStr) : dateStr)),
+          label: Text(
+            expired
+                ? l10n.expired
+                : l10n.expiresOn(
+                    locale == 'bn' ? toBanglaDigits(dateStr) : dateStr,
+                  ),
+          ),
           backgroundColor: expired
               ? Theme.of(context).colorScheme.errorContainer
               : Theme.of(context).colorScheme.tertiaryContainer,

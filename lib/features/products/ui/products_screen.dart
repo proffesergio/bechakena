@@ -1,3 +1,4 @@
+import '../../settings/ui/business_settings_status.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -56,6 +57,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final products = ref.watch(productsProvider);
     final lowStockIds = _lowStockOnly
@@ -223,6 +226,8 @@ class _FilterBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final categories = ref.watch(categoriesProvider).value ?? const <Category>[];
     return Padding(
@@ -285,6 +290,8 @@ class _ProductTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).languageCode;
     final stock = ref.watch(stockProvider(product.id));
@@ -296,7 +303,7 @@ class _ProductTile extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            formatTaka(product.salePrice, locale: locale),
+            formatTaka(product.salePrice, locale: locale, currency: ref.read(shopCurrencyProvider)),
             style: Theme.of(context).textTheme.titleMedium,
           ),
           PopupMenuButton<String>(
@@ -441,6 +448,8 @@ class _AdjustStockDialogState extends ConsumerState<AdjustStockDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final stock = ref.watch(stockProvider(widget.product.id));
     final delta = _deltaQty;
@@ -569,6 +578,8 @@ class _ProductEditDialogState extends ConsumerState<ProductEditDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final categories = ref.watch(categoriesProvider).value ?? const <Category>[];
     return AlertDialog(
@@ -670,7 +681,7 @@ class _ProductEditDialogState extends ConsumerState<ProductEditDialog> {
           final text = v?.trim() ?? '';
           if (text.isEmpty) return required ? l10n.requiredField : null;
           try {
-            Money.parse(text);
+            Money.parse(text, currency: ref.read(shopCurrencyProvider));
             return null;
           } on FormatException {
             return l10n.invalidAmount;
@@ -762,7 +773,7 @@ class _ProductEditDialogState extends ConsumerState<ProductEditDialog> {
     }
 
     final cost =
-        _cost.text.trim().isEmpty ? Money.zero : Money.parse(_cost.text);
+        _cost.text.trim().isEmpty ? Money.zero : Money.parse(_cost.text, currency: ref.read(shopCurrencyProvider));
     final low = _lowStock.text.trim().isEmpty
         ? Qty.zero
         : Qty.parse(_lowStock.text);
@@ -772,7 +783,7 @@ class _ProductEditDialogState extends ConsumerState<ProductEditDialog> {
       final updated = widget.product!.copyWith(
         name: _name.text.trim(),
         nameBn: Value(clean(_nameBn)),
-        salePrice: Money.parse(_price.text),
+        salePrice: Money.parse(_price.text, currency: ref.read(shopCurrencyProvider)),
         costPrice: cost,
         barcode: Value(clean(_barcode)),
         sku: Value(clean(_sku)),
@@ -787,7 +798,7 @@ class _ProductEditDialogState extends ConsumerState<ProductEditDialog> {
           await db.productsDao.insertProduct(ProductsCompanion.insert(
         name: _name.text.trim(),
         nameBn: Value(clean(_nameBn)),
-        salePrice: Money.parse(_price.text),
+        salePrice: Money.parse(_price.text, currency: ref.read(shopCurrencyProvider)),
         costPrice: Value(cost),
         barcode: Value(clean(_barcode)),
         sku: Value(clean(_sku)),

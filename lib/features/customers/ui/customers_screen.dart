@@ -1,3 +1,4 @@
+import '../../settings/ui/business_settings_status.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,14 +10,18 @@ import '../../../core/format.dart';
 import '../../../core/money.dart';
 import '../../../core/sms/templates.dart';
 import '../../../l10n/gen/app_localizations.dart';
+import '../../auth/logic/access.dart';
+import '../../auth/logic/permissions.dart';
 
 class CustomersScreen extends ConsumerWidget {
   const CustomersScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
-    final customers = ref.watch(customersProvider);
+    final customers = ref.watch(scopedCustomersProvider);
 
     return Scaffold(
       body: customers.when(
@@ -49,12 +54,15 @@ class _CustomerTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).languageCode;
     final due = ref.watch(customerDueProvider(customer.id));
     final dueMoney = due.value ?? Money.zero;
 
-    final canRemind = dueMoney > Money.zero && (customer.phone?.isNotEmpty ?? false);
+    final canRemind =
+        dueMoney > Money.zero && (customer.phone?.isNotEmpty ?? false);
     return ListTile(
       title: Text(customer.name),
       subtitle: customer.phone == null ? null : Text(customer.phone!),
@@ -67,23 +75,26 @@ class _CustomerTile extends ConsumerWidget {
               icon: const Icon(Icons.sms),
               onPressed: () => showDialog<void>(
                 context: context,
-                builder: (_) => DueReminderDialog(
-                    customer: customer, due: dueMoney),
+                builder: (_) =>
+                    DueReminderDialog(customer: customer, due: dueMoney),
               ),
             ),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(l10n.dueLabel,
-                  style: Theme.of(context).textTheme.bodySmall),
+              Text(l10n.dueLabel, style: Theme.of(context).textTheme.bodySmall),
               Text(
-                formatTaka(dueMoney, locale: locale),
+                formatTaka(
+                  dueMoney,
+                  locale: locale,
+                  currency: ref.read(shopCurrencyProvider),
+                ),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: dueMoney > Money.zero
-                          ? Theme.of(context).colorScheme.error
-                          : null,
-                    ),
+                  color: dueMoney > Money.zero
+                      ? Theme.of(context).colorScheme.error
+                      : null,
+                ),
               ),
             ],
           ),
@@ -91,10 +102,12 @@ class _CustomerTile extends ConsumerWidget {
       ),
       onTap: dueMoney > Money.zero
           ? () => showDialog<void>(
-                context: context,
-                builder: (_) => ReceivePaymentDialog(
-                    customerId: customer.id, outstanding: dueMoney),
-              )
+              context: context,
+              builder: (_) => ReceivePaymentDialog(
+                customerId: customer.id,
+                outstanding: dueMoney,
+              ),
+            )
           : null,
     );
   }
@@ -103,20 +116,30 @@ class _CustomerTile extends ConsumerWidget {
 /// Previews the due-reminder SMS and queues it in the local outbox. Actual
 /// delivery happens via the Cloud Plan dispatcher (offline-first: additive).
 class DueReminderDialog extends ConsumerWidget {
-  const DueReminderDialog({super.key, required this.customer, required this.due});
+  const DueReminderDialog({
+    super.key,
+    required this.customer,
+    required this.due,
+  });
 
   final Customer customer;
   final Money due;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).languageCode;
+    if (!ref.watch(canManageCustomerProvider(customer.id))) {
+      return AlertDialog(content: Text(l10n.globalPermissionDenied));
+    }
     final message = renderDueReminderSms(
       shopName: Brand.name,
       customerName: customer.name,
       due: due,
       locale: locale,
+      currency: ref.read(shopCurrencyProvider),
     );
 
     return AlertDialog(
@@ -127,8 +150,10 @@ class DueReminderDialog extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(customer.phone ?? '',
-                style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              customer.phone ?? '',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(12),
@@ -150,11 +175,20 @@ class DueReminderDialog extends ConsumerWidget {
           icon: const Icon(Icons.sms),
           label: Text(l10n.queueSms),
           onPressed: () async {
+            if (!ref.read(canManageCustomerProvider(customer.id))) return;
             final messenger = ScaffoldMessenger.of(context);
             final navigator = Navigator.of(context);
-            final shopName =
-                await ref.read(databaseProvider).settingsDao.getValue('shop.name');
-            await ref.read(databaseProvider).smsDao.enqueue(
+            final shopName = await ref
+                .read(databaseProvider)
+                .settingsDao
+                .getValue('shop.name');
+            if (!context.mounted ||
+                !ref.read(canManageCustomerProvider(customer.id)))
+              return;
+            await ref
+                .read(databaseProvider)
+                .smsDao
+                .enqueue(
                   phone: customer.phone!,
                   kind: SmsKind.dueReminder,
                   body: renderDueReminderSms(
@@ -162,6 +196,7 @@ class DueReminderDialog extends ConsumerWidget {
                     customerName: customer.name,
                     due: due,
                     locale: locale,
+                    currency: ref.read(shopCurrencyProvider),
                   ),
                   customerId: Value(customer.id),
                 );
@@ -195,6 +230,8 @@ class _AddCustomerDialogState extends ConsumerState<AddCustomerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     return AlertDialog(
       title: Text(l10n.addCustomer),
@@ -229,16 +266,19 @@ class _AddCustomerDialogState extends ConsumerState<AddCustomerDialog> {
         ),
         FilledButton(
           onPressed: () async {
+            if (!ref.read(canProvider(Capability.manageCustomers))) return;
             if (!_formKey.currentState!.validate()) return;
             final navigator = Navigator.of(context);
             final phone = _phone.text.trim();
             await ref
                 .read(databaseProvider)
                 .customersDao
-                .insertCustomer(CustomersCompanion.insert(
-                  name: _name.text.trim(),
-                  phone: Value(phone.isEmpty ? null : phone),
-                ));
+                .insertCustomer(
+                  CustomersCompanion.insert(
+                    name: _name.text.trim(),
+                    phone: Value(phone.isEmpty ? null : phone),
+                  ),
+                );
             if (mounted) navigator.pop();
           },
           child: Text(l10n.save),
@@ -249,8 +289,11 @@ class _AddCustomerDialogState extends ConsumerState<AddCustomerDialog> {
 }
 
 class ReceivePaymentDialog extends ConsumerStatefulWidget {
-  const ReceivePaymentDialog(
-      {super.key, required this.customerId, required this.outstanding});
+  const ReceivePaymentDialog({
+    super.key,
+    required this.customerId,
+    required this.outstanding,
+  });
 
   final String customerId;
   final Money outstanding;
@@ -261,8 +304,9 @@ class ReceivePaymentDialog extends ConsumerStatefulWidget {
 }
 
 class _ReceivePaymentDialogState extends ConsumerState<ReceivePaymentDialog> {
-  late final TextEditingController _amount =
-      TextEditingController(text: widget.outstanding.asDecimalString);
+  late final TextEditingController _amount = TextEditingController(
+    text: widget.outstanding.asDecimalString,
+  );
 
   @override
   void dispose() {
@@ -272,7 +316,10 @@ class _ReceivePaymentDialogState extends ConsumerState<ReceivePaymentDialog> {
 
   Money? get _amountMoney {
     try {
-      final m = Money.parse(_amount.text);
+      final m = Money.parse(
+        _amount.text,
+        currency: ref.read(shopCurrencyProvider),
+      );
       return (m.isZero || m.isNegative) ? null : m;
     } on FormatException {
       return null;
@@ -281,7 +328,12 @@ class _ReceivePaymentDialogState extends ConsumerState<ReceivePaymentDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
+    if (!ref.watch(canManageCustomerProvider(widget.customerId))) {
+      return AlertDialog(content: Text(l10n.globalPermissionDenied));
+    }
     final amount = _amountMoney;
     return AlertDialog(
       title: Text(l10n.receivePayment),
@@ -304,8 +356,13 @@ class _ReceivePaymentDialogState extends ConsumerState<ReceivePaymentDialog> {
           onPressed: amount == null
               ? null
               : () async {
+                  if (!ref.read(canManageCustomerProvider(widget.customerId)))
+                    return;
                   final navigator = Navigator.of(context);
-                  await ref.read(databaseProvider).customersDao.addDuePayment(
+                  await ref
+                      .read(databaseProvider)
+                      .customersDao
+                      .addDuePayment(
                         customerId: widget.customerId,
                         amount: amount,
                         method: PayMethod.cash,

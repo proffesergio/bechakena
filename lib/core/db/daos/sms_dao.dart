@@ -27,11 +27,13 @@ class SmsDao extends DatabaseAccessor<AppDatabase> with _$SmsDaoMixin {
       ));
 
   Stream<List<SmsLogData>> watchQueued() => (select(smsLog)
-        ..where((s) => s.status.equalsValue(SmsStatus.queued))
+        ..where((s) =>
+            s.status.equalsValue(SmsStatus.queued) & s.deletedAt.isNull())
         ..orderBy([(s) => OrderingTerm.asc(s.createdAt)]))
       .watch();
 
   Stream<List<SmsLogData>> watchLog({int limit = 200}) => (select(smsLog)
+        ..where((s) => s.deletedAt.isNull())
         ..orderBy([(s) => OrderingTerm.desc(s.createdAt)])
         ..limit(limit))
       .watch();

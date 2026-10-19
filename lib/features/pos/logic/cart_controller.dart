@@ -4,6 +4,7 @@ import '../../../core/db/database.dart';
 import '../../../core/db/sale_draft.dart';
 import '../../../core/money.dart';
 import '../../../core/qty.dart';
+import '../../../core/pricing/pricing.dart';
 
 class CartLine {
   const CartLine({
@@ -22,7 +23,7 @@ class CartLine {
   final int vatRateBp;
   final Money lineDiscount;
 
-  Money get lineTotal => unitPrice.timesQty(qty) - lineDiscount;
+  Money get lineTotal => linePrice(unitPrice: unitPrice, qty: qty, discount: lineDiscount);
 
   CartLine copyWith({Qty? qty, Money? lineDiscount}) => CartLine(
         productId: productId,
@@ -45,8 +46,8 @@ class CartState {
   Money get subtotal =>
       lines.fold(Money.zero, (sum, line) => sum + line.lineTotal);
 
-  Money get vat => lines.fold(Money.zero,
-      (sum, line) => sum + line.lineTotal.vatPortionInclusive(line.vatRateBp));
+  Money get vat => includedTax(lines.map((line) => TaxableAmount(line.lineTotal, line.vatRateBp)),
+      billDiscount: billDiscount);
 
   Money get total => subtotal - billDiscount;
 }
@@ -81,6 +82,9 @@ class CartController extends Notifier<CartState> {
     required Money price,
     Qty qty = const Qty(1000),
   }) {
+    if (price.isNegative || qty <= Qty.zero || name.trim().isEmpty) {
+      throw ArgumentError('Manual items need a name, nonnegative price and positive quantity');
+    }
     state = CartState(
       lines: [
         ...state.lines,
@@ -97,13 +101,15 @@ class CartController extends Notifier<CartState> {
     } else {
       lines[index] = lines[index].copyWith(qty: qty);
     }
-    state = CartState(lines: lines, billDiscount: state.billDiscount);
+    final subtotal = lines.fold(Money.zero, (sum, line) => sum + line.lineTotal);
+    state = CartState(lines: lines, billDiscount: state.billDiscount > subtotal ? subtotal : state.billDiscount);
   }
 
   void removeAt(int index) => setQty(index, Qty.zero);
 
   void setBillDiscount(Money discount) {
-    state = CartState(lines: state.lines, billDiscount: discount);
+    state = CartState(lines: state.lines,
+      billDiscount: Money(discount.paisa.clamp(0, state.subtotal.paisa)));
   }
 
   void clear() => state = const CartState();

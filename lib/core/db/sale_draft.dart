@@ -1,5 +1,6 @@
 import '../money.dart';
 import '../qty.dart';
+import '../pricing/pricing.dart';
 import 'tables.dart';
 
 /// One cart line as assembled at the POS, before finalization.
@@ -21,7 +22,7 @@ class SaleDraftItem {
   final Money lineDiscount;
   final int vatRateBp;
 
-  Money get lineTotal => unitPrice.timesQty(qty) - lineDiscount;
+  Money get lineTotal => linePrice(unitPrice: unitPrice, qty: qty, discount: lineDiscount);
 
   /// VAT contained in this line (prices are VAT-inclusive).
   Money get vatPortion => lineTotal.vatPortionInclusive(vatRateBp);

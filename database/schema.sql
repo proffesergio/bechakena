@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────────────────
--- BechaKena — complete SQLite schema, schema version 6.
+-- BechaKena — complete SQLite schema (version declared below).
 --
 -- This file creates the database from scratch. It is generated from the Drift
 -- table definitions in lib/core/db/tables.dart, which remain the source of
@@ -13,7 +13,7 @@
 --   • `dart run tool/dump_schema.dart` regenerates this file.
 --
 -- Conventions you can rely on:
---   • Money columns are INTEGER paisa (1 BDT = 100 paisa); never floats.
+--   • Money columns are INTEGER minor units (100 per configured currency); never floats.
 --   • Quantity columns are INTEGER milli-units (1 pc = 1000; 250 g = 250 kg).
 --   • Stock is derived: stock = SUM(stock_movements.qty_delta) per product
 --     and branch. There is no stored stock column anywhere.
@@ -23,7 +23,7 @@
 --   • id/updated_at/device_id defaults are applied by the app, not by SQLite,
 --     so this script always receives explicit values on insert.
 -- ─────────────────────────────────────────────────────────────────────────────
--- Schema version: v6
+-- Schema version: v8
 -- Generated:      dart run tool/dump_schema.dart
 -- Tables:         21
 
@@ -69,4 +69,54 @@ CREATE TABLE "suppliers" ("id" TEXT NOT NULL, "updated_at" INTEGER NOT NULL, "de
 
 CREATE TABLE "sync_outbox" ("seq" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "table_name" TEXT NOT NULL, "row_id" TEXT NOT NULL, "op" TEXT NOT NULL, "payload" TEXT NOT NULL, "queued_at" INTEGER NOT NULL);
 
-PRAGMA user_version = 6;
+CREATE INDEX idx_dine_orders_branch_status ON dine_orders (branch_id, status);
+
+CREATE INDEX idx_dine_orders_sale_id ON dine_orders (sale_id);
+
+CREATE INDEX idx_dine_orders_staff_id ON dine_orders (staff_id);
+
+CREATE INDEX idx_dine_orders_table_id ON dine_orders (table_id);
+
+CREATE INDEX idx_due_payments_customer_id ON due_payments (customer_id);
+
+CREATE INDEX idx_order_items_order_id ON dine_order_items (order_id);
+
+CREATE INDEX idx_order_items_product_id ON dine_order_items (product_id);
+
+CREATE INDEX idx_products_category_id ON products (category_id);
+
+CREATE INDEX idx_purchase_items_product_id ON purchase_items (product_id);
+
+CREATE INDEX idx_purchase_items_purchase_id ON purchase_items (purchase_id);
+
+CREATE INDEX idx_purchases_branch_created ON purchases (branch_id, created_at);
+
+CREATE INDEX idx_purchases_supplier_id ON purchases (supplier_id);
+
+CREATE INDEX idx_return_items_product_id ON return_items (product_id);
+
+CREATE INDEX idx_return_items_return_id ON return_items (return_id);
+
+CREATE INDEX idx_returns_original_sale_id ON returns (original_sale_id);
+
+CREATE INDEX idx_returns_staff_id ON returns (staff_id);
+
+CREATE INDEX idx_sale_items_product_id ON sale_items (product_id);
+
+CREATE INDEX idx_sale_items_sale_id ON sale_items (sale_id);
+
+CREATE INDEX idx_sale_payments_sale_id ON sale_payments (sale_id);
+
+CREATE INDEX idx_sales_branch_created ON sales (branch_id, created_at);
+
+CREATE INDEX idx_sales_customer_id ON sales (customer_id);
+
+CREATE INDEX idx_sales_staff_id ON sales (staff_id);
+
+CREATE INDEX idx_sms_log_customer_id ON sms_log (customer_id);
+
+CREATE INDEX idx_stock_movements_branch_product ON stock_movements (branch_id, product_id);
+
+CREATE INDEX idx_stock_movements_product_id ON stock_movements (product_id);
+
+PRAGMA user_version = 8;

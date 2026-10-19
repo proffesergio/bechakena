@@ -1,3 +1,4 @@
+import '../../settings/ui/business_settings_status.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,6 +26,8 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final tables = ref.watch(diningTablesProvider);
     final openOrders = ref.watch(openOrdersProvider).value ?? const <DineOrder>[];
@@ -90,6 +93,8 @@ class _TableCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).languageCode;
     final scheme = Theme.of(context).colorScheme;
@@ -143,7 +148,7 @@ class _TableCard extends ConsumerWidget {
                     style: Theme.of(context).textTheme.bodySmall),
               if (occupied)
                 Text(
-                  '${formatTaka(total, locale: locale)} · ${l10n.itemsCount(items.length.toString())}',
+                  '${formatTaka(total, locale: locale, currency: ref.read(shopCurrencyProvider))} · ${l10n.itemsCount(items.length.toString())}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: scheme.onTertiaryContainer,
                       fontWeight: FontWeight.w600),
@@ -240,6 +245,8 @@ class _TableEditDialogState extends ConsumerState<TableEditDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     return AlertDialog(
       title: Text(_isEdit ? l10n.editTable : l10n.addTable),

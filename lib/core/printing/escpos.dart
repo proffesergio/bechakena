@@ -1,9 +1,41 @@
+import 'dart:typed_data';
+
+import 'package:image/image.dart' as img;
+
+import 'logo_raster.dart';
+
+/// Wraps packed monochrome pixels in an ESC/POS GS v 0 command.
+List<int> escPosRasterBytes(RasterBitmap raster) => <int>[
+  0x1D,
+  0x76,
+  0x30,
+  0x00,
+  raster.bytesPerRow & 0xFF,
+  (raster.bytesPerRow >> 8) & 0xFF,
+  raster.height & 0xFF,
+  (raster.height >> 8) & 0xFF,
+  ...raster.bytes,
+];
+
+/// Compatibility helper for callers that already have a decoded image.
+List<int> escPosRaster(img.Image image, {int threshold = 128}) =>
+    escPosRasterBytes(rasterizeImage(image, threshold: threshold));
+
+/// Compatibility helper for decoding and encoding an optional logo.
+List<int>? tryEscPosRasterFromImage(
+  Uint8List encoded, {
+  required int maxWidthDots,
+}) {
+  final raster = tryRasterFromImage(encoded, maxWidthDots: maxWidthDots);
+  return raster == null ? null : escPosRasterBytes(raster);
+}
+
 /// Minimal ESC/POS encoding: init, optional cash-drawer kick, optional raster
 /// logo header, text/raster body, feed and partial cut. Works on any 58/80 mm
 /// thermal printer.
 ///
 /// [rasterHeader], when supplied, is a pre-encoded GS v 0 raster bitmap (see
-/// `logo_raster.dart`); it is centred above the text so the shop logo prints
+/// [escPosRasterBytes]); it is centred above the text so the shop logo prints
 /// on every receipt.
 List<int> escPosBytes(
   String text, {

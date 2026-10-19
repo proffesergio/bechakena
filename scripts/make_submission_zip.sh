@@ -6,8 +6,12 @@
 #
 # The ZIP mirrors the repository layout one-to-one (so every path in
 # HowToSetup.md resolves) and deliberately excludes git history, build output,
-# tool caches and every non-placeholder env file. The script refuses to build
-# if a required submission file is missing or a forbidden path is staged.
+# tool caches, every non-placeholder env file and all generated sources
+# (`*.g.dart`, `*.freezed.dart`) — reviewers regenerate those with
+# `dart run build_runner build --delete-conflicting-outputs`, exactly as
+# documented in HowToSetup.md §2. The script refuses to build if a required
+# submission file is missing, a forbidden path is staged, or a generated
+# source slipped through.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -32,15 +36,20 @@ rsync -a "$ROOT/" "$STAGE/" \
   --exclude '.vercel' \
   --exclude '.idea' \
   --exclude '.claude' \
+  --exclude '.codex' \
+  --exclude '.agents' \
+  --exclude '__pycache__' \
+  --exclude '*.pyc' \
   --exclude 'node_modules' \
   --exclude '.next' \
   --exclude 'site/out' \
-  --exclude '.env' \
-  --exclude '.env.local' \
-  --exclude '.env.*.local' \
+  --include '.env.example' \
+  --exclude '.env*' \
   --exclude '*.log' \
   --exclude '*.zip' \
   --exclude '*.iml' \
+  --exclude '*.g.dart' \
+  --exclude '*.freezed.dart' \
   --exclude 'graphify-out' \
   --exclude '.flutter-plugins-dependencies' \
   --exclude '.DS_Store'
@@ -60,12 +69,25 @@ for f in "${required[@]}"; do
 done
 [[ "$missing" -eq 0 ]] || { echo "error: required files missing; not packaging" >&2; exit 1; }
 
+if find "$STAGE" -type f -name '.env*' ! -name '.env.example' -print -quit | rg -q .; then
+  echo "error: private environment file staged" >&2
+  exit 1
+fi
+
 for f in .git pyenv graphify-out site/node_modules site/.next site/out build .dart_tool .vercel; do
   if [[ -e "$STAGE/$f" ]]; then
     echo "error: forbidden path staged: $f" >&2
     exit 1
   fi
 done
+
+generated="$(find "$STAGE" \( -name '*.g.dart' -o -name '*.freezed.dart' \) -print \
+  | sed "s|^$STAGE/||" | head -5)"
+if [[ -n "$generated" ]]; then
+  echo "error: generated sources staged (run --delete-conflicting-outputs only in the working tree):" >&2
+  echo "$generated" >&2
+  exit 1
+fi
 
 mkdir -p "$(dirname "$OUT")"
 rm -f "$OUT"

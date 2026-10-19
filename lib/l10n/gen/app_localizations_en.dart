@@ -9,6 +9,45 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get replenishTitle => 'Smart replenishment';
+
+  @override
+  String get replenishHint =>
+      'Suggested orders use the last 28 days of finalized sales at this branch: average daily sales × (lead + cover days), or your minimum stock, whichever is higher, less current stock. Gross sales include subsequently returned items. Review seasonality and supplier constraints before ordering. Suggestions never place orders automatically.';
+
+  @override
+  String get replenishLead => 'Supplier lead time';
+
+  @override
+  String get replenishCover => 'Target stock cover';
+
+  @override
+  String replenishDays(int days) {
+    return '$days days';
+  }
+
+  @override
+  String get replenishExport => 'Export order plan';
+
+  @override
+  String get replenishExported => 'Order plan downloaded';
+
+  @override
+  String get replenishError =>
+      'Could not load or export the order plan. Please try again.';
+
+  @override
+  String get replenishEmpty => 'No replenishment suggested for this branch.';
+
+  @override
+  String get replenishNoHistory => 'Minimum stock target';
+
+  @override
+  String replenishStockSales(String stock, String sold, String unit) {
+    return 'Stock: $stock · Sold in 28 days: $sold $unit';
+  }
+
+  @override
   String get navPos => 'POS';
 
   @override
@@ -819,4 +858,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get switchModuleAction => 'Switch';
+
+  @override
+  String get accessRestricted => 'You don\'t have access to this record.';
+
+  @override
+  String get globalCurrency => 'Accounting currency';
+
+  @override
+  String get globalCurrencyHelp =>
+      'Choose before adding prices or transactions. Only two-decimal currencies are supported; no currency conversion. One currency applies to all branches in this module.';
+
+  @override
+  String get globalCurrencyLocked =>
+      'Currency is locked because prices, running order items, or financial records exist (including deleted records). Existing amounts cannot be converted or relabeled. Zero- and three-decimal currencies are not supported.';
+
+  @override
+  String get globalTaxLabel => 'Tax label (e.g. VAT, GST, sales tax)';
+
+  @override
+  String get globalTaxId => 'Business tax registration ID';
+
+  @override
+  String get globalInvalidTaxDetails =>
+      'Enter a tax label (1–32 characters) and an optional tax ID (up to 80 characters), without line breaks or control characters.';
+
+  @override
+  String get globalPermissionDenied =>
+      'Your current role cannot change these settings.';
+
+  @override
+  String get globalSettingsSaveFailed =>
+      'Settings could not be saved. Please try again.';
+
+  @override
+  String get globalSettingsLoadFailed =>
+      'Business settings could not be loaded. Reopen this screen or restore a valid backup.';
+
+  @override
+  String get globalTaxHelp =>
+      'The label and registration ID appear on receipts. Tax calculation remains inclusive at each product’s configured rate; this does not configure country-specific tax filing.';
 }

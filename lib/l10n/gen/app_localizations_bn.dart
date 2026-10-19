@@ -9,6 +9,45 @@ class AppLocalizationsBn extends AppLocalizations {
   AppLocalizationsBn([String locale = 'bn']) : super(locale);
 
   @override
+  String get replenishTitle => 'স্মার্ট পুনঃমজুদ পরিকল্পনা';
+
+  @override
+  String get replenishHint =>
+      'এই শাখার গত ২৮ দিনের চূড়ান্ত বিক্রয়ের দৈনিক গড় × (সরবরাহের সময় + মজুদের দিন), অথবা ন্যূনতম মজুদ—যেটি বেশি—থেকে বর্তমান মজুদ বাদ দিয়ে পরামর্শ তৈরি হয়। পরে ফেরত দেওয়া পণ্যের বিক্রয়ও গণনায় থাকে। অর্ডারের আগে মৌসুম ও সরবরাহকারীর শর্ত যাচাই করুন। নিজে থেকে কোনো অর্ডার হয় না।';
+
+  @override
+  String get replenishLead => 'সরবরাহের সময়';
+
+  @override
+  String get replenishCover => 'মজুদের লক্ষ্য';
+
+  @override
+  String replenishDays(int days) {
+    return '$days দিন';
+  }
+
+  @override
+  String get replenishExport => 'অর্ডার পরিকল্পনা ডাউনলোড';
+
+  @override
+  String get replenishExported => 'অর্ডার পরিকল্পনা ডাউনলোড হয়েছে';
+
+  @override
+  String get replenishError =>
+      'পরিকল্পনা লোড বা ডাউনলোড করা যায়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get replenishEmpty => 'এই শাখায় পুনঃমজুদের পরামর্শ নেই।';
+
+  @override
+  String get replenishNoHistory => 'ন্যূনতম মজুদের লক্ষ্য';
+
+  @override
+  String replenishStockSales(String stock, String sold, String unit) {
+    return 'মজুদ: $stock · ২৮ দিনে বিক্রয়: $sold $unit';
+  }
+
+  @override
   String get navPos => 'বিক্রয়';
 
   @override
@@ -819,4 +858,44 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get switchModuleAction => 'পরিবর্তন';
+
+  @override
+  String get accessRestricted => 'এই রেকর্ডটি দেখার অনুমতি আপনার নেই।';
+
+  @override
+  String get globalCurrency => 'হিসাবের মুদ্রা';
+
+  @override
+  String get globalCurrencyHelp =>
+      'মূল্য বা লেনদেন যোগ করার আগে মুদ্রা বাছুন। শুধু দুই দশমিক ঘরের মুদ্রা সমর্থিত; মুদ্রা রূপান্তর হয় না। এই মডিউলের সব শাখায় একই মুদ্রা প্রযোজ্য।';
+
+  @override
+  String get globalCurrencyLocked =>
+      'মূল্য, চলমান অর্ডারের পণ্য বা আর্থিক রেকর্ড থাকায় মুদ্রা পরিবর্তন বন্ধ (মুছে ফেলা রেকর্ডসহ)। পুরোনো টাকার অঙ্ক রূপান্তর বা মুদ্রা বদলে দেখানো যাবে না। শূন্য বা তিন দশমিক ঘরের মুদ্রা সমর্থিত নয়।';
+
+  @override
+  String get globalTaxLabel => 'করের নাম (যেমন ভ্যাট, জিএসটি, বিক্রয় কর)';
+
+  @override
+  String get globalTaxId => 'ব্যবসার কর নিবন্ধন নম্বর';
+
+  @override
+  String get globalInvalidTaxDetails =>
+      'করের নাম ১–৩২ অক্ষরে দিন। ঐচ্ছিক কর নম্বর সর্বোচ্চ ৮০ অক্ষর। নতুন লাইন বা নিয়ন্ত্রণ অক্ষর ব্যবহার করবেন না।';
+
+  @override
+  String get globalPermissionDenied =>
+      'আপনার বর্তমান ভূমিকায় এই সেটিংস পরিবর্তনের অনুমতি নেই।';
+
+  @override
+  String get globalSettingsSaveFailed =>
+      'সেটিংস সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get globalSettingsLoadFailed =>
+      'ব্যবসার সেটিংস লোড করা যায়নি। এই পাতা আবার খুলুন অথবা সঠিক ব্যাকআপ পুনরুদ্ধার করুন।';
+
+  @override
+  String get globalTaxHelp =>
+      'করের নাম ও নিবন্ধন নম্বর রসিদে দেখানো হয়। প্রতিটি পণ্যের নির্ধারিত হার অনুযায়ী মূল্যের অন্তর্ভুক্ত কর গণনা হয়; এটি দেশভিত্তিক কর দাখিলের ব্যবস্থা নয়।';
 }

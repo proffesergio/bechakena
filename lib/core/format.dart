@@ -1,4 +1,5 @@
 import 'money.dart';
+import 'currency.dart';
 
 const _banglaDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
 
@@ -11,22 +12,27 @@ String toBanglaDigits(String input) => input.replaceAllMapped(
 /// Formats [amount] as taka with the ৳ sign and Bangladeshi lakh grouping
 /// (last three digits, then groups of two): ৳1,23,45,678.90.
 /// A `bn` locale additionally renders Bangla digits.
-String formatTaka(Money amount, {String locale = 'en'}) {
+String formatTaka(Money amount, {String locale = 'en', ShopCurrency currency = ShopCurrency.bdt}) {
   final abs = amount.paisa.abs();
-  final grouped = _lakhGroup((abs ~/ 100).toString());
+  final grouped = _group((abs ~/ 100).toString(), currency);
   final decimals = (abs % 100).toString().padLeft(2, '0');
-  var result = '৳$grouped.$decimals';
+  var result = '${currency.symbol}$grouped.$decimals';
   if (locale.startsWith('bn')) result = toBanglaDigits(result);
   return amount.isNegative ? '-$result' : result;
 }
 
 /// Grouped decimal amount without currency symbol or Bangla digits —
 /// e.g. 1,23,456.78. Used on thermal receipts (ASCII only).
-String formatAmount(Money amount) {
+String formatAmount(Money amount, {ShopCurrency currency = ShopCurrency.bdt}) {
   final abs = amount.paisa.abs();
-  final grouped = _lakhGroup((abs ~/ 100).toString());
+  final grouped = _group((abs ~/ 100).toString(), currency);
   final decimals = (abs % 100).toString().padLeft(2, '0');
   return '${amount.isNegative ? '-' : ''}$grouped.$decimals';
+}
+
+String _group(String digits, ShopCurrency currency) {
+  if (currency.lakhGrouping) return _lakhGroup(digits);
+  return digits.replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
 }
 
 String _lakhGroup(String digits) {

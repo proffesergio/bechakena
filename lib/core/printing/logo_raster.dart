@@ -2,13 +2,31 @@ import 'dart:typed_data';
 
 import 'package:image/image.dart' as img;
 
-/// Decodes PNG/JPG bytes and encodes them as an ESC/POS `GS v 0` raster bitmap,
+/// Printer-independent monochrome image, packed MSB-first with row padding.
+class RasterBitmap {
+  const RasterBitmap({
+    required this.width,
+    required this.height,
+    required this.bytes,
+  });
+
+  final int width;
+  final int height;
+  final Uint8List bytes;
+  int get bytesPerRow => (width + 7) >> 3;
+}
+
+/// Decodes PNG/JPG bytes into a monochrome raster bitmap,
 /// downscaled to at most [maxWidthDots] (384 for 58 mm, 576 for 80 mm) and
 /// thresholded to 1-bit black/white — the only image format cheap thermal
 /// printers understand. Returns `null` when the bytes aren't a decodable image
 /// so a bad logo never blocks a receipt.
-List<int>? tryEscPosRasterFromImage(Uint8List encoded,
-    {required int maxWidthDots}) {
+RasterBitmap? tryRasterFromImage(
+  Uint8List encoded, {
+  required int maxWidthDots,
+}) {
+  if (maxWidthDots <= 0)
+    throw ArgumentError.value(maxWidthDots, 'maxWidthDots');
   img.Image? decoded;
   try {
     // Malformed bytes can make a format probe read past the buffer, so guard
@@ -22,13 +40,13 @@ List<int>? tryEscPosRasterFromImage(Uint8List encoded,
   if (image.width > maxWidthDots) {
     image = img.copyResize(image, width: maxWidthDots);
   }
-  return escPosRaster(image);
+  return rasterizeImage(image);
 }
 
-/// Packs an [image] into a `GS v 0` raster command, MSB-first, 1 = black dot.
+/// Packs an [image] into monochrome pixel bytes, MSB-first, 1 = black dot.
 /// Pixels darker than [threshold] (0–255 luminance) print; transparent pixels
 /// are treated as paper (white).
-List<int> escPosRaster(img.Image image, {int threshold = 128}) {
+RasterBitmap rasterizeImage(img.Image image, {int threshold = 128}) {
   final width = image.width;
   final height = image.height;
   final bytesPerRow = (width + 7) >> 3;
@@ -45,10 +63,5 @@ List<int> escPosRaster(img.Image image, {int threshold = 128}) {
     }
   }
 
-  return <int>[
-    0x1D, 0x76, 0x30, 0x00, // GS v 0, mode 0 (normal)
-    bytesPerRow & 0xFF, (bytesPerRow >> 8) & 0xFF, // xL, xH
-    height & 0xFF, (height >> 8) & 0xFF, // yL, yH
-    ...data,
-  ];
+  return RasterBitmap(width: width, height: height, bytes: data);
 }

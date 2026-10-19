@@ -228,6 +228,7 @@ class _PinLoginState extends ConsumerState<_PinLogin> {
   }
 
   Future<void> _login() async {
+    if (_busy || _staffId == null) return;
     final l10n = AppLocalizations.of(context);
     setState(() {
       _busy = true;
@@ -235,6 +236,7 @@ class _PinLoginState extends ConsumerState<_PinLogin> {
     });
     final db = ref.read(databaseProvider);
     final ok = await db.staffDao.verifyPin(_staffId!, _pin.text.trim());
+    if (!mounted) return;
     if (ok == null) {
       setState(() {
         _busy = false;

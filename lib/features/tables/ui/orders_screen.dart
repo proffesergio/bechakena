@@ -1,3 +1,4 @@
+import '../../settings/ui/business_settings_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,6 +8,7 @@ import '../../../core/format.dart';
 import '../../../core/money.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../auth/logic/session.dart';
+import '../logic/order_math.dart';
 import 'order_editor_screen.dart';
 
 /// Restaurant home: every open tab (dine-in, takeaway, delivery) at a glance,
@@ -17,6 +19,8 @@ class OrdersScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final orders = ref.watch(openOrdersProvider);
     final tables = ref.watch(diningTablesProvider).value ?? const <DiningTable>[];
@@ -102,6 +106,8 @@ class _OrderCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).languageCode;
     final items =
@@ -147,7 +153,7 @@ class _OrderCard extends ConsumerWidget {
                 children: [
                   Text(l10n.itemsCount(items.length.toString()),
                       style: Theme.of(context).textTheme.bodySmall),
-                  Text(formatTaka(total, locale: locale),
+                  Text(formatTaka(total, locale: locale, currency: ref.read(shopCurrencyProvider)),
                       style: Theme.of(context)
                           .textTheme
                           .titleMedium

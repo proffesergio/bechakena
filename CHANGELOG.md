@@ -7,6 +7,23 @@ All notable changes to BechaKena are documented here. The format follows
 
 ## [1.0.0] — 2026-10-19
 
+### Audit follow-up and product upgrades
+
+- Added persisted two-decimal shop currency, configurable receipt tax identity,
+  consistent money entry/display/receipt/SMS formatting, and persisted language.
+  Currency changes lock after priced or financial data exists; no FX is offered.
+- Added an offline branch-scoped replenishment planner with lead/cover controls,
+  whole-piece rounding and CSV export. Live sales refresh recent demand.
+- Hardened branch loading and customer/return dialogs; extracted the RBAC
+  policy, shared pricing, atomic sale finalizer, receipt data, UI sections and
+  design tokens. PINs now use 600,000 PBKDF2 iterations with legacy upgrades
+  and a persisted five-attempt / 30-second staff lockout.
+- Added schema v8 foreign-key and branch indexes; regenerated SQL artifacts.
+- Updated the animated bilingual showcase with sample receipt and replenishment
+  controls, explicit product boundaries and mobile layout fixes.
+- Excluded generated sources, caches and private environment files from the
+  submission archive; clarified clean setup and optional backend scope.
+
 The first complete, offline-first release: retail POS and restaurant service
 in one app, Bangla + English throughout, with an optional Cloud Plan.
 

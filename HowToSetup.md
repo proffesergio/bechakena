@@ -19,13 +19,17 @@ network access; the cloud (Supabase) is optional and configured at build time.
 
 | Tool | Version | Needed for |
 |---|---|---|
-| Flutter SDK | 3.47.7+ (stable) | A, B, C, D |
+| Flutter SDK | 3.47.x (stable; tested 3.47.7) | A, B, C, D |
+| Dart SDK | 3.12.x (bundled with the Flutter SDK) | A, B, C, D |
 | Node.js + npm | 22+ | A, B (showcase landing page) |
 | Python 3 | 3.10+ | A, B (packaging check only) |
 | nginx | 1.24+ | A |
 | Docker + Compose | v2 | B |
 | Visual Studio **Desktop development with C++** | 2022 | C (Windows builds) |
 | Android Studio / Android SDK | current | D |
+
+For the submission archive command, install `rsync`, `zip`, and `unzip`.
+The archive excludes generated sources; always run the generators below.
 
 Full platform build details (installers, code signing, iOS) live in
 [`docs/BUILD.md`](docs/BUILD.md). Day-to-day app usage lives in
@@ -36,6 +40,24 @@ Get the code:
 ```bash
 git clone <repo-url> bechakena && cd bechakena
 ```
+
+Common first steps for every target (the generated Drift/Riverpod sources are
+not shipped in the submission ZIP — this step recreates them):
+
+```bash
+flutter pub get
+flutter gen-l10n                                          # bn + en strings
+dart run build_runner build --delete-conflicting-outputs  # Drift + Riverpod code
+```
+
+On an empty native installation, create the first owner and open **Settings**
+before importing products or loading sample data. Select the shop currency
+(BDT/USD/EUR/GBP/AED/SAR/INR/CAD/AUD/SGD/MYR/PKR), tax label and business tax ID.
+The currency uses two decimals and is shared by branches within that module.
+It locks once priced or financial records exist to preserve historical money.
+No foreign exchange or automatic country tax compliance is provided. English
+and Bengali language choices persist on the device. The public web demo is
+pre-seeded in BDT; its sample amounts are not converted.
 
 ---
 
@@ -67,6 +89,11 @@ flutter build web --release --base-href /demo/ --no-web-resources-cdn
 npm --prefix site ci
 npm --prefix site run build
 ```
+
+`--no-web-resources-cdn` bundles CanvasKit and the icon font inside
+`build/web/` instead of fetching them from `gstatic.com` at runtime — required
+for the offline-first demo (the Docker image and the VPS/nginx setup both
+serve it without any external CDN calls).
 
 **3. Publish the files**
 
@@ -189,6 +216,9 @@ git tag v1.0.0 && git push origin v1.0.0   # CI attaches Windows .zip + Android 
 ## D. Android phone/tablet (configurable API)
 
 ```bash
+flutter pub get
+flutter gen-l10n
+dart run build_runner build --delete-conflicting-outputs
 flutter build apk --release \
   --dart-define=BECHAKENA_API_BASE_URL=https://your-server.example.com/functions/v1 \
   --dart-define=BECHAKENA_SUPABASE_URL=https://your-project.supabase.co \
@@ -209,12 +239,13 @@ iOS needs a Mac + Apple account — see [`docs/BUILD.md` §4](docs/BUILD.md).
 ## Database setup
 
 The POS ships its own database engine (SQLite via Drift); there is no server
-to install and nothing to migrate by hand. The repository includes the scripts
-for tooling, backups, analytics and reviewers:
+to install and nothing to migrate by hand. **The app creates its database on
+first launch** — the scripts below are for inspecting the schema or pre-seeding
+a demo database on a fixture/review machine:
 
 | File | Purpose |
 |---|---|
-| `database/schema.sql` | Complete schema (v6, 21 tables) that creates a database from scratch |
+| `database/schema.sql` | Complete schema (v8, 21 tables) that creates a database from scratch |
 | `database/seed.sql` | Demo shop + catalog + customers + sales so a fresh install has data |
 | `database/README.md` | How both files are generated and kept identical to the app |
 
@@ -228,6 +259,9 @@ applies the same schema the script contains. Stock is always derived
 review machine):
 
 ```bash
+sqlite3 test.db < database/schema.sql   # inspect the exact shipped schema
+sqlite3 test.db < database/seed.sql     # demo shop, catalog, customers, sales
+# or, for a working demo inside the app, use the module file name:
 sqlite3 bechakena_superShop.db < database/schema.sql
 sqlite3 bechakena_superShop.db < database/seed.sql
 ```
@@ -283,7 +317,8 @@ local data, then relaunch.
 
 After editing any user-facing string, update **both** `lib/l10n/app_en.arb`
 and `lib/l10n/app_bn.arb`, then run `flutter gen-l10n`. After changing table
-definitions, re-run the schema dump: `dart run tool/dump_schema.dart`.
+definitions re-run `dart run build_runner build --delete-conflicting-outputs`
+(regenerates Drift code), then the schema dump: `dart run tool/dump_schema.dart`.
 
 ---
 
@@ -302,6 +337,13 @@ The app itself takes values at build time:
 Server-side secrets (`SUPABASE_SERVICE_ROLE_KEY`, `SMS_API_KEY`, Vercel
 tokens) must stay in the server/CI environment and never ship in the app or a
 committed file.
+
+**Cloud Plan scope:** the optional Supabase sync layer is roadmap-only. This
+archive ships the client-side configuration flags only — no backend or Edge
+Functions source, no server secrets. A fully local install is the supported
+configuration: skip the `BECHAKENA_SUPABASE_*` flags and the app runs complete
+and offline. Backend code, when it exists, is server-side and out of scope for
+this submission.
 
 ---
 

@@ -33,7 +33,32 @@ void main() {
           .toSet();
       expect(tables, hasLength(21));
       expect(sqlite.select('PRAGMA integrity_check').single.values.first, 'ok');
-      expect(sqlite.select('PRAGMA user_version').single.values.first, 6);
+      expect(sqlite.select('PRAGMA user_version').single.values.first, 8);
+
+      final indexes = sqlite
+          .select("SELECT name FROM sqlite_master WHERE type = 'index' "
+              "AND name LIKE 'idx_%'")
+          .map((row) => row['name'] as String)
+          .toSet();
+      expect(
+          indexes,
+          containsAll({
+            'idx_stock_movements_product_id',
+            'idx_sale_items_product_id',
+            'idx_purchase_items_product_id',
+            'idx_order_items_product_id',
+          }));
+      for (final table in tables) {
+        final indexedColumns = sqlite.select('PRAGMA index_list("$table")')
+            .expand((index) => sqlite.select('PRAGMA index_info("${index['name']}")')
+                .where((column) => column['seqno'] == 0)
+                .map((column) => column['name']))
+            .toSet();
+        for (final foreignKey in sqlite.select('PRAGMA foreign_key_list("$table")')) {
+          expect(indexedColumns, contains(foreignKey['from']),
+              reason: '$table.${foreignKey['from']} needs an index prefix');
+        }
+      }
     } finally {
       sqlite.close();
     }
@@ -71,6 +96,34 @@ void main() {
 
       final tables = await db.select(db.diningTables).get();
       expect(tables, isNotEmpty);
+    } finally {
+      await db.close();
+    }
+  });
+
+  test('version 7 databases gain all version 8 indexes without losing rows', () async {
+    const previousIndexes = {
+      'idx_stock_movements_product_id', 'idx_sale_items_product_id',
+      'idx_purchase_items_product_id', 'idx_order_items_product_id',
+    };
+    final sqlite = sqlite3.open(dbPath);
+    try {
+      sqlite.execute(File('database/schema.sql').readAsStringSync());
+      final indexes = sqlite.select("SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'idx_%'");
+      for (final index in indexes) {
+        final name = index['name'] as String;
+        if (!previousIndexes.contains(name)) sqlite.execute('DROP INDEX "$name"');
+      }
+      sqlite.execute('PRAGMA user_version = 7');
+    } finally {
+      sqlite.close();
+    }
+    final db = AppDatabase(NativeDatabase(File(dbPath)));
+    try {
+      expect(await db.select(db.shops).get(), hasLength(1));
+      final indexes = await db.customSelect("SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'idx_%'").get();
+      expect(indexes, hasLength(25));
+      expect((await db.customSelect('PRAGMA user_version').getSingle()).read<int>('user_version'), 8);
     } finally {
       await db.close();
     }

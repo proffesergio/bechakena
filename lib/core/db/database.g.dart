@@ -12631,6 +12631,106 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DiningTablesTable diningTables = $DiningTablesTable(this);
   late final $DineOrdersTable dineOrders = $DineOrdersTable(this);
   late final $DineOrderItemsTable dineOrderItems = $DineOrderItemsTable(this);
+  late final Index idxProductsCategoryId = Index(
+    'idx_products_category_id',
+    'CREATE INDEX idx_products_category_id ON products (category_id)',
+  );
+  late final Index idxStockMovementsProductId = Index(
+    'idx_stock_movements_product_id',
+    'CREATE INDEX idx_stock_movements_product_id ON stock_movements (product_id)',
+  );
+  late final Index idxStockMovementsBranchProduct = Index(
+    'idx_stock_movements_branch_product',
+    'CREATE INDEX idx_stock_movements_branch_product ON stock_movements (branch_id, product_id)',
+  );
+  late final Index idxSalesBranchCreated = Index(
+    'idx_sales_branch_created',
+    'CREATE INDEX idx_sales_branch_created ON sales (branch_id, created_at)',
+  );
+  late final Index idxSalesCustomerId = Index(
+    'idx_sales_customer_id',
+    'CREATE INDEX idx_sales_customer_id ON sales (customer_id)',
+  );
+  late final Index idxSalesStaffId = Index(
+    'idx_sales_staff_id',
+    'CREATE INDEX idx_sales_staff_id ON sales (staff_id)',
+  );
+  late final Index idxSaleItemsProductId = Index(
+    'idx_sale_items_product_id',
+    'CREATE INDEX idx_sale_items_product_id ON sale_items (product_id)',
+  );
+  late final Index idxSaleItemsSaleId = Index(
+    'idx_sale_items_sale_id',
+    'CREATE INDEX idx_sale_items_sale_id ON sale_items (sale_id)',
+  );
+  late final Index idxSalePaymentsSaleId = Index(
+    'idx_sale_payments_sale_id',
+    'CREATE INDEX idx_sale_payments_sale_id ON sale_payments (sale_id)',
+  );
+  late final Index idxDuePaymentsCustomerId = Index(
+    'idx_due_payments_customer_id',
+    'CREATE INDEX idx_due_payments_customer_id ON due_payments (customer_id)',
+  );
+  late final Index idxPurchasesBranchCreated = Index(
+    'idx_purchases_branch_created',
+    'CREATE INDEX idx_purchases_branch_created ON purchases (branch_id, created_at)',
+  );
+  late final Index idxPurchasesSupplierId = Index(
+    'idx_purchases_supplier_id',
+    'CREATE INDEX idx_purchases_supplier_id ON purchases (supplier_id)',
+  );
+  late final Index idxPurchaseItemsProductId = Index(
+    'idx_purchase_items_product_id',
+    'CREATE INDEX idx_purchase_items_product_id ON purchase_items (product_id)',
+  );
+  late final Index idxPurchaseItemsPurchaseId = Index(
+    'idx_purchase_items_purchase_id',
+    'CREATE INDEX idx_purchase_items_purchase_id ON purchase_items (purchase_id)',
+  );
+  late final Index idxSmsLogCustomerId = Index(
+    'idx_sms_log_customer_id',
+    'CREATE INDEX idx_sms_log_customer_id ON sms_log (customer_id)',
+  );
+  late final Index idxReturnsOriginalSaleId = Index(
+    'idx_returns_original_sale_id',
+    'CREATE INDEX idx_returns_original_sale_id ON returns (original_sale_id)',
+  );
+  late final Index idxReturnsStaffId = Index(
+    'idx_returns_staff_id',
+    'CREATE INDEX idx_returns_staff_id ON returns (staff_id)',
+  );
+  late final Index idxReturnItemsReturnId = Index(
+    'idx_return_items_return_id',
+    'CREATE INDEX idx_return_items_return_id ON return_items (return_id)',
+  );
+  late final Index idxReturnItemsProductId = Index(
+    'idx_return_items_product_id',
+    'CREATE INDEX idx_return_items_product_id ON return_items (product_id)',
+  );
+  late final Index idxDineOrdersTableId = Index(
+    'idx_dine_orders_table_id',
+    'CREATE INDEX idx_dine_orders_table_id ON dine_orders (table_id)',
+  );
+  late final Index idxDineOrdersBranchStatus = Index(
+    'idx_dine_orders_branch_status',
+    'CREATE INDEX idx_dine_orders_branch_status ON dine_orders (branch_id, status)',
+  );
+  late final Index idxDineOrdersStaffId = Index(
+    'idx_dine_orders_staff_id',
+    'CREATE INDEX idx_dine_orders_staff_id ON dine_orders (staff_id)',
+  );
+  late final Index idxDineOrdersSaleId = Index(
+    'idx_dine_orders_sale_id',
+    'CREATE INDEX idx_dine_orders_sale_id ON dine_orders (sale_id)',
+  );
+  late final Index idxOrderItemsProductId = Index(
+    'idx_order_items_product_id',
+    'CREATE INDEX idx_order_items_product_id ON dine_order_items (product_id)',
+  );
+  late final Index idxOrderItemsOrderId = Index(
+    'idx_order_items_order_id',
+    'CREATE INDEX idx_order_items_order_id ON dine_order_items (order_id)',
+  );
   late final ProductsDao productsDao = ProductsDao(this as AppDatabase);
   late final StockDao stockDao = StockDao(this as AppDatabase);
   late final SalesDao salesDao = SalesDao(this as AppDatabase);
@@ -12667,6 +12767,31 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     diningTables,
     dineOrders,
     dineOrderItems,
+    idxProductsCategoryId,
+    idxStockMovementsProductId,
+    idxStockMovementsBranchProduct,
+    idxSalesBranchCreated,
+    idxSalesCustomerId,
+    idxSalesStaffId,
+    idxSaleItemsProductId,
+    idxSaleItemsSaleId,
+    idxSalePaymentsSaleId,
+    idxDuePaymentsCustomerId,
+    idxPurchasesBranchCreated,
+    idxPurchasesSupplierId,
+    idxPurchaseItemsProductId,
+    idxPurchaseItemsPurchaseId,
+    idxSmsLogCustomerId,
+    idxReturnsOriginalSaleId,
+    idxReturnsStaffId,
+    idxReturnItemsReturnId,
+    idxReturnItemsProductId,
+    idxDineOrdersTableId,
+    idxDineOrdersBranchStatus,
+    idxDineOrdersStaffId,
+    idxDineOrdersSaleId,
+    idxOrderItemsProductId,
+    idxOrderItemsOrderId,
   ];
 }
 
@@ -13263,8 +13388,10 @@ class $$ShopsTableTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), $$ShopsTableReferences(db, table, e)),
+                (e) => (
+                  e.readTable<$ShopsTable, Shop>(table),
+                  $$ShopsTableReferences(db, table, e),
+                ),
               )
               .toList(),
           prefetchHooksCallback:
@@ -13807,8 +13934,10 @@ class $$StaffTableTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), $$StaffTableReferences(db, table, e)),
+                (e) => (
+                  e.readTable<$StaffTable, StaffData>(table),
+                  $$StaffTableReferences(db, table, e),
+                ),
               )
               .toList(),
           prefetchHooksCallback:
@@ -14231,7 +14360,7 @@ class $$CategoriesTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$CategoriesTable, Category>(table),
                   $$CategoriesTableReferences(db, table, e),
                 ),
               )
@@ -15120,7 +15249,7 @@ class $$ProductsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$ProductsTable, Product>(table),
                   $$ProductsTableReferences(db, table, e),
                 ),
               )
@@ -15780,7 +15909,7 @@ class $$StockMovementsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$StockMovementsTable, StockMovement>(table),
                   $$StockMovementsTableReferences(db, table, e),
                 ),
               )
@@ -16306,7 +16435,7 @@ class $$CustomersTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$CustomersTable, Customer>(table),
                   $$CustomersTableReferences(db, table, e),
                 ),
               )
@@ -17310,8 +17439,10 @@ class $$SalesTableTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), $$SalesTableReferences(db, table, e)),
+                (e) => (
+                  e.readTable<$SalesTable, Sale>(table),
+                  $$SalesTableReferences(db, table, e),
+                ),
               )
               .toList(),
           prefetchHooksCallback:
@@ -17957,7 +18088,7 @@ class $$SaleItemsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$SaleItemsTable, SaleItem>(table),
                   $$SaleItemsTableReferences(db, table, e),
                 ),
               )
@@ -18346,7 +18477,7 @@ class $$SalePaymentsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$SalePaymentsTable, SalePayment>(table),
                   $$SalePaymentsTableReferences(db, table, e),
                 ),
               )
@@ -18741,7 +18872,7 @@ class $$DuePaymentsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$DuePaymentsTable, DuePayment>(table),
                   $$DuePaymentsTableReferences(db, table, e),
                 ),
               )
@@ -19091,7 +19222,7 @@ class $$SuppliersTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$SuppliersTable, Supplier>(table),
                   $$SuppliersTableReferences(db, table, e),
                 ),
               )
@@ -19621,7 +19752,7 @@ class $$PurchasesTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$PurchasesTable, Purchase>(table),
                   $$PurchasesTableReferences(db, table, e),
                 ),
               )
@@ -20140,7 +20271,7 @@ class $$PurchaseItemsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$PurchaseItemsTable, PurchaseItem>(table),
                   $$PurchaseItemsTableReferences(db, table, e),
                 ),
               )
@@ -20566,8 +20697,10 @@ class $$SmsLogTableTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), $$SmsLogTableReferences(db, table, e)),
+                (e) => (
+                  e.readTable<$SmsLogTable, SmsLogData>(table),
+                  $$SmsLogTableReferences(db, table, e),
+                ),
               )
               .toList(),
           prefetchHooksCallback: ({customerId = false}) {
@@ -20820,7 +20953,16 @@ class $$SyncOutboxTableTableManager
                 queuedAt: queuedAt,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SyncOutboxTable, SyncOutboxData>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SyncOutboxTable,
+                    SyncOutboxData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -20956,7 +21098,16 @@ class $$SettingsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SettingsTable, Setting>(table),
+                  BaseReferences<_$AppDatabase, $SettingsTable, Setting>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -21455,7 +21606,7 @@ class $$ReturnsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$ReturnsTable, Return>(table),
                   $$ReturnsTableReferences(db, table, e),
                 ),
               )
@@ -21973,7 +22124,7 @@ class $$ReturnItemsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$ReturnItemsTable, ReturnItem>(table),
                   $$ReturnItemsTableReferences(db, table, e),
                 ),
               )
@@ -22374,7 +22525,7 @@ class $$DiningTablesTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$DiningTablesTable, DiningTable>(table),
                   $$DiningTablesTableReferences(db, table, e),
                 ),
               )
@@ -23150,7 +23301,7 @@ class $$DineOrdersTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$DineOrdersTable, DineOrder>(table),
                   $$DineOrdersTableReferences(db, table, e),
                 ),
               )
@@ -23781,7 +23932,7 @@ class $$DineOrderItemsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$DineOrderItemsTable, DineOrderItem>(table),
                   $$DineOrderItemsTableReferences(db, table, e),
                 ),
               )

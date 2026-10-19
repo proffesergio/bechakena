@@ -1,73 +1,8 @@
 import '../format.dart';
+import '../currency.dart';
 import '../money.dart';
-import '../qty.dart';
-
-/// One printed line item.
-class ReceiptItem {
-  const ReceiptItem({
-    required this.name,
-    required this.qty,
-    required this.unitPrice,
-    required this.lineTotal,
-  });
-
-  final String name;
-  final Qty qty;
-  final Money unitPrice;
-  final Money lineTotal;
-}
-
-/// Everything needed to render a receipt, independent of DB row types.
-class ReceiptData {
-  const ReceiptData({
-    required this.shopName,
-    this.address,
-    this.phone,
-    required this.invoiceNo,
-    required this.dateTime,
-    required this.items,
-    required this.subtotal,
-    required this.discount,
-    required this.vat,
-    required this.total,
-    required this.paid,
-    required this.due,
-    required this.change,
-    this.footer,
-  });
-
-  final String shopName;
-  final String? address;
-  final String? phone;
-  final String invoiceNo;
-  final DateTime dateTime;
-  final List<ReceiptItem> items;
-  final Money subtotal;
-  final Money discount;
-  final Money vat;
-  final Money total;
-  final Money paid;
-  final Money due;
-  final Money change;
-  final String? footer;
-
-  ReceiptData copyWith({Money? paid, Money? due, Money? change}) => ReceiptData(
-    shopName: shopName,
-    address: address,
-    phone: phone,
-    invoiceNo: invoiceNo,
-    dateTime: dateTime,
-    items: items,
-    subtotal: subtotal,
-    discount: discount,
-    vat: vat,
-    total: total,
-    paid: paid ?? this.paid,
-    due: due ?? this.due,
-    change: change ?? this.change,
-    footer: footer,
-  );
-}
+import 'receipt_data.dart';
+export 'receipt_data.dart';
 
 /// Renders the monospaced receipt body. [width] is characters per line:
 /// 32 for 58 mm paper, 48 for 80 mm.
@@ -79,7 +14,10 @@ String renderReceiptText(ReceiptData data, {int width = 32}) {
   void pair(String left, String right) => lines.add(_pair(left, right, width));
   void divider() => lines.add('-' * width);
 
+  String amount(Money value) => formatAmount(value, currency: data.currency);
+  final code = data.currency == ShopCurrency.bdt ? 'Tk' : data.currency.code;
   center(data.shopName);
+  if (data.taxId.isNotEmpty) center('${data.taxLabel} ID: ${data.taxId}');
   if (data.address != null) center(data.address!);
   if (data.phone != null) center(data.phone!);
   divider();
@@ -88,20 +26,21 @@ String renderReceiptText(ReceiptData data, {int width = 32}) {
   for (final item in data.items) {
     lines.add(_fit(item.name, width));
     pair(
-      ' ${item.qty.display} x ${formatAmount(item.unitPrice)}',
-      formatAmount(item.lineTotal),
+      ' ${item.qty.display} x ${amount(item.unitPrice)}',
+      amount(item.lineTotal),
     );
   }
   divider();
-  pair('SUBTOTAL', 'Tk ${formatAmount(data.subtotal)}');
+  pair('SUBTOTAL', '$code ${amount(data.subtotal)}');
   if (!data.discount.isZero) {
-    pair('DISCOUNT', '-Tk ${formatAmount(data.discount)}');
+    pair('DISCOUNT', '-$code ${amount(data.discount)}');
   }
-  if (!data.vat.isZero) pair('VAT (incl.)', 'Tk ${formatAmount(data.vat)}');
-  pair('TOTAL', 'Tk ${formatAmount(data.total)}');
-  pair('PAID', 'Tk ${formatAmount(data.paid)}');
-  if (!data.due.isZero) pair('DUE', 'Tk ${formatAmount(data.due)}');
-  if (!data.change.isZero) pair('CHANGE', 'Tk ${formatAmount(data.change)}');
+  if (!data.vat.isZero)
+    pair('${data.taxLabel} (incl.)', '$code ${amount(data.vat)}');
+  pair('TOTAL', '$code ${amount(data.total)}');
+  pair('PAID', '$code ${amount(data.paid)}');
+  if (!data.due.isZero) pair('DUE', '$code ${amount(data.due)}');
+  if (!data.change.isZero) pair('CHANGE', '$code ${amount(data.change)}');
   divider();
   if (data.footer != null) center(data.footer!);
   return lines.join('\n');

@@ -157,7 +157,7 @@ flowchart TB
     subgraph APP["🖥 Flutter App (Windows · Android · iOS)"]
         PICK["Module picker → Super Shop | Restaurant"]
         UI["features/ — pos · tables · products · customers · inventory · reports · settings"]
-        CORE["core/ — Money · Qty · Drift DB · printing (receipt + KOT) · sync · license"]
+        CORE["core/ — Money · Qty · Drift DB · printing (receipt + KOT) · backups · SMS · CSV"]
         PICK --> UI --> CORE
         CORE --> DB[("SQLite ×2\nper-module, offline source of truth")]
     end
@@ -178,7 +178,7 @@ flowchart TB
 | UI / App | Flutter 3.47 (one codebase → Windows, Android, iOS) |
 | State | Riverpod 3 |
 | Routing | go_router (capability-guarded routes) |
-| Local database | Drift (SQLite) — 21 tables, schema v6, per-module files |
+| Local database | Drift (SQLite) — 21 tables, schema v8, per-module files |
 | Cloud (optional) | Supabase — Postgres, Auth, Edge Functions |
 | Receipts & tickets | ESC/POS thermal 58/80 mm — LAN today; USB/Bluetooth transports built-in (plugin-enabled) + shop-logo raster header + kitchen tickets |
 | Localization | Flutter ARB — `bn` + `en` (252 keys, full parity) |
@@ -186,6 +186,28 @@ flowchart TB
 ---
 
 ## 🏁 Getting Started
+
+### International shop settings and replenishment
+
+On a new installation, create the owner, then open **Settings** before adding
+products to choose the module's accounting currency, tax label and business
+tax ID. Supported currencies: BDT, USD, EUR, GBP, AED, SAR, INR, CAD, AUD, SGD,
+MYR and PKR. All use exactly two decimals. Checkout, entry parsing, receipts,
+reprints, reports and reminder previews use the saved currency. Language
+selection (English/Bengali) persists on the device.
+
+Currency changes are locked once products, running-order lines or financial
+records exist, including deleted records. This protects historical amounts;
+there is no currency conversion, foreign exchange, zero/three-decimal currency
+support, or certification of local tax rules. The browser demo starts with BDT
+sample data. Keep an actual shop's catalog blank until its currency is chosen.
+
+**Inventory → Replenishment planner** uses the active outlet's last 28 days of
+sales, derived stock, minimum level and selectable lead/cover days to suggest
+order quantities. Piece units round upward. Plans can be exported as CSV;
+they do not place orders or change stock. With no sales history, the minimum
+stock level supplies the target. Promotions, seasonality, returns and supplier
+availability are not forecast by this advisory calculation.
 
 ### Prerequisites
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) ≥ 3.47.7 (stable)
@@ -308,6 +330,7 @@ flutter test      # money math, stock, sales, baki, orders/KOT, permissions, wid
 ### License & Cloud Plan *(rolling out)*
 - One-time license per shop, verified fully offline (signed key bound to the machine).
 - Optional Cloud Plan adds encrypted backup, multi-device sync, and the owner's remote app. If it lapses, the POS keeps working locally — **it never locks you out.**
+- **Submission scope:** the Cloud Plan is roadmap-only today. No cloud backend, Edge Functions or server secrets ship in this repository — the local POS is complete and wholly functional offline, and this archive contains no API surface to deploy or protect. Backend code, when it exists, is server-side and out of scope for this submission.
 
 > Full licence terms for the software and its bundled components: [`LICENSE-NOTE.md`](LICENSE-NOTE.md).
 

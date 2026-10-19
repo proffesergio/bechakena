@@ -17,6 +17,46 @@ img.Image _solid(int w, int h, int r, int g, int b) {
 }
 
 void main() {
+  group('printer-independent bitmap', () {
+    test('contains only packed pixels and explicit dimensions', () {
+      final bitmap = rasterizeImage(_solid(9, 2, 0, 0, 0));
+      expect(bitmap.width, 9);
+      expect(bitmap.height, 2);
+      expect(bitmap.bytesPerRow, 2);
+      expect(bitmap.bytes, [0xFF, 0x80, 0xFF, 0x80]);
+      expect(escPosRasterBytes(bitmap), [
+        0x1D,
+        0x76,
+        0x30,
+        0x00,
+        2,
+        0,
+        2,
+        0,
+        ...bitmap.bytes,
+      ]);
+    });
+
+    test('transparent black is paper and opaque black prints', () {
+      final image = img.Image(width: 2, height: 1, numChannels: 4);
+      image.setPixelRgba(0, 0, 0, 0, 0, 0);
+      image.setPixelRgba(1, 0, 0, 0, 0, 255);
+      expect(rasterizeImage(image).bytes, [0x40]);
+    });
+
+    test('decoding downscales pixels without adding printer commands', () {
+      final encoded = Uint8List.fromList(img.encodePng(_solid(16, 4, 0, 0, 0)));
+      final bitmap = tryRasterFromImage(encoded, maxWidthDots: 8)!;
+      expect(bitmap.width, 8);
+      expect(bitmap.height, 2);
+      expect(bitmap.bytes, [0xFF, 0xFF]);
+      expect(
+        tryEscPosRasterFromImage(encoded, maxWidthDots: 8),
+        escPosRasterBytes(bitmap),
+      );
+    });
+  });
+
   group('escPosRaster', () {
     test('emits a GS v 0 header with correct dimensions', () {
       final bytes = escPosRaster(_solid(8, 1, 255, 255, 255));
@@ -48,8 +88,9 @@ void main() {
     test('undecodable bytes yield null, never throw', () {
       expect(
         tryEscPosRasterFromImage(
-            Uint8List.fromList([1, 2, 3, 4]), // not an image
-            maxWidthDots: 384),
+          Uint8List.fromList([1, 2, 3, 4]), // not an image
+          maxWidthDots: 384,
+        ),
         isNull,
       );
     });

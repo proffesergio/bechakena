@@ -98,6 +98,72 @@ abstract class AppLocalizations {
     Locale('en'),
   ];
 
+  /// No description provided for @replenishTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart replenishment'**
+  String get replenishTitle;
+
+  /// No description provided for @replenishHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested orders use the last 28 days of finalized sales at this branch: average daily sales × (lead + cover days), or your minimum stock, whichever is higher, less current stock. Gross sales include subsequently returned items. Review seasonality and supplier constraints before ordering. Suggestions never place orders automatically.'**
+  String get replenishHint;
+
+  /// No description provided for @replenishLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier lead time'**
+  String get replenishLead;
+
+  /// No description provided for @replenishCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Target stock cover'**
+  String get replenishCover;
+
+  /// No description provided for @replenishDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String replenishDays(int days);
+
+  /// No description provided for @replenishExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export order plan'**
+  String get replenishExport;
+
+  /// No description provided for @replenishExported.
+  ///
+  /// In en, this message translates to:
+  /// **'Order plan downloaded'**
+  String get replenishExported;
+
+  /// No description provided for @replenishError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load or export the order plan. Please try again.'**
+  String get replenishError;
+
+  /// No description provided for @replenishEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No replenishment suggested for this branch.'**
+  String get replenishEmpty;
+
+  /// No description provided for @replenishNoHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum stock target'**
+  String get replenishNoHistory;
+
+  /// No description provided for @replenishStockSales.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock: {stock} · Sold in 28 days: {sold} {unit}'**
+  String replenishStockSales(String stock, String sold, String unit);
+
   /// No description provided for @navPos.
   ///
   /// In en, this message translates to:
@@ -1609,6 +1675,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Switch'**
   String get switchModuleAction;
+
+  /// No description provided for @accessRestricted.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have access to this record.'**
+  String get accessRestricted;
+
+  /// No description provided for @globalCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounting currency'**
+  String get globalCurrency;
+
+  /// No description provided for @globalCurrencyHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose before adding prices or transactions. Only two-decimal currencies are supported; no currency conversion. One currency applies to all branches in this module.'**
+  String get globalCurrencyHelp;
+
+  /// No description provided for @globalCurrencyLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency is locked because prices, running order items, or financial records exist (including deleted records). Existing amounts cannot be converted or relabeled. Zero- and three-decimal currencies are not supported.'**
+  String get globalCurrencyLocked;
+
+  /// No description provided for @globalTaxLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax label (e.g. VAT, GST, sales tax)'**
+  String get globalTaxLabel;
+
+  /// No description provided for @globalTaxId.
+  ///
+  /// In en, this message translates to:
+  /// **'Business tax registration ID'**
+  String get globalTaxId;
+
+  /// No description provided for @globalInvalidTaxDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a tax label (1–32 characters) and an optional tax ID (up to 80 characters), without line breaks or control characters.'**
+  String get globalInvalidTaxDetails;
+
+  /// No description provided for @globalPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current role cannot change these settings.'**
+  String get globalPermissionDenied;
+
+  /// No description provided for @globalSettingsSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings could not be saved. Please try again.'**
+  String get globalSettingsSaveFailed;
+
+  /// No description provided for @globalSettingsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Business settings could not be loaded. Reopen this screen or restore a valid backup.'**
+  String get globalSettingsLoadFailed;
+
+  /// No description provided for @globalTaxHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The label and registration ID appear on receipts. Tax calculation remains inclusive at each product’s configured rate; this does not configure country-specific tax filing.'**
+  String get globalTaxHelp;
 }
 
 class _AppLocalizationsDelegate

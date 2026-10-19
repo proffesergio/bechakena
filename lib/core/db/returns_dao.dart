@@ -78,10 +78,12 @@ class ReturnsDao extends DatabaseAccessor<AppDatabase> with _$ReturnsDaoMixin {
     });
   }
 
-  Future<List<ReturnItem>> itemsOf(String returnId) =>
-      (select(returnItems)..where((i) => i.returnId.equals(returnId))).get();
+  Future<List<ReturnItem>> itemsOf(String returnId) => (select(returnItems)
+        ..where((i) => i.returnId.equals(returnId) & i.deletedAt.isNull()))
+      .get();
 
   Stream<List<Return>> watchRecent({int limit = 100}) => (select(returns)
+        ..where((r) => r.deletedAt.isNull())
         ..orderBy([(r) => OrderingTerm.desc(r.createdAt)])
         ..limit(limit))
       .watch();
@@ -93,7 +95,8 @@ class ReturnsDao extends DatabaseAccessor<AppDatabase> with _$ReturnsDaoMixin {
     final query = selectOnly(returns)
       ..addColumns([sum])
       ..where(returns.createdAt.isBiggerOrEqualValue(start) &
-          returns.createdAt.isSmallerThanValue(end));
+          returns.createdAt.isSmallerThanValue(end) &
+          returns.deletedAt.isNull());
     final row = await query.getSingle();
     return Money(row.read(sum) ?? 0);
   }

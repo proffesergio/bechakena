@@ -17,13 +17,16 @@ class SessionController extends Notifier<StaffData?> {
   void logout() => state = null;
 }
 
-final currentStaffProvider =
-    NotifierProvider<SessionController, StaffData?>(SessionController.new);
+final currentStaffProvider = NotifierProvider<SessionController, StaffData?>(
+  SessionController.new,
+);
 
 /// All active staff (login picker, staff management).
 final staffListProvider = StreamProvider<List<StaffData>>(
-    (ref) => ref.watch(databaseProvider).staffDao.watchStaff());
+  (ref) => ref.watch(databaseProvider).staffDao.watchStaff(),
+);
 
 /// Whether any staff exists — drives first-run owner setup.
 final hasStaffProvider = FutureProvider<bool>(
-    (ref) => ref.watch(databaseProvider).staffDao.hasAnyStaff());
+  (ref) => ref.watch(databaseProvider).staffDao.hasAnyStaff(),
+);

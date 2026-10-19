@@ -1,3 +1,4 @@
+import '../../features/settings/ui/business_settings_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -68,6 +69,8 @@ class _ProductPickerState extends ConsumerState<ProductPicker> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).languageCode;
     final query = ref.watch(_searchQueryProvider).trim().toLowerCase();
@@ -195,6 +198,8 @@ class ProductCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settingsStatus = businessSettingsStatus(ref, context);
+    if (settingsStatus != null) return settingsStatus;
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).languageCode;
     final theme = Theme.of(context);
@@ -243,7 +248,7 @@ class ProductCard extends ConsumerWidget {
                   ],
                 ),
                 const Spacer(),
-                Text(formatTaka(product.salePrice, locale: locale),
+                Text(formatTaka(product.salePrice, locale: locale, currency: ref.read(shopCurrencyProvider)),
                     style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold, color: accent)),
                 const SizedBox(height: 4),

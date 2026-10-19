@@ -9,6 +9,11 @@
 ///                         --dart-define=BECHAKENA_SUPABASE_ANON_KEY=...
 ///
 /// See `.env.example` at the repository root for every variable.
+///
+/// Hardening: these constants are compiled into the shipped binary — only
+/// public identifiers (URLs, anon/public keys) belong here. Server secrets
+/// (`SUPABASE_SERVICE_ROLE_KEY`, `SMS_API_KEY`, license private key, Vercel
+/// tokens) must stay in the server/CI environment; see `docs/SECURITY.md`.
 abstract final class AppConfig {
   /// Base URL of the optional Cloud Plan API / Edge Functions host.
   static const String apiBaseUrl =
