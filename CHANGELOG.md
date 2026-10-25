@@ -18,6 +18,8 @@ All notable changes to BechaKena are documented here. The format follows
   audit-to-source checklist in `docs/RESUBMISSION.md`.
 - Fixed ten existing Dart analyzer brace warnings blocking CI; added listing
   checks and a downloadable submission archive to the showcase workflow.
+- Kept the customer-access test subscribed while awaiting its stream, matching
+  the dialog's Riverpod lifecycle; documented CI token renewal.
 
 ## [1.0.0] — 2026-10-19
 

@@ -167,6 +167,12 @@ void main() {
           ],
         );
         addTearDown(container.dispose);
+        // Riverpod pauses streams without listeners; model the dialog's watch.
+        final subscription = container.listen(
+          canManageCustomerProvider(local.id),
+          (_, _) {},
+        );
+        addTearDown(subscription.close);
         expect(container.read(canManageCustomerProvider(local.id)), isFalse);
         await container.read(scopedCustomersProvider.future);
         expect(container.read(canManageCustomerProvider(local.id)), isTrue);

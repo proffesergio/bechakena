@@ -115,6 +115,8 @@ alias `bkpos.vercel.app`). The showcase workflow builds both the landing page
 and the Flutter demo and uploads deployment and submission ZIP artifacts.
 The existing GitHub `VERCEL_TOKEN` secret was rejected in the previous run;
 replace it with a valid token for that team to restore automatic deployment.
+Step-by-step instructions are in [VERCEL_TOKEN.md](VERCEL_TOKEN.md). The CLI
+token-creation attempt was rejected by Vercel (HTTP 403); no secret was changed.
 A completed public-output artifact can also be deployed through the linked,
 authenticated CLI with `vercel deploy --prebuilt --prod`.
 
