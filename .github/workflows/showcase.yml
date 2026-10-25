@@ -50,6 +50,19 @@ jobs:
           npm ci
           npm run build
           npm run typecheck
+          npm test
+      - name: Validate and build submission source archive
+        run: |
+          python3 -m unittest discover -s scripts -p 'test*.py'
+          python3 scripts/make_submission_zip.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bechakena-vibe96-submission
+          path: |
+            dist/bechakena-vibe96.zip
+            dist/bechakena-vibe96.zip.sha256
+          if-no-files-found: error
+          retention-days: 30
       - name: Validate and package public output
         run: python3 scripts/prepare_vercel.py
       - uses: actions/upload-artifact@v4

@@ -69,3 +69,6 @@ graphify-out/
 # Stray Python venv — excluded from the archive; untrack with:
 #   git rm -r --cached pyenv
 pyenv/
+
+# Local audit renders and verification scratch files
+/tmp/

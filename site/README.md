@@ -2,6 +2,12 @@
 
 Bilingual Next.js static marketing site at `/`, with the Flutter browser demo at `/demo/`.
 
+Version 1.0.1 uses a light product-led landing page and includes marketplace
+artwork: `public/media/cover.png` (1920×1080) and `landing-square.png`
+(1080×1080). Editable SVGs and `../scripts/make_listing_media.py` accompany the
+PNGs. Use `/` as the listing landing URL; keep `/demo/` as the interactive demo.
+Submission evidence and publication steps: `../docs/RESUBMISSION.md`.
+
 ```sh
 npm ci
 npm run dev

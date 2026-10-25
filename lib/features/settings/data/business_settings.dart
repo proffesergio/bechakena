@@ -54,8 +54,9 @@ class BusinessSettingsStore {
     required bool Function() canManage,
   }) => db.transaction(() async {
     void authorize() {
-      if (!canManage())
+      if (!canManage()) {
         throw const BusinessSettingsException(BusinessSettingsError.forbidden);
+      }
     }
 
     authorize();

@@ -183,8 +183,9 @@ class DueReminderDialog extends ConsumerWidget {
                 .settingsDao
                 .getValue('shop.name');
             if (!context.mounted ||
-                !ref.read(canManageCustomerProvider(customer.id)))
+                !ref.read(canManageCustomerProvider(customer.id))) {
               return;
+            }
             await ref
                 .read(databaseProvider)
                 .smsDao
@@ -356,8 +357,9 @@ class _ReceivePaymentDialogState extends ConsumerState<ReceivePaymentDialog> {
           onPressed: amount == null
               ? null
               : () async {
-                  if (!ref.read(canManageCustomerProvider(widget.customerId)))
+                  if (!ref.read(canManageCustomerProvider(widget.customerId))) {
                     return;
+                  }
                   final navigator = Navigator.of(context);
                   await ref
                       .read(databaseProvider)

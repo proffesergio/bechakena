@@ -2,16 +2,16 @@
 
 ## Short description (as submitted)
 
-> Offline-first POS for Worldwide shops and restaurants. Dart/Flutter app for Windows, Android, iOS and web. Data in a local Drift/SQLite database. Modules: barcode checkout, baki khata (dues), inventory, purchasing, reports, restaurant tables, receipts, optional cloud sync.
+> Offline-first retail and restaurant POS built with Flutter/Dart and Drift/SQLite. Barcode checkout, inventory, baki khata, purchasing, reports, tables and kitchen tickets. Bangla/English UI; Windows, Android, iOS and browser demo. Cloud sync is roadmap-only.
 
-— **273/300 characters.**
+— Within the 300-character listing limit. Cloud features are explicitly roadmap-only.
 
 What the blurb covers for review:
 
 | Required item | Covered by |
 |---|---|
-| What it does & for whom | "Offline-first POS for Worldwide shops and restaurants" |
-| Main modules | "barcode checkout, baki khata (dues), inventory, purchasing, reports, restaurant tables, receipts, optional cloud sync" |
+| What it does & for whom | Offline-first retail and restaurant POS |
+| Main modules | Barcode checkout, inventory, baki khata, purchasing, reports, tables and kitchen tickets |
 | Language & framework | Dart / Flutter |
 | Database | Drift over local SQLite |
 | Web / mobile apps | Windows, Android, iOS + web (browser demo) |
@@ -24,6 +24,7 @@ Build, test and setup instructions are intentionally out of scope here — see
 | Field | Value |
 |---|---|
 | Category | **Ecommerce & Retail** |
+| Landing page URL | `https://bkpos.vercel.app/` |
 | Live demo URL | `https://bkpos.vercel.app/demo/` |
 | Demo credentials | **Demo Owner · PIN 1234** — pick either module first; data stays in the visitor's browser |
 
@@ -77,7 +78,7 @@ The submission ZIP mirrors the repository layout one-to-one, so every path in
 1. Build the archive (validates required files, refuses build junk or env files):
 
    ```bash
-   scripts/make_submission_zip.sh        # → dist/bechakena-vibe96.zip
+   python scripts/make_submission_zip.py # → dist/bechakena-vibe96.zip
    ```
 
 2. Repo hygiene (already applied in this repository): `site/package-lock.json`
@@ -85,3 +86,12 @@ The submission ZIP mirrors the repository layout one-to-one, so every path in
    re-check with `git status` if you add files.
 
 3. Upload `dist/bechakena-vibe96.zip` at vibe96.com/sell/submit.
+
+4. Use `https://bkpos.vercel.app/` for the **landing page** and
+   `https://bkpos.vercel.app/demo/` for the **live POS demo**. Publish the updated
+   build before resubmitting; local changes do not change the hosted website.
+
+5. Upload `site/public/media/cover.png` as the cover and
+   `site/public/media/landing-square.png` as the square landing image.
+   See [RESUBMISSION.md](RESUBMISSION.md) for the review evidence and remaining
+   publication steps. Final approval requires a fresh Vibe96 review.

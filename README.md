@@ -260,6 +260,7 @@ flutter test      # money math, stock, sales, baki, orders/KOT, permissions, wid
 | [`CHANGELOG.md`](CHANGELOG.md) | Version history |
 | [`.env.example`](.env.example) | Every configuration variable, with placeholders and comments |
 | [`docs/VIBE96.md`](docs/VIBE96.md) | Marketplace submission notes: description, category, archive layout |
+| [`docs/RESUBMISSION.md`](docs/RESUBMISSION.md) | Version 1.0.1 reviewer checklist, listing images, validation and publication steps |
 | [`LICENSE-NOTE.md`](LICENSE-NOTE.md) | Licence terms for the software and its bundled third-party components |
 
 ---

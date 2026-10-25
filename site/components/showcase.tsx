@@ -51,8 +51,6 @@ export default function Showcase() {
   const tabId = useId();
   const brand = locale === "bn" ? "বেচাকেনা" : "BechaKena";
   const imagePaths = [locale === "bn" ? "/media/pos-bn.png" : "/media/pos-en.png", "/media/restaurant.png", "/media/reports.png", "/media/receipt.png"];
-  const stockTokens = locale === "bn" ? ["+৫,০০০", "−১,০০০", "+১,০০০"] : ["+5,000", "−1,000", "+1,000"];
-  const stockTotal = locale === "bn" ? "৫,০০০" : "5,000";
 
   useEffect(() => {
     try {
@@ -86,7 +84,7 @@ export default function Showcase() {
     <a className="skip-link" href="#main">{t.skip}</a>
     <header className="header" id="top"><div className="container nav">
       <a className="brand" href="#top" aria-label={brand}><Mark /><span>{brand}<small>neWell Software</small></span></a>
-      <nav className="nav-links" aria-label={t.menu}><a href="#product">{t.product}</a><a href="#modules">{t.modules}</a><a href="#ownership">{t.pricing}</a></nav>
+      <nav className="nav-links" aria-label={t.menu}><a href="#product">{t.product}</a><a href="#modules">{t.modules}</a><a href="#technology">{locale === "bn" ? "প্রযুক্তি" : "Technology"}</a><a href="#ownership">{t.pricing}</a></nav>
       <div className="nav-actions"><div className="language-switch" role="group" aria-label={t.languageLabel}><button lang="en" aria-pressed={locale === "en"} onClick={() => changeLocale("en")}>EN</button><button lang="bn" aria-pressed={locale === "bn"} onClick={() => changeLocale("bn")}>বাংলা</button></div><a className="nav-demo" href="/demo/">{t.tryDemo}<Arrow diagonal /></a></div>
     </div></header>
 
@@ -99,6 +97,11 @@ export default function Showcase() {
           <div className="capture-label"><span className="tiny-square" aria-hidden="true" />{t.heroCaption}</div>
         </motion.div>
         <div className="proof-strip">{t.proof.map((item, i) => <span key={i}><Icon kind="check" />{item}</span>)}</div>
+      </section>
+
+      <section className="demo-start container" id="try" aria-labelledby="demo-start-title">
+        <div><Eyebrow>{locale === "bn" ? "নিজেই দেখুন" : "TAKE IT FOR A SPIN"}</Eyebrow><h2 id="demo-start-title">{t.demoTitle}</h2><p>{t.demoBody}</p></div>
+        <div><ol>{t.demoSteps.map(step => <li key={step}>{step}</li>)}</ol><a className="inline-link" href="/demo/">{t.tryDemo}<Arrow diagonal /></a></div>
       </section>
 
       <section className="section container product-section" id="product" aria-labelledby="tour-title">
@@ -118,39 +121,11 @@ export default function Showcase() {
 
       <section className="section foundations container" aria-labelledby="foundations-title"><Reveal><Eyebrow>{t.foundationsEyebrow}</Eyebrow><h2 id="foundations-title">{t.foundationTitle}<br /><span className="muted-heading">{t.foundationAccent}</span></h2></Reveal><div className="foundation-grid">{t.foundations.map((item, i) => <Reveal className="foundation" key={i} delay={i * 0.08}><div className="feature-icon"><Icon kind={(["wallet", "stock", "money"] as const)[i]} /></div><span className="eyebrow small-eyebrow">{item.label}</span><h3>{item.title}</h3><p>{item.text}</p></Reveal>)}</div></section>
 
-      <section className="section quality-section container" aria-labelledby="quality-title">
-        <Reveal className="quality-head"><div><Eyebrow>{t.qualityEyebrow}</Eyebrow><h2 id="quality-title">{t.qualityTitle}<br /><span className="muted-heading">{t.qualityAccent}</span></h2></div><p className="section-lede">{t.qualityBody}</p></Reveal>
-        <div className="quality-grid">
-          <Reveal className="quality-card">
-            <div className="qviz qviz-fast" aria-hidden="true">
-              <p className="qviz-cloud"><Icon kind="offline" />{t.qualityVizCloud}<i className="cloud-strike" /></p>
-              <div className="qviz-rows"><span /><span /><span className="qviz-gone"><i>{t.qualityVizFiltered}</i></span><span /></div>
-              <i className="qviz-beam" />
-              <b className="qviz-chip">{t.qualityVizLocal}</b>
-            </div>
-            <span className="quality-tag">{t.qualityCards[0].tag}</span><h3>{t.qualityCards[0].title}</h3><p>{t.qualityCards[0].text}</p><p className="micro quality-caption">{t.qualityCards[0].caption}</p>
-          </Reveal>
-          <Reveal className="quality-card" delay={0.08}>
-            <div className="qviz qviz-sum" aria-hidden="true">
-              <div className="qviz-tokens">{stockTokens.map((token, i) => <span key={token} className={`qviz-token token-${i}`}>{token}</span>)}</div>
-              <div className="qviz-sum-box"><span>Σ</span><strong>{stockTotal}</strong><em>{t.qualityVizStock}</em></div>
-            </div>
-            <span className="quality-tag">{t.qualityCards[1].tag}</span><h3>{t.qualityCards[1].title}</h3><p>{t.qualityCards[1].text}</p><p className="micro quality-caption">{t.qualityCards[1].caption}</p>
-          </Reveal>
-          <Reveal className="quality-card" delay={0.16}>
-            <div className="qviz qviz-checks" aria-hidden="true">
-              <div className="qviz-term">{t.qualityVizChecks.map((line, i) => <span key={line} className={`qterm-line qterm-${i}`}><Icon kind="check" />{line}</span>)}</div>
-              <div className="qterm-bar"><i /><b>{t.qualityVizAll}</b></div>
-            </div>
-            <span className="quality-tag">{t.qualityCards[2].tag}</span><h3>{t.qualityCards[2].title}</h3><p>{t.qualityCards[2].text}</p><p className="micro quality-caption">{t.qualityCards[2].caption}</p>
-          </Reveal>
-        </div>
-        <Reveal className="quality-gates">{t.qualityGates.map(gate => <span key={gate}><Icon kind="check" />{gate}</span>)}</Reveal>
-      </section>
-
       <section className="offline-section" aria-labelledby="offline-title"><div className="container offline-layout"><Reveal><Eyebrow><span className="status-dot" />{t.offlineEyebrow}</Eyebrow><h2 id="offline-title">{t.offlineTitle}<br /><span>{t.offlineAccent}</span></h2><p className="offline-body">{t.offlineBody}</p></Reveal><Reveal className="offline-diagram"><div className="offline-orbit" aria-hidden="true"><div className="orbit orbit-one" /><div className="orbit orbit-two" /><div className="orbit orbit-three" /><div className="orbit-center"><Mark /></div><span className="orbit-node node-one"><Icon kind="stock" /></span><span className="orbit-node node-two"><Icon kind="wallet" /></span><span className="orbit-node node-three"><Icon kind="money" /></span></div><ol className="offline-steps">{t.offlineFlow.map((step, i) => <li key={i}><Icon kind="check" /><span>{step}</span></li>)}</ol></Reveal><p className="micro offline-foot">{t.offlineFoot}</p></div></section>
 
       <section className="section container" id="modules" aria-labelledby="modules-title"><Reveal className="section-heading"><div><Eyebrow>{t.moduleEyebrow}</Eyebrow><h2 id="modules-title">{t.moduleTitle}<br /><span className="muted-heading">{t.moduleAccent}</span></h2></div><p className="section-lede">{t.moduleBody}</p></Reveal><div className="module-grid"><Reveal className="module-card retail-card"><div className="module-copy"><Eyebrow>{t.retailTag}</Eyebrow><h3>{t.retailTitle}</h3><p>{t.retailText}</p><a className="inline-link" href="/demo/">{t.moduleLink}<Arrow diagonal /></a></div><div className="module-image"><img src={imagePaths[0]} alt={t.tabs[0].alt} width="1440" height="1000" loading="lazy" /></div></Reveal><Reveal className="module-card restaurant-card" delay={0.1}><div className="module-copy"><Eyebrow>{t.restaurantTag}</Eyebrow><h3>{t.restaurantTitle}</h3><p>{t.restaurantText}</p><a className="inline-link" href="/demo/">{t.moduleLink}<Arrow diagonal /></a></div><div className="module-image"><img src="/media/restaurant.png" alt={t.tabs[1].alt} width="1440" height="1000" loading="lazy" /></div></Reveal></div></section>
+
+      <section className="section technology-section container" id="technology" aria-labelledby="technology-title"><Reveal><Eyebrow>{t.stackEyebrow}</Eyebrow><h2 id="technology-title">{t.stackTitle}</h2><p className="technology-body">{t.stackBody}</p><ul className="stack-list">{["Flutter / Dart", "Riverpod", "Drift / SQLite", "Next.js / React"].map((name, i) => <li key={name}><span>0{i + 1}</span>{name}</li>)}</ul></Reveal></section>
 
       <section className="section how-section container" aria-labelledby="how-title"><Reveal><Eyebrow>{t.howEyebrow}</Eyebrow><h2 id="how-title">{t.howTitle}</h2></Reveal><div className="how-grid">{t.howSteps.map((item, i) => <Reveal key={i} delay={i * 0.08}><span className="step-number">0{i + 1}</span><h3>{item.title}</h3><p>{item.text}</p></Reveal>)}</div></section>
 

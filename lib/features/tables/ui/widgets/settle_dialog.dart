@@ -203,8 +203,9 @@ class _SettleDialogState extends ConsumerState<SettleDialog> {
   Future<void> _settle() async {
     if (!ref.read(canProvider(Capability.sell))) return;
     if (_customerId != null &&
-        !ref.read(canManageCustomerProvider(_customerId!)))
+        !ref.read(canManageCustomerProvider(_customerId!))) {
       return;
+    }
 
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);

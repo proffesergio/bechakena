@@ -78,11 +78,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _logoPath = await settings.getValue('shop.logoPath');
       if (mounted) setState(() => _loaded = true);
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _loaded = true;
           _loadFailed = true;
         });
+      }
     }
   }
 

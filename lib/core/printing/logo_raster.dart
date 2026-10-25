@@ -25,8 +25,9 @@ RasterBitmap? tryRasterFromImage(
   Uint8List encoded, {
   required int maxWidthDots,
 }) {
-  if (maxWidthDots <= 0)
+  if (maxWidthDots <= 0) {
     throw ArgumentError.value(maxWidthDots, 'maxWidthDots');
+  }
   img.Image? decoded;
   try {
     // Malformed bytes can make a format probe read past the buffer, so guard

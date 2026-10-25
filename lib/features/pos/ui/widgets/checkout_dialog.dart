@@ -197,8 +197,9 @@ class _CheckoutDialogState extends ConsumerState<CheckoutDialog> {
   Future<void> _finalize() async {
     if (!ref.read(canProvider(Capability.sell))) return;
     if (_customerId != null &&
-        !ref.read(canManageCustomerProvider(_customerId!)))
+        !ref.read(canManageCustomerProvider(_customerId!))) {
       return;
+    }
 
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);

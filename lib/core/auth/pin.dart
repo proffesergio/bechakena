@@ -28,8 +28,9 @@ bool verifyPin(String pin, String storedHash) {
   final parts = storedHash.split(r'$');
   if (parts.length != 4 || parts[0] != 'pbkdf2sha256') return false;
   final iterations = int.tryParse(parts[1]);
-  if (iterations == null || iterations < 1 || iterations > 2000000)
+  if (iterations == null || iterations < 1 || iterations > 2000000) {
     return false;
+  }
   Uint8List salt;
   Uint8List expected;
   try {
@@ -38,8 +39,9 @@ bool verifyPin(String pin, String storedHash) {
   } on FormatException {
     return false;
   }
-  if (salt.length < 8 || salt.length > 64 || expected.length != 32)
+  if (salt.length < 8 || salt.length > 64 || expected.length != 32) {
     return false;
+  }
   final actual = _pbkdf2(pin, salt, iterations);
   return _constantTimeEquals(actual, expected);
 }

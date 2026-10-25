@@ -5,6 +5,20 @@ All notable changes to BechaKena are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Releases are cut by pushing a
 `v*` tag; CI attaches the Windows build and Android APK to the GitHub Release.
 
+## [1.0.1] — 2026-10-25
+
+### Submission presentation
+
+- Redesigned the bilingual landing page with a light palette, product-first
+  hero, real screenshots, demo login instructions and a technology section.
+- Added a 1920×1080 cover and 1080×1080 square landing preview, plus editable
+  SVG sources. Artwork contains no contact details, websites or social links.
+- Updated link previews to use the new cover. Kept the working POS at `/demo/`.
+- Added cross-platform ZIP packaging, archive integrity/privacy tests and an
+  audit-to-source checklist in `docs/RESUBMISSION.md`.
+- Fixed ten existing Dart analyzer brace warnings blocking CI; added listing
+  checks and a downloadable submission archive to the showcase workflow.
+
 ## [1.0.0] — 2026-10-19
 
 ### Audit follow-up and product upgrades

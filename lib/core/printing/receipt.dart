@@ -35,8 +35,9 @@ String renderReceiptText(ReceiptData data, {int width = 32}) {
   if (!data.discount.isZero) {
     pair('DISCOUNT', '-$code ${amount(data.discount)}');
   }
-  if (!data.vat.isZero)
+  if (!data.vat.isZero) {
     pair('${data.taxLabel} (incl.)', '$code ${amount(data.vat)}');
+  }
   pair('TOTAL', '$code ${amount(data.total)}');
   pair('PAID', '$code ${amount(data.paid)}');
   if (!data.due.isZero) pair('DUE', '$code ${amount(data.due)}');

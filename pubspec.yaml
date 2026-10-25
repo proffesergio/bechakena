@@ -2,7 +2,7 @@ name: bechakena
 description: "Offline-first retail and restaurant POS with configurable shop currency."
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.12.2
