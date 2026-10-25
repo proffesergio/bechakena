@@ -28,6 +28,12 @@ for a single-shop install); it hardens everything above that line.
 
 ## Authorisation
 
+**Submission R5 scope:** this release ships zero HTTP API endpoints. The Next.js
+site is a static export and the POS database is local to the device/browser.
+Server-side endpoint authentication is therefore not an applicable component
+of this offline release. Local authentication and role controls below are the
+auditable boundary; no Cloud Plan backend is implemented or deployed here.
+
 - **Capability checks** gate every mutating action (returns, price edits,
   purchases, staff management, settings) through
   `permissions.dart` at the UI/logic boundary.
@@ -39,6 +45,12 @@ for a single-shop install); it hardens everything above that line.
   data. Owners run the head-office view across branches.
 - The scope is applied in SQL (DAOs take an optional `branchId`), not just in
   the widget tree, and callers must pass the current scope. DAOs are trusted local persistence APIs; they do not independently authenticate callers.
+- Sale ID/invoice lookups, child items/payments and report aggregates accept the
+  same branch scope in SQL. Stock/alert providers fail closed while the outlet
+  loads. Running-order lists use the active outlet.
+- Product/category catalogs and staff accounts are shared across branches of
+  one module. They have no branch ownership column; stock and transactions do.
+  The retail and restaurant modules use separate database files.
 
 ## Data integrity
 
@@ -46,6 +58,9 @@ for a single-shop install); it hardens everything above that line.
   adjustments, both append-only and auditable.
 - **Stock is derived** (`SUM(stock_movements.qty_delta)` per branch/product),
   never a stored counter that could drift.
+- All 25 FKs have an index prefix and explicit `ON DELETE RESTRICT`; physical
+  deletion cannot cascade through financial history. Schema v9 upgrades run
+  atomically, preserve records and validate FKs before commit.
 - Every synced row carries `id`, `updatedAt`, `deletedAt`, `deviceId`; deletes
   are soft, so sync conflicts resolve deterministically (last-writer-wins on
   `updatedAt`).
@@ -59,8 +74,8 @@ for a single-shop install); it hardens everything above that line.
   compiled into the binary by design.
 - Server-side secrets (`SUPABASE_SERVICE_ROLE_KEY`, `SMS_API_KEY`, license
   private key, Vercel tokens) live only in the server/CI environment.
-- Per-device API keys/tokens for Cloud Plan sync are issued at runtime and
-  kept in the device-local settings store, never committed.
+- A future Cloud Plan would need to issue per-device tokens at runtime and
+  store them securely. No such backend/token issuance ships in this release.
 
 ## Cloud backend scope
 

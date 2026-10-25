@@ -10,7 +10,7 @@ import '../../../../core/qty.dart';
 import '../../../../l10n/gen/app_localizations.dart';
 import '../../../pos/ui/receipt_dialog.dart';
 import '../../logic/order_math.dart';
-import 'manual_item_dialog.dart';
+import '../../../../app/widgets/manual_item_dialog.dart';
 import 'settle_dialog.dart';
 
 /// The live tab pane of the order editor: line list with qty steppers,
@@ -48,7 +48,10 @@ class OrderPane extends ConsumerWidget {
                 icon: const Icon(Icons.playlist_add),
                 onPressed: () => showDialog<void>(
                   context: context,
-                  builder: (_) => ManualItemDialog(orderId: order.id),
+                  builder: (_) => ManualItemDialog(onSave: (name, price, qty) async {
+                    await ref.read(databaseProvider).ordersDao.addManual(order.id,
+                      name: name, price: price, qty: qty);
+                  }),
                 ),
               ),
             ],

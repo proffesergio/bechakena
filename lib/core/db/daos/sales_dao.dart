@@ -51,20 +51,20 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
       customerId: customerId, items: items, tenders: tenders,
       billDiscount: billDiscount, now: now, branchId: branchId);
 
-  Future<Sale?> byId(String saleId) => (select(sales)
-        ..where((s) => s.id.equals(saleId) & s.deletedAt.isNull()))
+  Future<Sale?> byId(String saleId, {String? branchId}) => (select(sales)
+        ..where((s) => s.id.equals(saleId) & s.deletedAt.isNull() & _branchFilter(branchId)))
       .getSingleOrNull();
 
-  Future<Sale?> findByInvoiceNo(String invoiceNo) => (select(sales)
-        ..where((s) => s.invoiceNo.equals(invoiceNo) & s.deletedAt.isNull()))
+  Future<Sale?> findByInvoiceNo(String invoiceNo, {String? branchId}) => (select(sales)
+        ..where((s) => s.invoiceNo.equals(invoiceNo) & s.deletedAt.isNull() & _branchFilter(branchId)))
       .getSingleOrNull();
 
-  Future<List<SaleItem>> itemsOf(String saleId) => (select(saleItems)
-        ..where((i) => i.saleId.equals(saleId) & i.deletedAt.isNull()))
+  Future<List<SaleItem>> itemsOf(String saleId, {String? branchId}) => (select(saleItems)
+        ..where((i) => i.saleId.equals(saleId) & i.deletedAt.isNull() & _readableSale(i.saleId, branchId)))
       .get();
 
-  Future<List<SalePayment>> paymentsOf(String saleId) => (select(salePayments)
-        ..where((p) => p.saleId.equals(saleId) & p.deletedAt.isNull()))
+  Future<List<SalePayment>> paymentsOf(String saleId, {String? branchId}) => (select(salePayments)
+        ..where((p) => p.saleId.equals(saleId) & p.deletedAt.isNull() & _readableSale(p.saleId, branchId)))
       .get();
 
   /// Recent sales, newest first. [branchId] scopes the list to one outlet
@@ -80,20 +80,27 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
         ..limit(limit))
       .watch();
 
-  Expression<bool> _inRange(DateTime start, DateTime end) =>
+  Expression<bool> _readableSale(Expression<String> id, String? branchId) =>
+      existsQuery(selectOnly(sales)..addColumns([sales.id])
+        ..where(sales.id.equalsExp(id) & sales.deletedAt.isNull() & _branchFilter(branchId)));
+
+  Expression<bool> _branchFilter(String? branchId) => branchId == null
+      ? const Constant(true) : sales.branchId.equals(branchId);
+
+  Expression<bool> _inRange(DateTime start, DateTime end, String? branchId) =>
       sales.createdAt.isBiggerOrEqualValue(start) &
       sales.createdAt.isSmallerThanValue(end) &
-      sales.deletedAt.isNull();
+      sales.deletedAt.isNull() & _branchFilter(branchId);
 
   /// Per-day sales totals in [start, end) — days without sales are omitted.
   Future<List<DailyTotal>> dailyTotals(
-      {required DateTime start, required DateTime end}) async {
+      {required DateTime start, required DateTime end, String? branchId}) async {
     final day = sales.createdAt.date;
     final total = sales.total.sum();
     final count = countAll();
     final query = selectOnly(sales)
       ..addColumns([day, total, count])
-      ..where(_inRange(start, end))
+      ..where(_inRange(start, end, branchId))
       ..groupBy([day])
       ..orderBy([OrderingTerm.asc(day)]);
     final rows = await query.get();
@@ -109,13 +116,13 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
 
   /// Products ranked by revenue in [start, end).
   Future<List<TopProduct>> topProducts(
-      {required DateTime start, required DateTime end, int limit = 8}) async {
+      {required DateTime start, required DateTime end, int limit = 8, String? branchId}) async {
     final revenue = saleItems.lineTotal.sum();
     final qtySum = saleItems.qty.sum();
     final query = selectOnly(saleItems).join(
         [innerJoin(sales, sales.id.equalsExp(saleItems.saleId))])
       ..addColumns([saleItems.nameSnapshot, revenue, qtySum])
-      ..where(_inRange(start, end) & saleItems.deletedAt.isNull())
+      ..where(_inRange(start, end, branchId) & saleItems.deletedAt.isNull())
       ..groupBy([saleItems.nameSnapshot])
       ..orderBy([OrderingTerm.desc(revenue)])
       ..limit(limit);
@@ -133,11 +140,11 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
   /// Sales total per staff id in [start, end). A null key = sales with no
   /// attributed staff (recorded before login was enforced, or walk-in).
   Future<Map<String?, Money>> staffTotals(
-      {required DateTime start, required DateTime end}) async {
+      {required DateTime start, required DateTime end, String? branchId}) async {
     final total = sales.total.sum();
     final query = selectOnly(sales)
       ..addColumns([sales.staffId, total])
-      ..where(_inRange(start, end))
+      ..where(_inRange(start, end, branchId))
       ..groupBy([sales.staffId]);
     final rows = await query.get();
     return {
@@ -148,12 +155,12 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
 
   /// Tender totals per payment method in [start, end).
   Future<Map<PayMethod, Money>> paymentTotals(
-      {required DateTime start, required DateTime end}) async {
+      {required DateTime start, required DateTime end, String? branchId}) async {
     final amount = salePayments.amount.sum();
     final query = selectOnly(salePayments).join(
         [innerJoin(sales, sales.id.equalsExp(salePayments.saleId))])
       ..addColumns([salePayments.method, amount])
-      ..where(_inRange(start, end))
+      ..where(_inRange(start, end, branchId))
       ..groupBy([salePayments.method]);
     final rows = await query.get();
     return {

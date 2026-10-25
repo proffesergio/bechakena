@@ -1,3 +1,4 @@
+import '../../../../app/widgets/tender_fields.dart';
 import '../../../auth/logic/permissions.dart';
 import '../../../settings/data/business_settings.dart';
 import '../../../settings/ui/business_settings_status.dart';
@@ -135,10 +136,8 @@ class _CheckoutDialogState extends ConsumerState<CheckoutDialog> {
                 onChanged: (v) => setState(() => _customerId = v),
               ),
               const SizedBox(height: 12),
-              _tenderField(_cash, l10n.cashLabel, autofocus: true),
-              _tenderField(_bkash, l10n.bkash),
-              _tenderField(_nagad, l10n.nagad),
-              _tenderField(_card, l10n.card),
+              TenderFields(cash: _cash, bkash: _bkash, nagad: _nagad, card: _card,
+                onChanged: () => setState(() {})),
               const SizedBox(height: 8),
               if (tenders == null)
                 Text(
@@ -174,23 +173,6 @@ class _CheckoutDialogState extends ConsumerState<CheckoutDialog> {
           child: Text(l10n.confirmSale),
         ),
       ],
-    );
-  }
-
-  Widget _tenderField(
-    TextEditingController controller,
-    String label, {
-    bool autofocus = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: TextField(
-        controller: controller,
-        autofocus: autofocus,
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        decoration: InputDecoration(labelText: label),
-        onChanged: (_) => setState(() {}),
-      ),
     );
   }
 
@@ -232,7 +214,7 @@ class _CheckoutDialogState extends ConsumerState<CheckoutDialog> {
     }
 
     // Assemble the printable receipt from settings + the finalized sale.
-    final items = await db.salesDao.itemsOf(sale.id);
+    final items = await db.salesDao.itemsOf(sale.id, branchId: ref.read(readScopeBranchProvider));
     final settings = db.settingsDao;
     final business = await BusinessSettingsStore(db).load();
     final receipt = receiptFromSale(

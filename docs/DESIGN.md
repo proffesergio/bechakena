@@ -4,7 +4,11 @@
 **Product:** BechaKena (বেচাকেনা) — offline-first supermarket POS & inventory for Bangladesh
 **Company:** neWell Software
 **Platforms:** Windows desktop (primary), Android, iOS — one Flutter codebase
-**Status:** v1 in development · Last updated: 2026-07-09
+**Status:** offline POS v1.0.2; cloud/activation sections are future design only.
+
+**Submission boundary:** the delivered product has no Cloud Plan backend,
+Edge Functions, SMS gateway or activation service. Supabase/remote-sync details
+below are a roadmap specification, not services implemented by this archive.
 
 ---
 

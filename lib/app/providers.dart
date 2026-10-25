@@ -162,16 +162,25 @@ final diningTablesProvider = StreamProvider<List<DiningTable>>((ref) {
 /// All open restaurant orders (running tabs) across dine-in, takeaway and
 /// delivery. Drives the Orders hub and each table's free/occupied status.
 final openOrdersProvider = StreamProvider<List<DineOrder>>(
-  (ref) => ref.watch(databaseProvider).ordersDao.watchOpenOrders(),
+  (ref) {
+    final branchId = ref.watch(currentBranchProvider);
+    if (branchId == null || branchId.isEmpty) return Stream.value(const <DineOrder>[]);
+    return ref.watch(databaseProvider).ordersDao.watchOpenOrders(branchId: branchId);
+  },
 );
 
 /// Line items of one running order, live.
 final orderItemsProvider = StreamProvider.family<List<DineOrderItem>, String>(
-  (ref, orderId) => ref.watch(databaseProvider).ordersDao.watchItems(orderId),
+  (ref, orderId) {
+    final branchId = ref.watch(currentBranchProvider);
+    if (branchId == null || branchId.isEmpty) return Stream.value(const <DineOrderItem>[]);
+    return ref.watch(databaseProvider).ordersDao.watchItems(orderId, branchId: branchId);
+  },
 );
 
 final stockProvider = StreamProvider.family<Qty, String>((ref, productId) {
   final branchId = ref.watch(currentBranchProvider);
+  if (branchId == null || branchId.isEmpty) { return Stream.value(Qty.zero); }
   return ref
       .watch(databaseProvider)
       .stockDao
@@ -199,6 +208,7 @@ final customerDueProvider = FutureProvider.family<Money, String>(
 
 final lowStockProvider = FutureProvider<List<LowStockRow>>((ref) {
   final branchId = ref.watch(currentBranchProvider);
+  if (branchId == null || branchId.isEmpty) { return []; }
   return ref
       .watch(databaseProvider)
       .stockDao
@@ -207,6 +217,7 @@ final lowStockProvider = FutureProvider<List<LowStockRow>>((ref) {
 
 final expiringSoonProvider = FutureProvider<List<ExpiringBatch>>((ref) {
   final branchId = ref.watch(currentBranchProvider);
+  if (branchId == null || branchId.isEmpty) { return []; }
   return ref
       .watch(databaseProvider)
       .stockDao

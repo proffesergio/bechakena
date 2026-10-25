@@ -74,7 +74,7 @@ class Products extends Table with SyncColumns {
   TextColumn get sku => text().nullable()();
   TextColumn get name => text()();
   TextColumn get nameBn => text().nullable()();
-  TextColumn get categoryId => text().nullable().references(Categories, #id)();
+  TextColumn get categoryId => text().nullable().references(Categories, #id, onDelete: KeyAction.restrict)();
   TextColumn get unit => text().withDefault(const Constant('pcs'))();
   IntColumn get salePrice => integer().map(const MoneyConverter())();
   IntColumn get costPrice =>
@@ -102,12 +102,12 @@ class Products extends Table with SyncColumns {
   columns: {#branchId, #productId},
 )
 class StockMovements extends Table with SyncColumns {
-  TextColumn get productId => text().references(Products, #id)();
+  TextColumn get productId => text().references(Products, #id, onDelete: KeyAction.restrict)();
 
   /// Branch/outlet this movement belongs to. Stock is derived per branch:
   /// stock(product, branch) = SUM(qtyDelta WHERE productId AND branchId).
   /// Nullable only for legacy rows (backfilled to the default branch on open).
-  TextColumn get branchId => text().nullable().references(Shops, #id)();
+  TextColumn get branchId => text().nullable().references(Shops, #id, onDelete: KeyAction.restrict)();
   IntColumn get qtyDelta => integer().map(const QtyConverter())();
   TextColumn get type => textEnum<MovementType>()();
 
@@ -137,9 +137,9 @@ class Sales extends Table with SyncColumns {
   TextColumn get invoiceNo => text().unique()();
 
   /// Branch/outlet where the sale was rung up. Nullable only for legacy rows.
-  TextColumn get branchId => text().nullable().references(Shops, #id)();
-  TextColumn get staffId => text().nullable().references(Staff, #id)();
-  TextColumn get customerId => text().nullable().references(Customers, #id)();
+  TextColumn get branchId => text().nullable().references(Shops, #id, onDelete: KeyAction.restrict)();
+  TextColumn get staffId => text().nullable().references(Staff, #id, onDelete: KeyAction.restrict)();
+  TextColumn get customerId => text().nullable().references(Customers, #id, onDelete: KeyAction.restrict)();
   IntColumn get subtotal => integer().map(const MoneyConverter())();
   IntColumn get discount =>
       integer().map(const MoneyConverter()).withDefault(const Constant(0))();
@@ -156,10 +156,10 @@ class Sales extends Table with SyncColumns {
 @TableIndex(name: 'idx_sale_items_product_id', columns: {#productId})
 @TableIndex(name: 'idx_sale_items_sale_id', columns: {#saleId})
 class SaleItems extends Table with SyncColumns {
-  TextColumn get saleId => text().references(Sales, #id)();
+  TextColumn get saleId => text().references(Sales, #id, onDelete: KeyAction.restrict)();
 
   /// Null for manual (unlisted) items typed in at the POS.
-  TextColumn get productId => text().nullable().references(Products, #id)();
+  TextColumn get productId => text().nullable().references(Products, #id, onDelete: KeyAction.restrict)();
   TextColumn get nameSnapshot => text()();
   IntColumn get qty => integer().map(const QtyConverter())();
   IntColumn get unitPrice => integer().map(const MoneyConverter())();
@@ -171,7 +171,7 @@ class SaleItems extends Table with SyncColumns {
 
 @TableIndex(name: 'idx_sale_payments_sale_id', columns: {#saleId})
 class SalePayments extends Table with SyncColumns {
-  TextColumn get saleId => text().references(Sales, #id)();
+  TextColumn get saleId => text().references(Sales, #id, onDelete: KeyAction.restrict)();
   TextColumn get method => textEnum<PayMethod>()();
   IntColumn get amount => integer().map(const MoneyConverter())();
   TextColumn get refNo => text().nullable()();
@@ -181,7 +181,7 @@ class SalePayments extends Table with SyncColumns {
 /// Balance = SUM(sales.due) − SUM(due_payments.amount) per customer.
 @TableIndex(name: 'idx_due_payments_customer_id', columns: {#customerId})
 class DuePayments extends Table with SyncColumns {
-  TextColumn get customerId => text().references(Customers, #id)();
+  TextColumn get customerId => text().references(Customers, #id, onDelete: KeyAction.restrict)();
   IntColumn get amount => integer().map(const MoneyConverter())();
   TextColumn get method => textEnum<PayMethod>()();
   TextColumn get note => text().nullable()();
@@ -194,8 +194,8 @@ class DuePayments extends Table with SyncColumns {
 @TableIndex(name: 'idx_returns_original_sale_id', columns: {#originalSaleId})
 @TableIndex(name: 'idx_returns_staff_id', columns: {#staffId})
 class Returns extends Table with SyncColumns {
-  TextColumn get originalSaleId => text().nullable().references(Sales, #id)();
-  TextColumn get staffId => text().nullable().references(Staff, #id)();
+  TextColumn get originalSaleId => text().nullable().references(Sales, #id, onDelete: KeyAction.restrict)();
+  TextColumn get staffId => text().nullable().references(Staff, #id, onDelete: KeyAction.restrict)();
   IntColumn get refundTotal => integer().map(const MoneyConverter())();
   TextColumn get note => text().nullable()();
   DateTimeColumn get createdAt =>
@@ -205,8 +205,8 @@ class Returns extends Table with SyncColumns {
 @TableIndex(name: 'idx_return_items_return_id', columns: {#returnId})
 @TableIndex(name: 'idx_return_items_product_id', columns: {#productId})
 class ReturnItems extends Table with SyncColumns {
-  TextColumn get returnId => text().references(Returns, #id)();
-  TextColumn get productId => text().nullable().references(Products, #id)();
+  TextColumn get returnId => text().references(Returns, #id, onDelete: KeyAction.restrict)();
+  TextColumn get productId => text().nullable().references(Products, #id, onDelete: KeyAction.restrict)();
   TextColumn get nameSnapshot => text()();
   IntColumn get qty => integer().map(const QtyConverter())();
   IntColumn get refundAmount => integer().map(const MoneyConverter())();
@@ -227,8 +227,8 @@ class Suppliers extends Table with SyncColumns {
 @TableIndex(name: 'idx_purchases_supplier_id', columns: {#supplierId})
 class Purchases extends Table with SyncColumns {
   /// Branch/outlet the stock was received into. Nullable only for legacy rows.
-  TextColumn get branchId => text().nullable().references(Shops, #id)();
-  TextColumn get supplierId => text().nullable().references(Suppliers, #id)();
+  TextColumn get branchId => text().nullable().references(Shops, #id, onDelete: KeyAction.restrict)();
+  TextColumn get supplierId => text().nullable().references(Suppliers, #id, onDelete: KeyAction.restrict)();
   TextColumn get invoiceRef => text().nullable()();
   IntColumn get totalCost =>
       integer().map(const MoneyConverter()).withDefault(const Constant(0))();
@@ -239,8 +239,8 @@ class Purchases extends Table with SyncColumns {
 @TableIndex(name: 'idx_purchase_items_product_id', columns: {#productId})
 @TableIndex(name: 'idx_purchase_items_purchase_id', columns: {#purchaseId})
 class PurchaseItems extends Table with SyncColumns {
-  TextColumn get purchaseId => text().references(Purchases, #id)();
-  TextColumn get productId => text().references(Products, #id)();
+  TextColumn get purchaseId => text().references(Purchases, #id, onDelete: KeyAction.restrict)();
+  TextColumn get productId => text().references(Products, #id, onDelete: KeyAction.restrict)();
   IntColumn get qty => integer().map(const QtyConverter())();
   IntColumn get unitCost => integer().map(const MoneyConverter())();
   DateTimeColumn get expiryDate => dateTime().nullable()();
@@ -250,7 +250,7 @@ class PurchaseItems extends Table with SyncColumns {
 
 @TableIndex(name: 'idx_sms_log_customer_id', columns: {#customerId})
 class SmsLog extends Table with SyncColumns {
-  TextColumn get customerId => text().nullable().references(Customers, #id)();
+  TextColumn get customerId => text().nullable().references(Customers, #id, onDelete: KeyAction.restrict)();
   TextColumn get phone => text()();
   TextColumn get kind => textEnum<SmsKind>()();
   TextColumn get body => text()();
@@ -295,14 +295,14 @@ class DiningTables extends Table with SyncColumns {
 @TableIndex(name: 'idx_dine_orders_staff_id', columns: {#staffId})
 @TableIndex(name: 'idx_dine_orders_sale_id', columns: {#saleId})
 class DineOrders extends Table with SyncColumns {
-  TextColumn get tableId => text().nullable().references(DiningTables, #id)();
+  TextColumn get tableId => text().nullable().references(DiningTables, #id, onDelete: KeyAction.restrict)();
   TextColumn get orderType => textEnum<OrderType>()();
   TextColumn get status =>
       textEnum<OrderStatus>().withDefault(const Constant('open'))();
 
   /// Branch/outlet the order was opened in. Nullable only for legacy rows.
-  TextColumn get branchId => text().nullable().references(Shops, #id)();
-  TextColumn get staffId => text().nullable().references(Staff, #id)();
+  TextColumn get branchId => text().nullable().references(Shops, #id, onDelete: KeyAction.restrict)();
+  TextColumn get staffId => text().nullable().references(Staff, #id, onDelete: KeyAction.restrict)();
 
   /// For takeaway/delivery (dine-in identifies the guest by the table).
   TextColumn get customerName => text().nullable()();
@@ -310,7 +310,7 @@ class DineOrders extends Table with SyncColumns {
   TextColumn get note => text().nullable()();
 
   /// The finalized sale this order became on settle; null while open.
-  TextColumn get saleId => text().nullable().references(Sales, #id)();
+  TextColumn get saleId => text().nullable().references(Sales, #id, onDelete: KeyAction.restrict)();
   DateTimeColumn get createdAt =>
       dateTime().clientDefault(() => DateTime.now().toUtc())();
 }
@@ -321,10 +321,10 @@ class DineOrders extends Table with SyncColumns {
 @TableIndex(name: 'idx_order_items_product_id', columns: {#productId})
 @TableIndex(name: 'idx_order_items_order_id', columns: {#orderId})
 class DineOrderItems extends Table with SyncColumns {
-  TextColumn get orderId => text().references(DineOrders, #id)();
+  TextColumn get orderId => text().references(DineOrders, #id, onDelete: KeyAction.restrict)();
 
   /// Null for manual (off-menu) items typed in at the table.
-  TextColumn get productId => text().nullable().references(Products, #id)();
+  TextColumn get productId => text().nullable().references(Products, #id, onDelete: KeyAction.restrict)();
   TextColumn get nameSnapshot => text()();
   IntColumn get qty => integer().map(const QtyConverter())();
   IntColumn get unitPrice => integer().map(const MoneyConverter())();

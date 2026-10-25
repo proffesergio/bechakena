@@ -164,9 +164,11 @@ class _TableCard extends ConsumerWidget {
   }
 
   Future<void> _openTable(BuildContext context, WidgetRef ref) async {
+    final branchId = ref.read(currentBranchProvider);
+    if (branchId == null || branchId.isEmpty) return;
     final dao = ref.read(databaseProvider).ordersDao;
     final navigator = Navigator.of(context);
-    var current = order ?? await dao.openOrderForTable(table.id);
+    var current = order ?? await dao.openOrderForTable(table.id, branchId: branchId);
     current ??= await dao.createOrder(
       tableId: table.id,
       orderType: OrderType.dineIn,

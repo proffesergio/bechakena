@@ -16,25 +16,28 @@ class OrdersDao extends DatabaseAccessor<AppDatabase> with _$OrdersDaoMixin {
   OrdersDao(super.db);
 
   /// All open tabs, oldest first. Optionally filtered to one order type.
-  Stream<List<DineOrder>> watchOpenOrders({OrderType? type}) {
+  Stream<List<DineOrder>> watchOpenOrders({OrderType? type, String? branchId}) {
     final q = select(dineOrders)
       ..where((o) => o.status.equalsValue(OrderStatus.open))
       ..where((o) => o.deletedAt.isNull())
       ..orderBy([(o) => OrderingTerm.asc(o.createdAt)]);
     if (type != null) q.where((o) => o.orderType.equalsValue(type));
+    if (branchId != null) q.where((o) => o.branchId.equals(branchId));
     return q.watch();
   }
 
   /// The open order sitting on a table, if any (drives free/occupied status).
-  Future<DineOrder?> openOrderForTable(String tableId) => (select(dineOrders)
+  Future<DineOrder?> openOrderForTable(String tableId, {String? branchId}) => (select(dineOrders)
         ..where((o) => o.tableId.equals(tableId))
+        ..where((o) => branchId == null ? const Constant(true) : o.branchId.equals(branchId))
         ..where((o) => o.status.equalsValue(OrderStatus.open))
         ..where((o) => o.deletedAt.isNull())
         ..limit(1))
       .getSingleOrNull();
 
-  Future<DineOrder?> byId(String orderId) => (select(dineOrders)
-        ..where((o) => o.id.equals(orderId) & o.deletedAt.isNull()))
+  Future<DineOrder?> byId(String orderId, {String? branchId}) => (select(dineOrders)
+        ..where((o) => o.id.equals(orderId) & o.deletedAt.isNull() &
+            (branchId == null ? const Constant(true) : o.branchId.equals(branchId))))
       .getSingleOrNull();
 
   /// Opens a new tab. For dine-in pass [tableId]; for takeaway/delivery pass a
@@ -58,15 +61,20 @@ class OrdersDao extends DatabaseAccessor<AppDatabase> with _$OrdersDaoMixin {
     ));
   }
 
-  Stream<List<DineOrderItem>> watchItems(String orderId) => (select(dineOrderItems)
+  Expression<bool> _readableOrder(Expression<String> id, String? branchId) =>
+      existsQuery(selectOnly(dineOrders)..addColumns([dineOrders.id])
+        ..where(dineOrders.id.equalsExp(id) & dineOrders.deletedAt.isNull() &
+          (branchId == null ? const Constant(true) : dineOrders.branchId.equals(branchId))));
+
+  Stream<List<DineOrderItem>> watchItems(String orderId, {String? branchId}) => (select(dineOrderItems)
         ..where((i) => i.orderId.equals(orderId))
-        ..where((i) => i.deletedAt.isNull())
+        ..where((i) => i.deletedAt.isNull() & _readableOrder(i.orderId, branchId))
         ..orderBy([(i) => OrderingTerm.asc(i.createdAt)]))
       .watch();
 
-  Future<List<DineOrderItem>> itemsOf(String orderId) => (select(dineOrderItems)
+  Future<List<DineOrderItem>> itemsOf(String orderId, {String? branchId}) => (select(dineOrderItems)
         ..where((i) => i.orderId.equals(orderId))
-        ..where((i) => i.deletedAt.isNull()))
+        ..where((i) => i.deletedAt.isNull() & _readableOrder(i.orderId, branchId)))
       .get();
 
   /// Adds a menu product to the tab. Merges into an existing line for the same

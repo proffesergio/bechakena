@@ -2,7 +2,7 @@
 
 Bilingual Next.js static marketing site at `/`, with the Flutter browser demo at `/demo/`.
 
-Version 1.0.1 uses a light product-led landing page and includes marketplace
+Version 1.0.2 uses a light product-led landing page and includes marketplace
 artwork: `public/media/cover.png` (1920×1080) and `landing-square.png`
 (1080×1080). Editable SVGs and `../scripts/make_listing_media.py` accompany the
 PNGs. Use `/` as the listing landing URL; keep `/demo/` as the interactive demo.
@@ -37,4 +37,4 @@ The generated Vercel Build Output API configuration redirects `/demo` to `/demo/
 
 The `Showcase package and deployment` GitHub Actions workflow builds and uploads the validated package on relevant pushes to `main`. It requires the captures above to be committed. A manual run defaults to packaging only; choose `preview` or `production` to deploy that package with Vercel CLI. Configure repository secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` for the intended Vercel project before deploying. The workflow does not create or configure the Vercel project. To deploy an already packaged local build, run `vercel deploy --prebuilt` from the repository root with the intended project linked (add `--prod` for production).
 
-No analytics, contact backend, sign-in or payment collection is installed. Contact links open WhatsApp or email. The locale, sample receipt and replenishment controls run in the visitor’s browser without writing POS settings. The receipt preview uses two-decimal currency examples and integer minor-unit tax calculations; it does not convert money or certify a local tax setup. The replenishment scenario illustrates 28-day demand with configurable lead and cover days, clearly separate from live inventory. The actual POS supports English and Bengali; cloud backup and sync remain roadmap items. Sample calculations have focused tests (Node.js 22.18+ or 24 recommended).
+Vercel Analytics is installed in the marketing layout using `@vercel/analytics/next`. It records website analytics when enabled for the Vercel project; no POS transaction records or custom form events are sent by this integration. No contact backend, sign-in or payment collection is installed. Contact links open WhatsApp or email. The locale, sample receipt and replenishment controls run in the visitor’s browser without writing POS settings. The receipt preview uses two-decimal currency examples and integer minor-unit tax calculations; it does not convert money or certify a local tax setup. The replenishment scenario illustrates 28-day demand with configurable lead and cover days, clearly separate from live inventory. The actual POS supports English and Bengali; cloud backup and sync remain roadmap items. Sample calculations have focused tests (Node.js 22.18+ or 24 recommended).

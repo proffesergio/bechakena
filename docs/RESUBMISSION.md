@@ -1,4 +1,7 @@
-# BechaKena 1.0.1 — Vibe96 resubmission
+# BechaKena 1.0.2 — Vibe96 resubmission
+
+Audit #972 follow-up and current source evidence: [AUDIT_RESPONSE.md](../AUDIT_RESPONSE.md).
+The older audit #349 mapping below is historical; the current release uses schema v9.
 
 Prepared for SUB-2026-1043. The human notice names B0064-43201; audit run #349
 names B0064-53050. Keep those references separate when requesting re-review.
@@ -47,7 +50,7 @@ state, including a bcrypt implementation that this project does not use.
 | R1 complete source | Flutter at repository root, Next.js in `site/`, SQL in `database/`, deployment source in `scripts/` and `docker/` |
 | R2 credentials | Only placeholder `.env.example` is packaged; private env files, key/certificate files, local databases and tool output are excluded |
 | R3 clean build | `HowToSetup.md` prerequisites and main build flow; both lockfiles included; generated Dart files regenerated before building |
-| R4 database | `database/schema.sql` + `seed.sql`, schema version 8; application/migrations in `lib/core/db/database.dart` |
+| R4 database | `database/schema.sql` + `seed.sql`, schema version 9; application/migrations in `lib/core/db/database.dart` |
 | R5 auth/backend scope | `HowToSetup.md` and `docs/SECURITY.md`: local POS only; no deployed API/backend/Edge Functions ship; optional backend is roadmap-only |
 | R6 demo | Keep the existing `/demo/` app separate from `/` marketing; verify hosted version after deployment |
 | R7 mobile | `mobile/README.md`, platform source and configurable `lib/app/config.dart`; no server secrets in client defines |
@@ -108,7 +111,7 @@ in this session; responsive layouts and interactions need browser QA before revi
    contact links, FAQ and sample controls on desktop and phone widths.
 3. Edit the Vibe96 landing URL to `/`; keep `/demo/` in the live demo field.
 4. Upload the two PNGs above through Edit media and replace the source ZIP.
-5. Submit version 1.0.1 for a fresh audit and human review.
+5. Submit version 1.0.2 for a fresh audit and human review.
 
 The deployment target is confirmed as `n3rd-s-projects/bechakena` (production
 alias `bkpos.vercel.app`). The showcase workflow builds both the landing page

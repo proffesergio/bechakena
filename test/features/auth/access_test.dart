@@ -9,6 +9,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class _LoadingBranch extends CurrentBranchController {
+  @override
+  String? build() => null;
+}
+
 /// Regression tests for the authorisation audit (round 2): branch-attributed
 /// read paths must be scoped to the session's branch for every role below
 /// owner, so a record id alone can never expose another outlet's sales,
@@ -99,6 +104,49 @@ void main() {
       final scoped = await db.salesDao.watchRecent(branchId: branchA).first;
       expect(scoped.map((s) => s.id), [a.id]);
       expect((await db.salesDao.watchRecent().first).length, 2);
+    });
+
+    test('sale IDs, invoice numbers and child records enforce the requested scope', () async {
+      final sale = await sellAt(branchA);
+      expect(await db.salesDao.byId(sale.id, branchId: branchB), isNull);
+      expect(await db.salesDao.findByInvoiceNo(sale.invoiceNo, branchId: branchB), isNull);
+      expect(await db.salesDao.itemsOf(sale.id, branchId: branchB), isEmpty);
+      expect(await db.salesDao.paymentsOf(sale.id, branchId: branchB), isEmpty);
+      expect(await db.salesDao.byId(sale.id, branchId: ''), isNull);
+      expect(await db.salesDao.byId(sale.id, branchId: branchA), isNotNull);
+      expect(await db.salesDao.itemsOf(sale.id, branchId: branchA), hasLength(1));
+      expect(await db.salesDao.paymentsOf(sale.id, branchId: branchA), hasLength(1));
+      expect(await db.salesDao.byId(sale.id), isNotNull);
+    });
+
+    test('stock providers do not aggregate other outlets while the branch is loading', () async {
+      final container = ProviderContainer(overrides: [
+        databaseProvider.overrideWithValue(db),
+        currentBranchProvider.overrideWith(_LoadingBranch.new),
+      ]);
+      addTearDown(container.dispose);
+      final stock = container.listen(stockProvider('unknown'), (_, _) {});
+      addTearDown(stock.close);
+      expect(await container.read(stockProvider('unknown').future), Qty.zero);
+      expect(await container.read(lowStockProvider.future), isEmpty);
+      expect(await container.read(expiringSoonProvider.future), isEmpty);
+    });
+
+    test('all report aggregates and refund totals respect outlet scope', () async {
+      final a = await sellAt(branchA);
+      final b = await sellAt(branchB);
+      for (final sale in [a, b]) {
+        await db.returnsDao.createReturn(originalSaleId: sale.id, now: now,
+          items: [ReturnDraftItem(nameSnapshot: 'Rice', qty: const Qty(1000), refundAmount: const Money(1000))]);
+      }
+      final start = now.subtract(const Duration(days: 1));
+      final end = now.add(const Duration(days: 1));
+      expect((await db.salesDao.dailyTotals(start: start, end: end, branchId: branchA)).single.count, 1);
+      expect((await db.salesDao.topProducts(start: start, end: end, branchId: branchA)).single.qty, const Qty(1000));
+      expect((await db.salesDao.paymentTotals(start: start, end: end, branchId: branchA))[PayMethod.cash], const Money(10000));
+      expect((await db.salesDao.staffTotals(start: start, end: end, branchId: branchA))[null], const Money(10000));
+      expect(await db.returnsDao.refundsInRange(start: start, end: end, branchId: branchA), const Money(1000));
+      expect(await db.returnsDao.refundsInRange(start: start, end: end), const Money(2000));
     });
 
     test('watchRecent(branchId) keeps only that outlet\'s purchases', () async {

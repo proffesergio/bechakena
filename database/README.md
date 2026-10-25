@@ -10,7 +10,7 @@ complete data model the app runs on, fully local.
 
 | File | What it is |
 |---|---|
-| `schema.sql` | The complete schema, schema version 8 — 21 tables, foreign keys, unique + hot-path indexes, `PRAGMA user_version = 8` |
+| `schema.sql` | The complete schema, schema version 9 — 21 tables, foreign keys, unique + hot-path indexes, `PRAGMA user_version = 9` |
 | `seed.sql` | Demo dataset: shop, owner (`Demo Owner` / PIN `1234`), branch, retail + restaurant catalogs, customers, suppliers, a purchase with expiry dates, three finalized sales (cash, bKash, baki) and the derived stock movements |
 
 ## Apply to a fresh database
@@ -20,7 +20,7 @@ sqlite3 bechakena_superShop.db < database/schema.sql
 sqlite3 bechakena_superShop.db < database/seed.sql
 ```
 
-The result opens in the app as a working shop. `PRAGMA user_version = 8` tells
+The result opens in the app as a working shop. `PRAGMA user_version = 9` tells
 the app migrations are already applied; without it the app would try to create
 tables that exist. `seed.sql` is demo data — never load it into a real shop's
 database, and change the demo PIN first if you keep the data.
@@ -56,5 +56,5 @@ stock, dues and demo sales.
   SQLite file (`bechakena_superShop.db`, `bechakena_restaurant.db`).
 
 Upgrade migrations for installs created by older app versions are Dart code in
-`lib/core/db/database.dart` (`MigrationStrategy`, v2→v8); a fresh install and
+`lib/core/db/migrations.dart` (`MigrationStrategy`, v2→v9); a fresh install and
 `schema.sql` always produce the same current shape.

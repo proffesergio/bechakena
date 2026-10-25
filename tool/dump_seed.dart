@@ -86,7 +86,8 @@ Future<void> main() async {
     }
     buffer
       ..writeln()
-      ..writeln('COMMIT;');
+      ..writeln('COMMIT;')
+      ..writeln('PRAGMA foreign_keys = ON;');
 
     final out = File('database/seed.sql');
     out.parent.createSync(recursive: true);

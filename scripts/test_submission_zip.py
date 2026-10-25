@@ -11,7 +11,8 @@ class SubmissionZipTests(unittest.TestCase):
         for name in ('.env', 'site/.env.production', '.git/config', 'site/node_modules/a.js',
                      'site/out/index.html', 'lib/core/db/database.g.dart', 'keys/live.pem',
                      'shop.sqlite3', 'tmp/audit.txt', 'android/local.properties',
-                     'dist/bechakena-vibe96.zip', 'site/tsconfig.tsbuildinfo'):
+                     'dist/bechakena-vibe96.zip', 'site/tsconfig.tsbuildinfo',
+                     'package.json', 'package-lock.json'):
             self.assertFalse(included(Path(name)), name)
         for name in REQUIRED:
             self.assertTrue(included(Path(name)), name)

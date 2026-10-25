@@ -280,3 +280,4 @@ INSERT OR REPLACE INTO "stock_movements" ("id", "updated_at", "deleted_at", "dev
 INSERT OR REPLACE INTO "stock_movements" ("id", "updated_at", "deleted_at", "device_id", "product_id", "branch_id", "qty_delta", "type", "ref_id", "expiry_date", "note", "created_at") VALUES ('01a15222-b2c9-7f3a-bc0e-a84ec626beb5', 1792379368, NULL, 'unregistered', '01a15222-abca-7747-b804-e73258bc0fc2', '01a15222-9130-794e-9197-ec5b496f9d30', -2000, 'sale', '01a15222-b2c8-759d-b549-2fdd05735be8', NULL, NULL, 1792372159);
 
 COMMIT;
+PRAGMA foreign_keys = ON;

@@ -5,6 +5,23 @@ All notable changes to BechaKena are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Releases are cut by pushing a
 `v*` tag; CI attaches the Windows build and Android APK to the GitHub Release.
 
+## [1.0.2] — 2026-10-25
+
+### Audit #972
+
+- Scoped sale ID/invoice/item/payment reads and report/refund totals to the
+  caller's outlet. Inventory waits for a loaded branch; running orders are
+  outlet-scoped and editors recheck ownership.
+- Added explicit restrictive FK rules in schema v9, an atomic record-preserving
+  migration, historical v8 fixture and FK/index/query-plan regression checks.
+  Seed imports now restore FK enforcement.
+- Reused shared manual-item and tender forms across checkout flows; extracted
+  staff/branch settings and schema migrations. Preserved existing capability,
+  validation, printing and immutable-sale boundaries.
+- Clarified the offline-only R5 scope and addressed every report finding in
+  `AUDIT_RESPONSE.md`. Pinned Node build requirements and added pre-build tests.
+- Added Vercel Analytics to the marketing site's root layout.
+
 ## [1.0.1] — 2026-10-25
 
 ### Submission presentation

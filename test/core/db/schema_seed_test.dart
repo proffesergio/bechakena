@@ -33,7 +33,7 @@ void main() {
           .toSet();
       expect(tables, hasLength(21));
       expect(sqlite.select('PRAGMA integrity_check').single.values.first, 'ok');
-      expect(sqlite.select('PRAGMA user_version').single.values.first, 8);
+      expect(sqlite.select('PRAGMA user_version').single.values.first, 9);
 
       final indexes = sqlite
           .select("SELECT name FROM sqlite_master WHERE type = 'index' "
@@ -101,7 +101,7 @@ void main() {
     }
   });
 
-  test('version 7 databases gain all version 8 indexes without losing rows', () async {
+  test('version 7 databases gain current indexes without losing rows', () async {
     const previousIndexes = {
       'idx_stock_movements_product_id', 'idx_sale_items_product_id',
       'idx_purchase_items_product_id', 'idx_order_items_product_id',
@@ -123,7 +123,43 @@ void main() {
       expect(await db.select(db.shops).get(), hasLength(1));
       final indexes = await db.customSelect("SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'idx_%'").get();
       expect(indexes, hasLength(25));
-      expect((await db.customSelect('PRAGMA user_version').getSingle()).read<int>('user_version'), 8);
+      expect((await db.customSelect('PRAGMA user_version').getSingle()).read<int>('user_version'), 9);
+    } finally {
+      await db.close();
+    }
+  });
+
+  test('version 8 upgrade preserves seeded records and enforces explicit RESTRICT', () async {
+    final counts = <String, int>{};
+    final sqlite = sqlite3.open(dbPath);
+    try {
+      sqlite.execute(File('test/fixtures/schema_v8.sql').readAsStringSync());
+      sqlite.execute(File('database/seed.sql').readAsStringSync());
+      for (final row in sqlite.select("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name != 'settings'")) {
+        final name = row['name'] as String;
+        counts[name] = sqlite.select('SELECT COUNT(*) AS n FROM "$name"').single['n'] as int;
+      }
+    } finally {
+      sqlite.close();
+    }
+    final db = AppDatabase(NativeDatabase(File(dbPath)));
+    try {
+      for (final entry in counts.entries) {
+        expect((await db.customSelect('SELECT COUNT(*) AS n FROM "${entry.key}"').getSingle()).read<int>('n'), entry.value,
+          reason: '${entry.key} must survive the upgrade');
+      }
+      var keys = 0;
+      for (final table in db.allTables) {
+        final foreignKeys = await db.customSelect('PRAGMA foreign_key_list("${table.actualTableName}")').get();
+        for (final key in foreignKeys) {
+          keys++;
+          expect(key.read<String>('on_delete'), 'RESTRICT');
+        }
+      }
+      expect(keys, 25);
+      expect(await db.customSelect('PRAGMA foreign_key_check').get(), isEmpty);
+      expect((await db.customSelect('PRAGMA foreign_keys').getSingle()).read<int>('foreign_keys'), 1);
+      expect((await db.customSelect('PRAGMA user_version').getSingle()).read<int>('user_version'), 9);
     } finally {
       await db.close();
     }

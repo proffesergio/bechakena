@@ -186,7 +186,7 @@ class _SaleDetailDialog extends ConsumerWidget {
     final rootContext = Navigator.of(context, rootNavigator: true).context;
     final db = ref.read(databaseProvider);
     final settings = db.settingsDao;
-    final items = await db.salesDao.itemsOf(sale.id);
+    final items = await db.salesDao.itemsOf(sale.id, branchId: ref.read(readScopeBranchProvider));
     final business = await BusinessSettingsStore(db).load();
     final receipt = receiptFromSale(
       business: business,
@@ -213,7 +213,7 @@ class _SaleDetailDialog extends ConsumerWidget {
 
 /// Per-sale items, fetched once for the detail dialog.
 final _saleItemsProvider = FutureProvider.family<List<SaleItem>, String>(
-  (ref, saleId) => ref.watch(databaseProvider).salesDao.itemsOf(saleId),
+  (ref, saleId) => ref.watch(databaseProvider).salesDao.itemsOf(saleId, branchId: ref.watch(readScopeBranchProvider)),
 );
 
 class _ReturnDialog extends ConsumerStatefulWidget {

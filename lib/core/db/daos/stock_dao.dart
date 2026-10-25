@@ -51,7 +51,7 @@ class StockDao extends DatabaseAccessor<AppDatabase> with _$StockDaoMixin {
   Expression<int> get _deltaSum => stockMovements.qtyDelta.sum();
 
   /// Derived-stock query, optionally scoped to one branch. A null [branchId]
-  /// sums across all branches (used briefly before the current branch loads).
+  /// sums across all branches for trusted callers. UI providers wait for an outlet.
   JoinedSelectStatement<dynamic, dynamic> _stockQuery(String productId,
       {String? branchId}) {
     final where = branchId == null

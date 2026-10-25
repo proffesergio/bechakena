@@ -21,14 +21,14 @@ network access; the cloud (Supabase) is optional and configured at build time.
 |---|---|---|
 | Flutter SDK | 3.47.x (stable; tested 3.47.7) | A, B, C, D |
 | Dart SDK | 3.12.x (bundled with the Flutter SDK) | A, B, C, D |
-| Node.js + npm | 22+ | A, B (showcase landing page) |
+| Node.js + npm | 22.18+ (22.x) or 24.x | A, B (showcase landing page) |
 | Python 3 | 3.10+ | A, B (packaging check only) |
 | nginx | 1.24+ | A |
 | Docker + Compose | v2 | B |
 | Visual Studio **Desktop development with C++** | 2022 | C (Windows builds) |
 | Android Studio / Android SDK | current | D |
 
-For the submission archive command, install `rsync`, `zip`, and `unzip`.
+The submission archive uses Python 3 only: `python scripts/make_submission_zip.py`.
 The archive excludes generated sources; always run the generators below.
 
 Full platform build details (installers, code signing, iOS) live in
@@ -48,6 +48,8 @@ not shipped in the submission ZIP — this step recreates them):
 flutter pub get
 flutter gen-l10n                                          # bn + en strings
 dart run build_runner build --delete-conflicting-outputs  # Drift + Riverpod code
+flutter analyze
+flutter test
 ```
 
 On an empty native installation, create the first owner and open **Settings**
@@ -84,10 +86,14 @@ source ~/.nvm/nvm.sh && nvm install 22
 flutter pub get
 flutter gen-l10n
 dart run build_runner build --delete-conflicting-outputs
+flutter analyze
+flutter test
 flutter build web --release --base-href /demo/ --no-web-resources-cdn
 
 npm --prefix site ci
+npm --prefix site test
 npm --prefix site run build
+npm --prefix site run typecheck
 ```
 
 `--no-web-resources-cdn` bundles CanvasKit and the icon font inside
@@ -219,6 +225,8 @@ git tag v1.0.0 && git push origin v1.0.0   # CI attaches Windows .zip + Android 
 flutter pub get
 flutter gen-l10n
 dart run build_runner build --delete-conflicting-outputs
+flutter analyze
+flutter test
 flutter build apk --release \
   --dart-define=BECHAKENA_API_BASE_URL=https://your-server.example.com/functions/v1 \
   --dart-define=BECHAKENA_SUPABASE_URL=https://your-project.supabase.co \
@@ -245,7 +253,7 @@ a demo database on a fixture/review machine:
 
 | File | Purpose |
 |---|---|
-| `database/schema.sql` | Complete schema (v8, 21 tables) that creates a database from scratch |
+| `database/schema.sql` | Complete schema (v9, 21 tables) that creates a database from scratch |
 | `database/seed.sql` | Demo shop + catalog + customers + sales so a fresh install has data |
 | `database/README.md` | How both files are generated and kept identical to the app |
 

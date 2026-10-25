@@ -27,7 +27,7 @@ REQUIRED = (
     'mobile/README.md', 'pubspec.yaml', 'pubspec.lock', 'site/package.json',
     'site/package-lock.json', 'scripts/prepare_vercel.py',
     'site/app/submission.css', 'site/public/media/cover.png',
-    'site/public/media/landing-square.png', 'docs/RESUBMISSION.md',
+    'site/public/media/landing-square.png', 'docs/RESUBMISSION.md', 'AUDIT_RESPONSE.md',
 )
 
 
@@ -36,6 +36,8 @@ def included(relative):
         return False
     if relative.parts[:2] == ('site', 'out'):
         return False
+    if relative.as_posix() in {'package.json', 'package-lock.json'}:
+        return False  # Root npm files are local tooling; the application is in site/.
     name = relative.name
     if name.startswith('.env') and name != '.env.example':
         return False

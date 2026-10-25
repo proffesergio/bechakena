@@ -8,7 +8,7 @@ import '../../../../core/qty.dart';
 import '../../../../l10n/gen/app_localizations.dart';
 import '../../logic/cart_controller.dart';
 import 'checkout_dialog.dart';
-import 'manual_item_dialog.dart';
+import '../../../../app/widgets/manual_item_dialog.dart';
 
 /// The right-hand invoice pane: current cart lines, totals and the pay button.
 class CartPane extends ConsumerWidget {
@@ -35,7 +35,9 @@ class CartPane extends ConsumerWidget {
                 tooltip: l10n.manualItem,
                 onPressed: () => showDialog<void>(
                   context: context,
-                  builder: (_) => const ManualItemDialog(),
+                  builder: (_) => ManualItemDialog(onSave: (name, price, qty) {
+                    ref.read(cartProvider.notifier).addManual(name: name, price: price, qty: qty);
+                  }),
                 ),
                 icon: const Icon(Icons.playlist_add),
               ),

@@ -66,7 +66,7 @@ The submission ZIP mirrors the repository layout one-to-one, so every path in
 | 1. Complete source, no compiled-only parts | Flutter app, `site/`, `docker/`, `scripts/` all shipped as source |
 | 2. No real credentials | Only `.env.example` placeholders; no `.env*`, tokens or keys staged (secret scan clean) |
 | 3. Builds from a clean machine | `HowToSetup.md` targets A–D; the ZIP excludes `.git`, `build/`, `node_modules`, `pyenv`, `site/out`, `.dart_tool`, `.vercel` |
-| 4. Database script | `database/schema.sql` (schema v8, 21 tables) + `database/seed.sql` demo data |
+| 4. Database script | `database/schema.sql` (schema v9, 21 tables) + `database/seed.sql` demo data |
 | 5. Auth & roles | Offline by design — no HTTP endpoints ship in this archive; every mutation is gated in-app by the session's capability matrix (`lib/features/auth/logic/permissions.dart`), admin areas are role-protected. The optional Cloud Plan backend is roadmap-only: server-side, not part of this submission |
 | 6. Pinned deps, no critical CVEs | `pubspec.lock` + `site/package-lock.json`; `npm audit` → 0 vulnerabilities |
 | 7. Documentation set | `README.md`, `HowToSetup.md`, `CLAUDE.md`, `CHANGELOG.md` at the ZIP root |

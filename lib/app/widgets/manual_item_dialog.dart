@@ -1,22 +1,25 @@
-import '../../../settings/ui/business_settings_status.dart';
-import '../../../../app/providers.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers.dart';
+import '../../core/money.dart';
+import '../../core/qty.dart';
+import '../../l10n/gen/app_localizations.dart';
+import '../../features/auth/logic/permissions.dart';
+import '../../features/settings/ui/business_settings_status.dart';
 
-import '../../../../core/money.dart';
-import '../../../../core/qty.dart';
-import '../../../../l10n/gen/app_localizations.dart';
-import '../../logic/cart_controller.dart';
-
-/// Adds an unlisted item (name, price, qty) straight to the cart.
+/// Shared validated entry form; each feature supplies its own persistence action.
 class ManualItemDialog extends ConsumerStatefulWidget {
-  const ManualItemDialog({super.key});
+  const ManualItemDialog({super.key, required this.onSave});
+
+  final FutureOr<void> Function(String name, Money price, Qty qty) onSave;
 
   @override
   ConsumerState<ManualItemDialog> createState() => _ManualItemDialogState();
 }
 
 class _ManualItemDialogState extends ConsumerState<ManualItemDialog> {
+  bool _saving = false;
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
   final _price = TextEditingController();
@@ -59,7 +62,8 @@ class _ManualItemDialogState extends ConsumerState<ManualItemDialog> {
                     const TextInputType.numberWithOptions(decimal: true),
                 validator: (v) {
                   try {
-                    Money.parse(v ?? '', currency: ref.read(shopCurrencyProvider));
+                    final price = Money.parse(v ?? '', currency: ref.read(shopCurrencyProvider));
+                    if (price.isNegative) return l10n.invalidAmount;
                     return null;
                   } on FormatException {
                     return l10n.invalidAmount;
@@ -74,7 +78,8 @@ class _ManualItemDialogState extends ConsumerState<ManualItemDialog> {
                     const TextInputType.numberWithOptions(decimal: true),
                 validator: (v) {
                   try {
-                    Qty.parse(v ?? '');
+                    final qty = Qty.parse(v ?? '');
+                    if (qty <= Qty.zero) return l10n.invalidAmount;
                     return null;
                   } on FormatException {
                     return l10n.invalidAmount;
@@ -87,18 +92,27 @@ class _ManualItemDialogState extends ConsumerState<ManualItemDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: _saving ? null : () => Navigator.of(context).pop(),
           child: Text(l10n.cancel),
         ),
         FilledButton(
-          onPressed: () {
+          onPressed: _saving ? null : () async {
             if (!_formKey.currentState!.validate()) return;
-            ref.read(cartProvider.notifier).addManual(
-                  name: _name.text.trim(),
-                  price: Money.parse(_price.text, currency: ref.read(shopCurrencyProvider)),
-                  qty: Qty.parse(_qty.text),
-                );
-            Navigator.of(context).pop();
+            if (!ref.read(canProvider(Capability.sell))) return;
+            final navigator = Navigator.of(context);
+            final messenger = ScaffoldMessenger.of(context);
+            setState(() => _saving = true);
+            try {
+              await widget.onSave(_name.text.trim(),
+                Money.parse(_price.text, currency: ref.read(shopCurrencyProvider)),
+                Qty.parse(_qty.text));
+              if (mounted) navigator.pop();
+            } catch (error) {
+              if (mounted) {
+                setState(() => _saving = false);
+                messenger.showSnackBar(SnackBar(content: Text(l10n.saveFailed('$error'))));
+              }
+            }
           },
           child: Text(l10n.save),
         ),

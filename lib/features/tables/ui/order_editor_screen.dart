@@ -6,6 +6,7 @@ import '../../../app/widgets/product_picker.dart';
 import '../../../core/db/database.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../logic/order_math.dart';
+import '../../auth/logic/access.dart';
 import 'widgets/order_pane.dart';
 
 /// The running-order surface: menu grid on the left, the live tab on the right.
@@ -23,6 +24,9 @@ class OrderEditorScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    if (!canViewBranch(ref.watch(readScopeBranchProvider), order.branchId)) {
+      return Scaffold(appBar: AppBar(), body: Center(child: Text(l10n.accessRestricted)));
+    }
     return Scaffold(
       appBar: AppBar(
         // Explicit back affordance to the floor/hub, always available.

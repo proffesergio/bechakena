@@ -1,5 +1,8 @@
 <div align="center">
 
+**Audit #972 follow-up (v1.0.2):** see [AUDIT_RESPONSE.md](AUDIT_RESPONSE.md)
+for every finding, fixes and the offline-only authentication scope.
+
 # 🛒 BechaKena · বেচাকেনা
 
 ### The offline-first POS built for Bangladeshi shops — now for restaurants too

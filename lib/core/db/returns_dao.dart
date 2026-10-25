@@ -90,13 +90,19 @@ class ReturnsDao extends DatabaseAccessor<AppDatabase> with _$ReturnsDaoMixin {
 
   /// Total refunded in [start, end).
   Future<Money> refundsInRange(
-      {required DateTime start, required DateTime end}) async {
+      {required DateTime start, required DateTime end, String? branchId}) async {
     final sum = returns.refundTotal.sum();
     final query = selectOnly(returns)
       ..addColumns([sum])
       ..where(returns.createdAt.isBiggerOrEqualValue(start) &
           returns.createdAt.isSmallerThanValue(end) &
           returns.deletedAt.isNull());
+    if (branchId != null) {
+      final sales = attachedDatabase.sales;
+      query.where(returns.originalSaleId.isInQuery(selectOnly(sales)
+        ..addColumns([sales.id])
+        ..where(sales.branchId.equals(branchId) & sales.deletedAt.isNull())));
+    }
     final row = await query.getSingle();
     return Money(row.read(sum) ?? 0);
   }

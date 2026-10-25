@@ -23,19 +23,22 @@ COPY lib ./lib
 COPY web ./web
 COPY assets ./assets
 COPY tool ./tool
+COPY test ./test
+COPY database ./database
 RUN flutter gen-l10n && \
     dart run build_runner build --delete-conflicting-outputs && \
+    flutter analyze && flutter test && \
     flutter build web --release --base-href /demo/ --no-web-resources-cdn
 
 # ── Stage 2: Next.js static landing page ─────────────────────────────────────
-FROM node:22-alpine AS site-build
+FROM node:22.23.3-alpine AS site-build
 
 WORKDIR /app
 COPY site/package.json site/package-lock.json ./
 RUN npm ci
 
 COPY site ./
-RUN npm run build && npm run typecheck
+RUN npm test && npm run build && npm run typecheck
 
 # ── Stage 3: serve the packaged showcase ─────────────────────────────────────
 FROM nginx:1.27-alpine
