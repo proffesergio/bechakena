@@ -75,7 +75,7 @@ extension _SchemaMigration on AppDatabase {
       }
       if (from < 9) {
         // Keep every row while replacing implicit NO ACTION with explicit RESTRICT.
-        for (final table in [products, stockMovements, sales, saleItems,
+        for (final table in <TableInfo<Table, dynamic>>[products, stockMovements, sales, saleItems,
           salePayments, duePayments, returns, returnItems, purchases,
           purchaseItems, smsLog, dineOrders, dineOrderItems]) {
           await m.alterTable(TableMigration(table));
