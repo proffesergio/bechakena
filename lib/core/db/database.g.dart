@@ -1815,7 +1815,7 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES categories (id)',
+      'REFERENCES categories (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _unitMeta = const VerificationMeta('unit');
@@ -2722,7 +2722,7 @@ class $StockMovementsTable extends StockMovements
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES products (id)',
+      'REFERENCES products (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _branchIdMeta = const VerificationMeta(
@@ -2736,7 +2736,7 @@ class $StockMovementsTable extends StockMovements
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES shops (id)',
+      'REFERENCES shops (id) ON DELETE RESTRICT',
     ),
   );
   @override
@@ -3952,7 +3952,7 @@ class $SalesTable extends Sales with TableInfo<$SalesTable, Sale> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES shops (id)',
+      'REFERENCES shops (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _staffIdMeta = const VerificationMeta(
@@ -3966,7 +3966,7 @@ class $SalesTable extends Sales with TableInfo<$SalesTable, Sale> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES staff (id)',
+      'REFERENCES staff (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _customerIdMeta = const VerificationMeta(
@@ -3980,7 +3980,7 @@ class $SalesTable extends Sales with TableInfo<$SalesTable, Sale> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES customers (id)',
+      'REFERENCES customers (id) ON DELETE RESTRICT',
     ),
   );
   @override
@@ -4831,7 +4831,7 @@ class $SaleItemsTable extends SaleItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES sales (id)',
+      'REFERENCES sales (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _productIdMeta = const VerificationMeta(
@@ -4845,7 +4845,7 @@ class $SaleItemsTable extends SaleItems
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES products (id)',
+      'REFERENCES products (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _nameSnapshotMeta = const VerificationMeta(
@@ -5538,7 +5538,7 @@ class $SalePaymentsTable extends SalePayments
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES sales (id)',
+      'REFERENCES sales (id) ON DELETE RESTRICT',
     ),
   );
   @override
@@ -6051,7 +6051,7 @@ class $DuePaymentsTable extends DuePayments
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES customers (id)',
+      'REFERENCES customers (id) ON DELETE RESTRICT',
     ),
   );
   @override
@@ -7060,7 +7060,7 @@ class $PurchasesTable extends Purchases
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES shops (id)',
+      'REFERENCES shops (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _supplierIdMeta = const VerificationMeta(
@@ -7074,7 +7074,7 @@ class $PurchasesTable extends Purchases
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES suppliers (id)',
+      'REFERENCES suppliers (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _invoiceRefMeta = const VerificationMeta(
@@ -7629,7 +7629,7 @@ class $PurchaseItemsTable extends PurchaseItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES purchases (id)',
+      'REFERENCES purchases (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _productIdMeta = const VerificationMeta(
@@ -7643,7 +7643,7 @@ class $PurchaseItemsTable extends PurchaseItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES products (id)',
+      'REFERENCES products (id) ON DELETE RESTRICT',
     ),
   );
   @override
@@ -8191,7 +8191,7 @@ class $SmsLogTable extends SmsLog with TableInfo<$SmsLogTable, SmsLogData> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES customers (id)',
+      'REFERENCES customers (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _phoneMeta = const VerificationMeta('phone');
@@ -9404,7 +9404,7 @@ class $ReturnsTable extends Returns with TableInfo<$ReturnsTable, Return> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES sales (id)',
+      'REFERENCES sales (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _staffIdMeta = const VerificationMeta(
@@ -9418,7 +9418,7 @@ class $ReturnsTable extends Returns with TableInfo<$ReturnsTable, Return> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES staff (id)',
+      'REFERENCES staff (id) ON DELETE RESTRICT',
     ),
   );
   @override
@@ -9972,7 +9972,7 @@ class $ReturnItemsTable extends ReturnItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES returns (id)',
+      'REFERENCES returns (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _productIdMeta = const VerificationMeta(
@@ -9986,7 +9986,7 @@ class $ReturnItemsTable extends ReturnItems
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES products (id)',
+      'REFERENCES products (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _nameSnapshotMeta = const VerificationMeta(
@@ -11084,7 +11084,7 @@ class $DineOrdersTable extends DineOrders
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES dining_tables (id)',
+      'REFERENCES dining_tables (id) ON DELETE RESTRICT',
     ),
   );
   @override
@@ -11117,7 +11117,7 @@ class $DineOrdersTable extends DineOrders
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES shops (id)',
+      'REFERENCES shops (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _staffIdMeta = const VerificationMeta(
@@ -11131,7 +11131,7 @@ class $DineOrdersTable extends DineOrders
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES staff (id)',
+      'REFERENCES staff (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _customerNameMeta = const VerificationMeta(
@@ -11174,7 +11174,7 @@ class $DineOrdersTable extends DineOrders
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES sales (id)',
+      'REFERENCES sales (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
@@ -11917,7 +11917,7 @@ class $DineOrderItemsTable extends DineOrderItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES dine_orders (id)',
+      'REFERENCES dine_orders (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _productIdMeta = const VerificationMeta(
@@ -11931,7 +11931,7 @@ class $DineOrderItemsTable extends DineOrderItems
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES products (id)',
+      'REFERENCES products (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _nameSnapshotMeta = const VerificationMeta(

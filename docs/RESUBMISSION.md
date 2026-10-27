@@ -1,6 +1,6 @@
-# BechaKena 1.0.2 — Vibe96 resubmission
+# BechaKena 1.0.3 — Vibe96 resubmission
 
-Audit #972 follow-up and current source evidence: [AUDIT_RESPONSE.md](../AUDIT_RESPONSE.md).
+Audit #1051 and #972 follow-up evidence: [AUDIT_RESPONSE.md](../AUDIT_RESPONSE.md).
 The older audit #349 mapping below is historical; the current release uses schema v9.
 
 Prepared for SUB-2026-1043. The human notice names B0064-43201; audit run #349
@@ -39,6 +39,18 @@ remote owner access and activation services must not be advertised as delivered.
 Recorded bKash/Nagad/card tender is not payment processing. Browser hardware
 printing is not offered. Native printer support depends on platform/equipment.
 
+## Audit #1051: requirement evidence
+
+Run #1051 stopped at the must-have list (0/100): one must-have missing (R5)
+and two partial (R1, R3); R6 was partial. Fixes in this version:
+
+| Audit item | Disposition and evidence |
+| --- | --- |
+| R1 complete source — partial | Added a component/source map to `README.md` and `docs/VIBE96.md`. The archive now proves every component: Flutter app and all platform runners (including the full Windows C++ runner), `site/` static export, `database/`, `scripts/`, `tool/`, `docker/`, `.github/`. Documented explicitly that **no separate admin app or API/backend exists**; back-office screens are role-gated parts of the same Flutter app. |
+| R3 clean machine — partial | Added **Clean-machine quickstart** at the top of `HowToSetup.md`: exact `flutter pub get` / codegen, `sqlite3` schema + seed (with `user_version`/`integrity_check` verification and the Windows app-support path), `flutter run`/build, and `flutter analyze`/`flutter test`. Documented that the ZIP excludes `build/` and `.dart_tool/` (plus caches, generated Dart, env files) and the packager enforces it. |
+| R5 auth on mutating endpoint — missing | No networked mutating endpoint exists. `docs/SECURITY.md` now states R5 directly: zero HTTP APIs, route handlers, Edge Functions or separate admin/API source; both runnable parts and their write paths are listed. Local RBAC gates every local mutation, and the docs state that client-side RBAC is not a network security boundary. The same scope appears in `README.md`, `HowToSetup.md`, `site/README.md` and `AUDIT_RESPONSE.md`. |
+| R6 pinned deps — partial | Added captured evidence under `docs/dependency-audit/` and summarized it in `docs/SECURITY.md`: `npm audit` = 0 vulnerabilities (64 deps); `flutter pub outdated` output; OSV scan of all 126 hosted Pub packages (five SDK packages excluded) = 0 advisories. Lockfiles remain committed and pinned. |
+
 ## Audit #349: requirement evidence
 
 Most technical changes below were already in this checkout before the 1.0.1
@@ -69,7 +81,7 @@ state, including a bcrypt implementation that this project does not use.
 | 5.10, 5.16 printing | `escpos.dart` creates bytes; `printer_transport.dart` sends them; `logo_raster.dart` returns printer-independent `RasterBitmap` |
 | 5.11–5.14 feature organization | Existing inventory replenishment widget, table order/settle widgets, domain table classes and typed demo product data retained; no speculative factory/layer added |
 | 5.15 configuration | `lib/app/config.dart` reads optional public identifiers from `String.fromEnvironment`; server-secret warning documented |
-| 6.1–6.5 setup/build | Prerequisites name Flutter 3.47.x / Dart 3.12.x; main steps regenerate sources; SQL inspection/seed steps documented; `next build` uses no webpack flag; local web resources flag explained |
+| 6.1–6.5 setup/build | Prerequisites name Flutter 3.47.7 and its bundled Dart SDK; main steps regenerate sources; SQL inspection/seed steps documented; `next build` uses no webpack flag; local web resources flag explained |
 
 ## Rebuild and verify
 
@@ -91,8 +103,10 @@ uv run --with pymupdf python scripts/make_listing_media.py
 ```
 
 Validation on this machine: Next.js production export and TypeScript succeed;
-five site tests, three ZIP regression tests, existing public-output safety tests
-and SQL schema/seed inspection pass. Static export anchors, image alt text,
+five site tests, three ZIP regression tests and existing public-output safety
+tests pass. The shipped SQL was executed with Python's `sqlite3` module:
+`user_version` = 9, `integrity_check` = ok, 21 tables, 0 FK violations, seed
+rows loaded. Static export anchors, image alt text,
 media freshness, archive file equality and SHA-256 were checked. Local HTTP checks
 return 200 for the refreshed landing page and cover image. Both PNGs were
 rendered and visually inspected. The available Flutter SDK is 3.32.5 / Dart 3.8.1,
@@ -111,7 +125,7 @@ in this session; responsive layouts and interactions need browser QA before revi
    contact links, FAQ and sample controls on desktop and phone widths.
 3. Edit the Vibe96 landing URL to `/`; keep `/demo/` in the live demo field.
 4. Upload the two PNGs above through Edit media and replace the source ZIP.
-5. Submit version 1.0.2 for a fresh audit and human review.
+5. Submit version 1.0.3 for a fresh audit and human review.
 
 The deployment target is confirmed as `n3rd-s-projects/bechakena` (production
 alias `bkpos.vercel.app`). The showcase workflow builds both the landing page

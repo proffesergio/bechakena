@@ -15,26 +15,28 @@ them **install and run**, on each platform. Product name/brand comes from
 
 ## 0. One-time setup (every platform)
 
-Flutter isn't on `PATH` on this machine — prefix commands or add it once:
+Install Flutter 3.47.7, add its `bin` directory to your `PATH`, and verify
+`flutter --version` reports that release (Dart 3.13.5 is bundled). For example,
+on a Unix shell, replace the path below with your own SDK location:
 
 ```bash
-export PATH="$PATH:/home/billsbro/development/flutter/bin"
+export PATH="/path/to/flutter/bin:$PATH"
 ```
 
 Then, from the repo root, **before any build**:
 
 ```bash
 flutter pub get
-dart run build_runner build --delete-conflicting-outputs   # Drift/Riverpod codegen
+dart run build_runner build   # Drift/Riverpod codegen
 flutter gen-l10n                                            # bn/en localizations
 flutter analyze                                             # must be clean
-flutter test                                                # 175 passing
+flutter test                                                # unit/widget/database tests
 ```
 
 Bump the version before a client build — edit `pubspec.yaml`:
 
 ```yaml
-version: 1.0.0+1     # <marketing-version>+<build-number>; raise build-number every release
+version: 1.0.3+4     # <marketing-version>+<build-number>; raise build-number every release
 ```
 
 ---
@@ -48,7 +50,7 @@ Requires **Visual Studio** with the *"Desktop development with C++"* workload
 
 ```powershell
 flutter pub get
-dart run build_runner build --delete-conflicting-outputs
+dart run build_runner build
 flutter gen-l10n
 flutter build windows --release
 ```
@@ -76,10 +78,10 @@ Install [Inno Setup](https://jrsoftware.org/isinfo.php) (free). Save this as
 ```ini
 [Setup]
 AppName=BechaKena
-AppVersion=1.0.0
+AppVersion=1.0.3
 DefaultDirName={autopf}\BechaKena
 DefaultGroupName=BechaKena
-OutputBaseFilename=BechaKena-Setup-1.0.0
+OutputBaseFilename=BechaKena-Setup-1.0.3
 Compression=lzma2
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64compatible
@@ -96,7 +98,7 @@ Name: "{commondesktop}\BechaKena"; Filename: "{app}\bechakena.exe"
 Filename: "{app}\bechakena.exe"; Description: "Launch BechaKena"; Flags: nowait postinstall skipifsilent
 ```
 
-Produces `BechaKena-Setup-1.0.0.exe` — a familiar double-click installer with a
+Produces `BechaKena-Setup-1.0.3.exe` — a familiar double-click installer with a
 Start-menu + desktop shortcut. This is the artifact to hand a shop owner.
 
 ### 1d. MSIX (optional — Store-style install/auto-update)
@@ -133,12 +135,13 @@ email/USB the APK, tap to install.
 >
 > ```properties
 > storeFile=/home/billsbro/bechakena-release.jks
-> storePassword=<your-store-password>
-> keyPassword=<your-key-password>
+> storePassword=REDACTED
+> keyPassword=REDACTED
 > keyAlias=bechakena
 > ```
 >
-> Then wire it into `android/app/build.gradle` `signingConfigs` / `buildTypes`
+> Replace both `REDACTED` values locally (or write this file from CI secrets);
+> never commit the filled file. Then wire it into `android/app/build.gradle.kts` `signingConfigs` / `buildTypes`
 > (Flutter's [signing guide](https://docs.flutter.dev/deployment/android#signing-the-app)).
 > Rebuild — the APK is now release-signed.
 
@@ -204,13 +207,13 @@ The repo already automates the two most-demoed targets. From a clean, committed
 tree:
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+git tag v1.0.3
+git push origin v1.0.3
 ```
 
 GitHub Actions (`.github/workflows/release.yml`) then:
-- builds `flutter build windows --release` → uploads **`BechaKena-windows-v1.0.0.zip`**
-- builds `flutter build apk --release` → uploads **`BechaKena-v1.0.0.apk`**
+- builds `flutter build windows --release` → uploads **`BechaKena-windows-v1.0.3.zip`**
+- builds `flutter build apk --release` → uploads **`BechaKena-v1.0.3.apk`**
 
 Both land on the repo's **Releases** page — send clients the download links. (The
 Windows artifact is the portable zip of §1b; for a polished installer use §1c

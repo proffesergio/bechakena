@@ -1,7 +1,7 @@
 # BechaKena — Operations Guide
 
 Everything a shop owner or installer needs to run BechaKena day to day, plus what
-a developer must set up to turn on the optional Cloud Plan features (multi-device
+a developer would need to implement for future Cloud Plan features (multi-device
 sync + real SMS sending). Nothing here requires the internet unless a section
 explicitly says "Cloud Plan".
 
@@ -119,11 +119,12 @@ device”* and LAN keeps working — nothing else is affected.
 
 ---
 
-## 5. Cloud Plan — what YOU need to provide
+## 5. Cloud Plan — future development scope
 
-Everything above is 100 % offline. The Cloud Plan is **additive**: if it’s never
-set up, the POS is fully functional; if it lapses, the POS keeps working locally.
-Two features need external accounts you must create and pay for.
+Everything above works offline. **Cloud sync, remote owner access and SMS
+delivery are not implemented in this release.** No backend, API or Edge Function
+ships in the archive. The following describes prerequisites for future
+development, not setup steps that activate existing functionality.
 
 ### 5a. Multi-device sync (Supabase)
 
@@ -141,9 +142,9 @@ What to prepare and hand to the developer:
 
 What the app already does to make this cheap to add later: every row carries a
 `UUIDv7 id`, `updatedAt`, `deletedAt`, and `deviceId`, and there’s a local
-`sync_outbox` table — the sync engine pushes the outbox and pulls by cursor.
-**You do not need to do anything in the app for this except supply the project URL
-+ key**; the engine itself is the remaining development work.
+`sync_outbox` table. A future sync engine would push the outbox and pull by
+cursor. Both that transport and the authenticated backend still need to be
+implemented. Supplying a project URL and key alone does not enable sync.
 
 ### 5b. Sending SMS for real (SMS gateway)
 
@@ -160,9 +161,10 @@ them needs a Bangladesh **SMS aggregator/gateway account**. What to provide:
 4. Decide masking vs non-masking (masking shows your name but costs more).
 
 Hand the **endpoint + API key + sender ID** to the developer. A Cloud Plan
-dispatcher (a small Supabase Edge Function or a server worker) then reads the
-`sms_log` outbox and calls the gateway; the app already marks each message
-`queued → sent / failed`. **Bangla templates already use ৳ and Bangla digits.**
+dispatcher (a small Supabase Edge Function or a server worker) would need to
+read the `sms_log` outbox, call the gateway and update delivery status. This
+dispatcher is not included; the shipped app only composes and queues messages.
+**Bangla templates already use ৳ and Bangla digits.**
 
 > Cost reality check for the shop: Supabase can be free at small scale; SMS is
 > pay-per-message to the aggregator. Both are optional.

@@ -1,27 +1,128 @@
-# BechaKena 1.0.2 — response to audit #972
+# BechaKena 1.0.3 — response to audit #1051
+
+Audit run #1051 stopped at the requirement list (0/100) because one must-have
+was missing (R5) and two more were partial (R1, R3); R6 was partial, so the six
+quality checks did not run. This release fixes those items and attaches the
+requested evidence.
 
 **Submission type:** offline Flutter retail/restaurant POS, with a static Next.js
-marketing page and a browser-local demo. **Server/API endpoints shipped: zero.**
-There is no Cloud Plan backend or Edge Function implementation in this release.
-Cloud sync, remote owner access, SMS dispatch and activation services are future
-work, not components omitted from an implemented backend.
+marketing page and a browser-local demo.
 
-## Requirement R5: authentication and roles
+**Runnable components in the archive: two.** (1) the Flutter POS and (2) the
+Next.js static showcase. **Server/API endpoints shipped: zero.** There is no
+separate admin application, no backend, no Edge Function and no hosted database
+source. Back-office screens (staff, products, purchases, reports, settings) are
+role-gated parts of the Flutter app. Cloud sync, remote owner access, SMS
+dispatch and activation services are roadmap-only; they are not components
+omitted from an implemented backend.
 
-The audit marks server-side endpoint protection partial because it cannot find
-HTTP endpoints. For this offline submission, that part of R5 is not applicable.
-The applicable controls are PIN sign-in, the capability matrix, guarded routes,
-live capability checks at local mutations, and branch-scoped record reads.
-See `docs/SECURITY.md`, `lib/core/auth/rbac.dart`,
-`lib/features/auth/logic/{permissions,access}.dart`, and their regression tests.
-The local SQLite file and OS account remain trusted; this is not a hosted
-multi-tenant service. A fresh audit/human review must determine the classification.
+## R1 — complete source for every component
 
-## Findings and disposition
+The source map is in `README.md#source-map--every-component` and
+`docs/VIBE96.md#components--complete-source-no-hidden-adminapi`.
+
+| Component | Source in the ZIP | Proof |
+|---|---|---|
+| Flutter POS | `lib/`, `test/`, `assets/`, `android/`, `ios/`, `linux/`, `windows/`, `web/`, `pubspec.yaml`, `pubspec.lock` | All Dart plus every platform runner. Windows ships the full C++ runner (`main.cpp`, `flutter_window.cpp/.h`, `win32_window.cpp/.h`, `utils.cpp/.h`, `Runner.rc`, `resource.h`, `runner.exe.manifest`, `runner/CMakeLists.txt`, `resources/app_icon.ico`) — not only CMake files. |
+| Showcase | `site/` | Next.js static export; `app/` has only page/layout/robots/sitemap + CSS, no route handlers. |
+| Database | `database/` | `schema.sql` (v9, 21 tables), `seed.sql`, generation notes. |
+| Build/package/deploy | `scripts/`, `tool/`, `docker/`, `.github/`, `docker-compose.yml` | ZIP packager, schema/seed dumpers, Docker/nginx, CI/release workflows. |
+| Mobile notes | `mobile/README.md` | Points at the single Flutter project at the root; source is not duplicated. |
+
+**No separate admin app or API component exists.** The archive includes the
+whole source tree above; nothing is shipped as a compiled-only part.
+
+## R3 — builds from a clean machine
+
+`HowToSetup.md` now starts with **Clean-machine quickstart (copy/paste)**. Exact
+sequence:
+
+```bash
+flutter --version                 # 3.47.7 and its bundled Dart SDK
+flutter pub get                   # restore from the committed lockfile
+flutter gen-l10n
+dart run build_runner build
+sqlite3 review.db < database/schema.sql
+sqlite3 review.db < database/seed.sql
+sqlite3 review.db "PRAGMA user_version; PRAGMA integrity_check;"   # 9, ok
+flutter run -d windows            # or flutter build windows --release
+flutter analyze
+flutter test
+```
+
+The SQL import was executed for this submission with Python's `sqlite3` module:
+`user_version` = 9, `integrity_check` = ok, 21 tables, 0 FK violations, with the
+seed rows loaded. The quickstart also gives the Windows app-support path
+(`%APPDATA%\com.newell\bechakena\bechakena_superShop.db`) for a pre-seeded demo,
+and the Android/iOS notes. The packager (`scripts/make_submission_zip.py`)
+excludes `build/`, `.dart_tool/`, `node_modules/`, `site/.next/`, `site/out/`,
+`.vercel/`, `dist/`, local databases, private env files and generated
+`*.g.dart`/`*.freezed.dart`; the archive tests fail if any of those slip in.
+
+## R5 — authentication and roles on every mutating endpoint
+
+**This submission has no networked mutating endpoint.** There is no HTTP API,
+no Next.js route handler, no Edge Function, no Supabase migration and no
+separate admin/API component. The two runnable parts write as follows:
+
+| Part | Transport | Writes |
+|---|---|---|
+| Flutter POS | No inbound endpoint; local process; optional outbound RAW/JetDirect TCP to a configured LAN printer | Local SQLite via Drift only |
+| Next.js showcase | Static export files | None; browser demo uses IndexedDB |
+
+The LAN printer path is outbound only (`Socket.connect` in
+`lib/core/platform/lan_print_io.dart`) and sends ESC/POS receipt bytes, not
+database rows. There is no `ServerSocket`, `HttpServer`, HTTP client or API
+route. Because no endpoint accepts a write, there is no server-side endpoint to
+authenticate. The applicable controls are the local PIN sign-in
+(`lib/core/auth/pin.dart`), capability matrix (`lib/core/auth/rbac.dart`),
+guarded routes, live checks at every local mutation
+(`lib/features/auth/logic/permissions.dart`) and branch-scoped reads
+(`lib/features/auth/logic/access.dart`). These are covered by
+`test/features/auth/permissions_test.dart`, `access_test.dart` and the DB scoping
+tests.
+
+**Client-side RBAC is not a network security boundary.** It restricts local
+user actions on the trusted device; it does not protect a hosted service, and
+this submission does not claim otherwise. The OS account and physical device are
+the trusted boundary, as documented in `docs/SECURITY.md`. A future Cloud Plan
+would add a server that must enforce its own authentication and per-device
+authorisation; that server code does not exist here.
+
+Verification:
+
+```bash
+find site/app -type f
+rg -n 'export async function (GET|POST|PUT|PATCH|DELETE)|NextResponse' site/app
+# no matches
+```
+
+## R6 — pinned dependencies and CVE evidence
+
+- `npm audit` (site): **0 vulnerabilities** — 64 dependencies (20 prod, 6 dev,
+  39 optional).
+- `flutter pub outdated`: retained as a version inventory, not CVE evidence.
+- OSV.dev `Pub` scan of all **126 hosted** packages in `pubspec.lock`:
+  **0 advisories** on 2026-10-27. Five SDK packages are excluded from the hosted
+  package scan. `python scripts/audit_pub.py` reproduces the scan and records
+  the lockfile SHA-256 and raw API results.
+- Evidence is attached in `docs/dependency-audit/` and summarized in
+  `docs/SECURITY.md#dependency-audit`. Both `site/package-lock.json` and
+  `pubspec.lock` are committed; the tested versions remain pinned.
+
+## Secret-scan note
+
+The two candidate lines in `docs/BUILD.md` were documentation placeholders, not
+credentials. They now read `storePassword=REDACTED` and `keyPassword=REDACTED`
+with an instruction to fill them locally or from CI secrets in the git-ignored
+`android/key.properties`. No live key material was present in the repository or
+archive; `.env.example` contains placeholders only.
+
+## Prior audit #972 — findings and disposition
 
 | Finding | Source evidence / change |
 | --- | --- |
-| 2.1 Next.js prerelease | The exact dependency is `16.4.2`, a non-prerelease SemVer identifier, with an integrity-pinned lockfile; no canary/RC package is used. Retained the working version rather than downgrading to the suggested old 15.1.0 release. |
+| 2.1 Next.js prerelease | The exact dependency is `16.4.2`, an official non-prerelease release with an integrity-pinned lockfile; see [upstream release](https://github.com/vercel/next.js/releases/tag/v16.4.2). No canary/RC package is used. Fresh npm audit reports zero advisories. |
 | 2.2–2.3 | Audit says no action required. Lockfiles retained. |
 | 3.1 customer list | Already uses `scopedCustomersProvider` → `CustomersDao.watchAll(branchId:)`. Regression tests cover local, remote and shared customers. The cited unfiltered UI call is absent. |
 | 3.2 product list | Products/categories are a shared catalog **within one module database**, not branch-owned records. `Products` has no `branch_id` or `watchAll()` method. Retail and restaurant each have a separate database; catalog queries also filter `businessType`. Stock quantities and transactions are branch-owned. Hiding a shared product based on stock would break new-outlet setup and zero-stock replenishment. |
@@ -55,6 +156,29 @@ multi-tenant service. A fresh audit/human review must determine the classificati
 
 ## Checks and submission files
 
+### Verification on 2026-10-27
+
+- Restored dependencies with `flutter pub get --enforce-lockfile` using an
+  isolated Flutter 3.47.7 SDK (Dart 3.13.5), then regenerated localization and
+  Drift sources. `flutter analyze` reports no issues; all **224 Flutter tests
+  pass**, including branch access, schema/seed, v8 migration and shared forms.
+  Regeneration also refreshed the checked-in Drift file's 25 FK constraints
+  to match the explicit `ON DELETE RESTRICT` rules in the table definitions.
+- All **5 site tests pass**; production static export and TypeScript checks pass.
+- The Flutter release web build passes with `/demo/` as its base path and
+  bundled web resources. All **14 Python tests pass**, with no skips; static
+  site/demo validation confirms the expected assets, WASM signatures and paths.
+- Fresh npm and hosted Pub advisory scans report zero advisories; the Pub scan
+  now records raw API results and lockfile hashes, with the corrected package
+  count explained above.
+- Fixed the PowerShell SQL import, contradictory cloud setup claims, missing
+  Docker test context and obsolete code-generator flags. The source packager
+  now requires Windows headers/CMake files and other platform build inputs,
+  rejects linked source directories and excludes SQLite sidecars/local keys.
+- Docker runtime validation is unavailable because Docker Desktop's Linux
+  daemon is not running. No native Windows/Android/iOS release build is claimed
+  by this verification run.
+
 Run `flutter pub get`, localization/code generation, `flutter analyze`, and
 `flutter test` with Flutter 3.47.7. `dart run tool/dump_schema.dart` regenerates
 schema v9. From `site/`, run `npm ci`, `npm test`, `npm run build`, and
@@ -66,10 +190,12 @@ python scripts/make_submission_zip.py
 ```
 
 Upload `dist/bechakena-vibe96.zip` and retain its SHA-256 companion. The archive
-contains this response, schema/seed, tests and all current source; private env
-files, credentials, generated Dart files and compiled/cache output are excluded.
-Vercel Analytics is now included in the marketing layout; it does not add a
-backend API or transmit local POS transaction records.
+contains this response, the full Flutter/platform source (including the Windows
+C++ runner), the static `site/`, schema/seed, tests and the
+`docs/dependency-audit/` evidence; private env files, credentials, generated
+Dart files and compiled/cache output are excluded. Vercel Analytics is included
+in the marketing layout; it does not add a backend API or transmit local POS
+transaction records.
 
 This response documents source facts and fixes. It does not claim Vibe96 has
 cleared warnings or guarantee a specific score.

@@ -11,23 +11,48 @@ ROOT = Path(__file__).resolve().parent.parent
 EXCLUDED_DIRS = {
     '.git', 'pyenv', 'venv', '.venv', '.dart_tool', 'build', 'ephemeral',
     '.gradle', 'Pods', 'coverage', 'dist', '.vercel', '.idea', '.claude',
-    '.codex', '.agents', '__pycache__', 'node_modules', '.next',
+    '.codex', '.agents', '.aws', '.ssh', '__pycache__', 'node_modules', '.next',
     'graphify-out', 'tmp', '.pytest_cache', '.pub-cache',
 }
 EXCLUDED_FILES = (
     '*.pyc', '*.log', '*.zip', '*.zip.tmp', '*.iml', '*.g.dart', '*.freezed.dart',
     '*.tsbuildinfo', '.flutter-plugins-dependencies', '.DS_Store',
     '*.key', '*.pem', '*.p12', '*.pfx', '*.jks', '*.keystore',
-    '*.db', '*.sqlite', '*.sqlite3', 'local.properties', 'key.properties',
+    '*.db', '*.sqlite', '*.sqlite3', '*.db-*', '*.sqlite-*', '*.sqlite3-*',
+    'local.properties', 'key.properties',
 )
 REQUIRED = (
     'README.md', 'HowToSetup.md', 'CLAUDE.md', 'CHANGELOG.md', 'LICENSE-NOTE.md',
-    '.env.example', 'docker-compose.yml', 'docker/Dockerfile',
+    '.env.example', '.dockerignore', 'docker-compose.yml', 'docker/Dockerfile',
     'database/schema.sql', 'database/seed.sql', 'database/README.md',
-    'mobile/README.md', 'pubspec.yaml', 'pubspec.lock', 'site/package.json',
-    'site/package-lock.json', 'scripts/prepare_vercel.py',
-    'site/app/submission.css', 'site/public/media/cover.png',
-    'site/public/media/landing-square.png', 'docs/RESUBMISSION.md', 'AUDIT_RESPONSE.md',
+    'mobile/README.md', 'pubspec.yaml', 'pubspec.lock', 'l10n.yaml',
+    'analysis_options.yaml', 'lib/main.dart',
+    'lib/core/auth/rbac.dart', 'lib/core/auth/pin.dart',
+    'site/package.json', 'site/package-lock.json', 'site/next.config.ts',
+    'site/app/layout.tsx', 'site/app/page.tsx', 'site/app/submission.css',
+    'site/public/media/cover.png', 'site/public/media/landing-square.png',
+    'scripts/prepare_vercel.py', 'scripts/audit_pub.py',
+    'android/app/src/main/kotlin/com/newell/bechakena/MainActivity.kt',
+    'android/settings.gradle.kts', 'android/build.gradle.kts',
+    'android/app/build.gradle.kts', 'android/app/src/main/AndroidManifest.xml',
+    'android/gradle/wrapper/gradle-wrapper.properties',
+    'ios/Runner/AppDelegate.swift', 'linux/runner/my_application.cc',
+    'ios/Runner.xcodeproj/project.pbxproj', 'ios/Runner/Info.plist',
+    'linux/CMakeLists.txt', 'linux/flutter/CMakeLists.txt',
+    'linux/runner/CMakeLists.txt', 'linux/runner/main.cc',
+    'linux/runner/my_application.h',
+    'windows/CMakeLists.txt', 'windows/flutter/CMakeLists.txt',
+    'windows/runner/CMakeLists.txt', 'windows/runner/resource.h',
+    'windows/runner/main.cpp', 'windows/runner/flutter_window.cpp',
+    'windows/runner/win32_window.cpp', 'windows/runner/utils.cpp',
+    'windows/runner/flutter_window.h', 'windows/runner/win32_window.h',
+    'windows/runner/utils.h',
+    'windows/runner/Runner.rc', 'windows/runner/runner.exe.manifest',
+    'windows/runner/resources/app_icon.ico', 'web/index.html',
+    'docs/SECURITY.md', 'docs/VIBE96.md', 'docs/RESUBMISSION.md',
+    'docs/dependency-audit/README.md', 'docs/dependency-audit/npm-audit.json',
+    'docs/dependency-audit/pub-outdated.txt',
+    'docs/dependency-audit/osv-pub-scan.json', 'AUDIT_RESPONSE.md',
 )
 
 
@@ -50,6 +75,10 @@ def package(root, output):
     for directory_name, dirs, names in os.walk(root, followlinks=False):
         directory = Path(directory_name)
         dirs[:] = sorted(d for d in dirs if included((directory / d).relative_to(root)))
+        for name in dirs:
+            path = directory / name
+            if path.is_symlink() or getattr(path, 'is_junction', lambda: False)():
+                raise ValueError(f'Linked directories cannot be submitted: {path.relative_to(root)}')
         for name in sorted(names):
             path = directory / name
             relative = path.relative_to(root)
@@ -70,9 +99,12 @@ def package(root, output):
             for relative in files:
                 archive.write(root / relative, relative.as_posix())
         with zipfile.ZipFile(temporary) as archive:
-            assert archive.testzip() is None, 'ZIP integrity check failed'
-            assert set(archive.namelist()) == names, 'ZIP contents differ from source'
-            assert all(included(Path(name)) for name in archive.namelist())
+            if archive.testzip() is not None:
+                raise ValueError('ZIP integrity check failed')
+            if set(archive.namelist()) != names:
+                raise ValueError('ZIP contents differ from source')
+            if not all(included(Path(name)) for name in archive.namelist()):
+                raise ValueError('ZIP contains excluded files')
         temporary.replace(output)
     finally:
         temporary.unlink(missing_ok=True)

@@ -1,0 +1,645 @@
+{
+  "queried_at_utc": "2026-10-27T03:56:34.311040+00:00",
+  "ecosystem": "Pub",
+  "source": "https://api.osv.dev/v1/querybatch",
+  "lockfile": "pubspec.lock",
+  "lockfile_sha256": "fe5d38ff4fb2d03008173576b478742ac64e32e9931cf1f7757859367624ecfa",
+  "lockfile_lf_sha256": "bed2bf94522aebe51448569aff373cdfac01faf04069ea288842ff719b676a7e",
+  "packages_checked": 126,
+  "advisories_found": 0,
+  "packages": [
+    {
+      "name": "_fe_analyzer_shared",
+      "version": "109.0.0"
+    },
+    {
+      "name": "analyzer",
+      "version": "14.5.0"
+    },
+    {
+      "name": "analyzer_buffer",
+      "version": "0.3.4"
+    },
+    {
+      "name": "archive",
+      "version": "4.5.2"
+    },
+    {
+      "name": "args",
+      "version": "2.7.0"
+    },
+    {
+      "name": "async",
+      "version": "2.13.1"
+    },
+    {
+      "name": "barcode",
+      "version": "2.2.9"
+    },
+    {
+      "name": "bidi",
+      "version": "2.0.13"
+    },
+    {
+      "name": "boolean_selector",
+      "version": "2.1.2"
+    },
+    {
+      "name": "build",
+      "version": "4.0.11"
+    },
+    {
+      "name": "build_config",
+      "version": "1.3.3"
+    },
+    {
+      "name": "build_daemon",
+      "version": "4.1.7"
+    },
+    {
+      "name": "build_runner",
+      "version": "2.16.2"
+    },
+    {
+      "name": "built_collection",
+      "version": "5.1.2"
+    },
+    {
+      "name": "built_value",
+      "version": "8.13.0"
+    },
+    {
+      "name": "characters",
+      "version": "1.4.1"
+    },
+    {
+      "name": "charcode",
+      "version": "1.4.0"
+    },
+    {
+      "name": "checked_yaml",
+      "version": "2.0.4"
+    },
+    {
+      "name": "cli_util",
+      "version": "0.6.0"
+    },
+    {
+      "name": "clock",
+      "version": "1.1.3"
+    },
+    {
+      "name": "code_assets",
+      "version": "2.1.0"
+    },
+    {
+      "name": "code_builder",
+      "version": "4.13.0"
+    },
+    {
+      "name": "collection",
+      "version": "1.19.1"
+    },
+    {
+      "name": "convert",
+      "version": "3.1.2"
+    },
+    {
+      "name": "cross_file",
+      "version": "0.3.5+5"
+    },
+    {
+      "name": "crypto",
+      "version": "3.0.7"
+    },
+    {
+      "name": "cupertino_icons",
+      "version": "1.0.9"
+    },
+    {
+      "name": "dart_style",
+      "version": "3.1.14"
+    },
+    {
+      "name": "drift",
+      "version": "2.35.2"
+    },
+    {
+      "name": "drift_dev",
+      "version": "2.35.1"
+    },
+    {
+      "name": "equatable",
+      "version": "2.1.0"
+    },
+    {
+      "name": "fake_async",
+      "version": "1.3.3"
+    },
+    {
+      "name": "ffi",
+      "version": "2.2.0"
+    },
+    {
+      "name": "file",
+      "version": "7.0.1"
+    },
+    {
+      "name": "file_selector",
+      "version": "1.1.0"
+    },
+    {
+      "name": "file_selector_android",
+      "version": "0.5.2+11"
+    },
+    {
+      "name": "file_selector_ios",
+      "version": "0.5.3+7"
+    },
+    {
+      "name": "file_selector_linux",
+      "version": "0.9.4+1"
+    },
+    {
+      "name": "file_selector_macos",
+      "version": "0.9.5+1"
+    },
+    {
+      "name": "file_selector_platform_interface",
+      "version": "2.7.0"
+    },
+    {
+      "name": "file_selector_web",
+      "version": "0.9.5"
+    },
+    {
+      "name": "file_selector_windows",
+      "version": "0.9.3+6"
+    },
+    {
+      "name": "fixnum",
+      "version": "1.1.1"
+    },
+    {
+      "name": "fl_chart",
+      "version": "1.2.0"
+    },
+    {
+      "name": "flutter_animate",
+      "version": "4.5.2"
+    },
+    {
+      "name": "flutter_lints",
+      "version": "6.0.0"
+    },
+    {
+      "name": "flutter_riverpod",
+      "version": "3.4.3"
+    },
+    {
+      "name": "flutter_shaders",
+      "version": "0.1.5"
+    },
+    {
+      "name": "freezed_annotation",
+      "version": "3.1.0"
+    },
+    {
+      "name": "glob",
+      "version": "2.2.0"
+    },
+    {
+      "name": "go_router",
+      "version": "17.5.0"
+    },
+    {
+      "name": "graphs",
+      "version": "2.3.2"
+    },
+    {
+      "name": "hooks",
+      "version": "2.2.0"
+    },
+    {
+      "name": "http",
+      "version": "1.6.0"
+    },
+    {
+      "name": "http_multi_server",
+      "version": "3.2.2"
+    },
+    {
+      "name": "http_parser",
+      "version": "4.1.2"
+    },
+    {
+      "name": "image",
+      "version": "4.12.0"
+    },
+    {
+      "name": "intl",
+      "version": "0.20.3"
+    },
+    {
+      "name": "io",
+      "version": "1.1.0"
+    },
+    {
+      "name": "jni",
+      "version": "1.1.0"
+    },
+    {
+      "name": "jni_flutter",
+      "version": "1.0.4+1"
+    },
+    {
+      "name": "jni_util",
+      "version": "1.0.0"
+    },
+    {
+      "name": "json_annotation",
+      "version": "4.12.0"
+    },
+    {
+      "name": "leak_tracker",
+      "version": "11.0.2"
+    },
+    {
+      "name": "leak_tracker_flutter_testing",
+      "version": "3.0.10"
+    },
+    {
+      "name": "leak_tracker_testing",
+      "version": "3.0.2"
+    },
+    {
+      "name": "lints",
+      "version": "6.1.0"
+    },
+    {
+      "name": "listen",
+      "version": "1.0.1"
+    },
+    {
+      "name": "logging",
+      "version": "1.3.0"
+    },
+    {
+      "name": "matcher",
+      "version": "0.12.20"
+    },
+    {
+      "name": "material_color_utilities",
+      "version": "0.13.0"
+    },
+    {
+      "name": "meta",
+      "version": "1.19.0"
+    },
+    {
+      "name": "mime",
+      "version": "2.1.0"
+    },
+    {
+      "name": "mockito",
+      "version": "5.8.1"
+    },
+    {
+      "name": "native_toolchain_c",
+      "version": "0.19.5"
+    },
+    {
+      "name": "objective_c",
+      "version": "9.6.2"
+    },
+    {
+      "name": "package_config",
+      "version": "3.0.0"
+    },
+    {
+      "name": "path",
+      "version": "1.9.1"
+    },
+    {
+      "name": "path_parsing",
+      "version": "1.1.0"
+    },
+    {
+      "name": "path_provider",
+      "version": "2.1.6"
+    },
+    {
+      "name": "path_provider_android",
+      "version": "2.3.1"
+    },
+    {
+      "name": "path_provider_foundation",
+      "version": "2.6.0"
+    },
+    {
+      "name": "path_provider_linux",
+      "version": "2.2.2"
+    },
+    {
+      "name": "path_provider_platform_interface",
+      "version": "2.1.3"
+    },
+    {
+      "name": "path_provider_windows",
+      "version": "2.3.0"
+    },
+    {
+      "name": "pdf",
+      "version": "3.13.1"
+    },
+    {
+      "name": "petitparser",
+      "version": "7.1.0"
+    },
+    {
+      "name": "platform",
+      "version": "3.2.0"
+    },
+    {
+      "name": "plugin_platform_interface",
+      "version": "2.1.8"
+    },
+    {
+      "name": "pool",
+      "version": "1.5.3"
+    },
+    {
+      "name": "posix",
+      "version": "6.5.2"
+    },
+    {
+      "name": "process",
+      "version": "5.0.6"
+    },
+    {
+      "name": "pub_semver",
+      "version": "2.2.1"
+    },
+    {
+      "name": "pubspec_parse",
+      "version": "1.6.0"
+    },
+    {
+      "name": "qr",
+      "version": "3.0.2"
+    },
+    {
+      "name": "recase",
+      "version": "4.1.0"
+    },
+    {
+      "name": "record_use",
+      "version": "1.1.1"
+    },
+    {
+      "name": "riverpod",
+      "version": "3.4.3"
+    },
+    {
+      "name": "riverpod_analyzer_utils",
+      "version": "1.0.0-dev.12"
+    },
+    {
+      "name": "riverpod_annotation",
+      "version": "4.0.7"
+    },
+    {
+      "name": "riverpod_generator",
+      "version": "4.0.9"
+    },
+    {
+      "name": "shelf",
+      "version": "1.4.3"
+    },
+    {
+      "name": "shelf_web_socket",
+      "version": "3.0.0"
+    },
+    {
+      "name": "source_gen",
+      "version": "4.3.1"
+    },
+    {
+      "name": "source_span",
+      "version": "1.10.2"
+    },
+    {
+      "name": "sqlite3",
+      "version": "3.7.1"
+    },
+    {
+      "name": "sqlparser",
+      "version": "0.45.0"
+    },
+    {
+      "name": "stack_trace",
+      "version": "1.12.2"
+    },
+    {
+      "name": "state_notifier",
+      "version": "1.0.0"
+    },
+    {
+      "name": "stream_channel",
+      "version": "2.1.4"
+    },
+    {
+      "name": "stream_transform",
+      "version": "2.1.2"
+    },
+    {
+      "name": "string_scanner",
+      "version": "1.4.1"
+    },
+    {
+      "name": "term_glyph",
+      "version": "1.2.2"
+    },
+    {
+      "name": "test_api",
+      "version": "0.7.12"
+    },
+    {
+      "name": "typed_data",
+      "version": "1.4.0"
+    },
+    {
+      "name": "uuid",
+      "version": "4.6.0"
+    },
+    {
+      "name": "vector_math",
+      "version": "2.4.3"
+    },
+    {
+      "name": "vm_service",
+      "version": "15.4.0"
+    },
+    {
+      "name": "watcher",
+      "version": "1.2.1"
+    },
+    {
+      "name": "web",
+      "version": "1.1.1"
+    },
+    {
+      "name": "web_socket",
+      "version": "1.0.1"
+    },
+    {
+      "name": "web_socket_channel",
+      "version": "3.0.3"
+    },
+    {
+      "name": "xdg_directories",
+      "version": "1.1.0"
+    },
+    {
+      "name": "xml",
+      "version": "7.1.0"
+    },
+    {
+      "name": "yaml",
+      "version": "3.1.4"
+    },
+    {
+      "name": "yaml_edit",
+      "version": "2.2.4"
+    }
+  ],
+  "hits": [],
+  "results": [
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {}
+  ]
+}

@@ -5,6 +5,45 @@ All notable changes to BechaKena are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Releases are cut by pushing a
 `v*` tag; CI attaches the Windows build and Android APK to the GitHub Release.
 
+## [1.0.3] — 2026-10-26
+
+### Resubmission verification — 2026-10-27
+
+- Regenerated stale Drift output so all 25 generated foreign-key constraints
+  match the source schema's explicit `ON DELETE RESTRICT` rules.
+- Fixed the PowerShell SQLite import commands and clarified that cloud sync
+  and SMS delivery still need implementation throughout setup/operations docs.
+- Required platform headers and build definitions in the source archive;
+  reject linked source directories and exclude SQLite sidecars and local keys.
+- Added a reproducible OSV scan with lockfile checksum and raw results;
+  corrected the package count to 126 hosted dependencies (five SDK packages
+  are outside that scan). npm and OSV reruns returned zero advisories.
+- Set the showcase build root explicitly so unrelated root npm tooling cannot
+  change resolution between a checkout and the submission archive.
+- Restored tests to the Docker build context: the image's `COPY test` and
+  `flutter test` steps previously conflicted with `.dockerignore`.
+
+### Audit #1051
+
+- Documented the complete source map for review: Flutter POS (including every
+  platform runner and the full Windows C++ runner), static `site/`, `database/`,
+  `scripts/`, `tool/`, `docker/` and `.github/`. Confirmed there is no separate
+  admin app or API/backend component.
+- Added a copy/paste clean-machine quickstart to `HowToSetup.md`: restore,
+  codegen, exact `sqlite3 schema.sql` + `seed.sql` commands with integrity
+  checks, the Windows app-support database path, run/build and verification.
+- Documented R5 directly: zero networked mutating endpoints; local SQLite writes
+  only; local PIN/capability RBAC gates mutations, and client-side RBAC is not a
+  network security boundary. The optional Cloud backend remains roadmap-only.
+- Attached R6 evidence in `docs/dependency-audit/`: `npm audit` 0
+  vulnerabilities; `flutter pub outdated` output; OSV scan of 131 locked Pub
+  packages with 0 advisories. Linked from `docs/SECURITY.md`.
+- Hardened the submission archive checks to require the Windows runner sources,
+  static site entry points, security/dependency evidence and docs; kept
+  `build/`, `.dart_tool/`, caches and generated sources out of the ZIP.
+- Replaced documentation password placeholders that triggered secret-scan
+  review with CI environment-variable references.
+
 ## [1.0.2] — 2026-10-25
 
 ### Audit #972

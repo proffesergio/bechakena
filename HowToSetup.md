@@ -8,10 +8,18 @@ target that matches what you want to run:
 | **A. VPS, native** | Landing page + browser demo behind nginx | Public demo on a server you own |
 | **B. Docker** | Same, built and served from one container | One-command deploy, clean-machine builds |
 | **C. Windows shop PC** | The POS itself (offline, local SQLite) | The actual product in a shop |
-| **D. Android phone/tablet** | The POS itself, API-configurable | Mobile billing, restaurant floor use |
+| **D. Android phone/tablet** | The POS itself (optional cloud config; no backend ships) | Mobile billing, restaurant floor use |
 
 Every target starts from the same repository. Nothing in the POS requires
-network access; the cloud (Supabase) is optional and configured at build time.
+network access. Cloud configuration flags are reserved for future development;
+they do not enable a working cloud service in this release.
+
+**Component scope:** this archive contains one Flutter app (the POS, including
+its owner/manager back-office screens) plus a static Next.js showcase. There is
+**no separate admin app, no backend API and no Edge Function source** in the
+submission. The POS has no networked mutating endpoint; all writes go to local
+SQLite and are gated by local role checks (see
+[`docs/SECURITY.md`](docs/SECURITY.md#authorisation--local-only-no-networked-mutating-endpoints-r5)).
 
 ---
 
@@ -20,9 +28,10 @@ network access; the cloud (Supabase) is optional and configured at build time.
 | Tool | Version | Needed for |
 |---|---|---|
 | Flutter SDK | 3.47.x (stable; tested 3.47.7) | A, B, C, D |
-| Dart SDK | 3.12.x (bundled with the Flutter SDK) | A, B, C, D |
+| Dart SDK | 3.13.5 bundled with Flutter 3.47.7; project requires >=3.12.2 <4.0.0 | A, B, C, D |
 | Node.js + npm | 22.18+ (22.x) or 24.x | A, B (showcase landing page) |
 | Python 3 | 3.10+ | A, B (packaging check only) |
+| `sqlite3` CLI | 3.35+ (optional) | Database fixture / review machines |
 | nginx | 1.24+ | A |
 | Docker + Compose | v2 | B |
 | Visual Studio **Desktop development with C++** | 2022 | C (Windows builds) |
@@ -41,13 +50,91 @@ Get the code:
 git clone <repo-url> bechakena && cd bechakena
 ```
 
-Common first steps for every target (the generated Drift/Riverpod sources are
-not shipped in the submission ZIP — this step recreates them):
+---
+
+## Clean-machine quickstart (copy/paste)
+
+This is the exact sequence from a fresh machine or a freshly unzipped
+`bechakena-vibe96.zip`. It restores dependencies, generates the Drift/Riverpod
+and localization sources, creates the SQLite database from the shipped scripts,
+and starts the POS. Run the commands from the repository root.
+
+**1. Confirm the toolchain** (use Flutter 3.47.7 and its bundled Dart SDK):
+
+```bash
+flutter --version
+node --version      # only needed for the optional site/ showcase
+sqlite3 --version   # only needed for the database fixture steps below
+```
+
+**2. Restore dependencies and generate sources.** The ZIP deliberately omits
+generated Dart (`*.g.dart`, `*.freezed.dart`) and local caches; this recreates
+them:
+
+```bash
+flutter pub get
+flutter gen-l10n
+dart run build_runner build
+```
+
+**3. Create and seed SQLite from the shipped scripts** (optional, for a review
+machine or a pre-seeded demo). The app normally creates its own database on
+first launch; these commands create the exact same schema and demo data:
+
+```bash
+sqlite3 review.db < database/schema.sql
+sqlite3 review.db < database/seed.sql
+sqlite3 review.db "PRAGMA user_version; PRAGMA integrity_check;"
+# expected output: 9, then ok
+```
+
+To make the Windows app open that demo on first launch, create the module file
+in its app-support directory before starting the app. Use this only on a fresh
+review installation; do not import demo SQL into an existing shop database.
+PowerShell uses SQLite's `.read` command instead of shell input redirection:
+
+```powershell
+New-Item -ItemType Directory -Force "$env:APPDATA\com.newell\bechakena"
+$reviewDatabase = "$env:APPDATA\com.newell\bechakena\bechakena_superShop.db"
+if (Test-Path -LiteralPath $reviewDatabase) { throw 'Use a fresh review installation.' }
+sqlite3 -bail "$reviewDatabase" ".read database/schema.sql" ".read database/seed.sql" "PRAGMA user_version; PRAGMA integrity_check; PRAGMA foreign_key_check;"
+# expected output: 9, then ok, with no foreign-key violations
+```
+
+On Android the equivalent directory is app-private storage; the simplest path
+is to launch the app and load sample data from **Settings → Load sample
+products**, or restore a backup made from another install.
+
+**4. Run the POS:**
+
+```bash
+flutter run -d windows            # shipping desktop target
+flutter run -d linux              # Linux development machine
+flutter build windows --release   # build\windows\x64\runner\Release\bechakena.exe
+```
+
+**5. Verify the checkout:**
+
+```bash
+flutter analyze
+flutter test
+```
+
+**What the submission ZIP excludes.** `python scripts/make_submission_zip.py`
+skips `.git/`, `build/`, `.dart_tool/`, `node_modules/`, `site/.next/`,
+`site/out/`, `.vercel/`, `dist/`, local databases, private env files and
+generated `*.g.dart` / `*.freezed.dart` files. It also fails the build if a
+required source or document is missing, so the archive always contains the
+complete source tree described in [README.md](README.md#source-map--every-component).
+
+---
+
+Common first steps for every target:
 
 ```bash
 flutter pub get
 flutter gen-l10n                                          # bn + en strings
-dart run build_runner build --delete-conflicting-outputs  # Drift + Riverpod code
+dart run build_runner build  # Drift + Riverpod code
 flutter analyze
 flutter test
 ```
@@ -85,7 +172,7 @@ source ~/.nvm/nvm.sh && nvm install 22
 ```bash
 flutter pub get
 flutter gen-l10n
-dart run build_runner build --delete-conflicting-outputs
+dart run build_runner build
 flutter analyze
 flutter test
 flutter build web --release --base-href /demo/ --no-web-resources-cdn
@@ -206,7 +293,7 @@ installer adds Start-menu entries — see [`docs/BUILD.md` §1c](docs/BUILD.md).
 ```bash
 flutter pub get
 flutter gen-l10n
-dart run build_runner build --delete-conflicting-outputs
+dart run build_runner build
 flutter run -d windows            # dev
 flutter build windows --release   # build\windows\x64\runner\Release\bechakena.exe
 ```
@@ -214,17 +301,17 @@ flutter build windows --release   # build\windows\x64\runner\Release\bechakena.e
 Cutting a release from git:
 
 ```bash
-git tag v1.0.0 && git push origin v1.0.0   # CI attaches Windows .zip + Android .apk
+git tag v1.0.3 && git push origin v1.0.3   # CI attaches Windows .zip + Android .apk
 ```
 
 ---
 
-## D. Android phone/tablet (configurable API)
+## D. Android phone/tablet (optional cloud configuration)
 
 ```bash
 flutter pub get
 flutter gen-l10n
-dart run build_runner build --delete-conflicting-outputs
+dart run build_runner build
 flutter analyze
 flutter test
 flutter build apk --release \
@@ -267,21 +354,24 @@ applies the same schema the script contains. Stock is always derived
 review machine):
 
 ```bash
-sqlite3 test.db < database/schema.sql   # inspect the exact shipped schema
-sqlite3 test.db < database/seed.sql     # demo shop, catalog, customers, sales
-# or, for a working demo inside the app, use the module file name:
-sqlite3 bechakena_superShop.db < database/schema.sql
-sqlite3 bechakena_superShop.db < database/seed.sql
+sqlite3 review.db < database/schema.sql   # inspect the exact shipped schema
+sqlite3 review.db < database/seed.sql     # demo shop, catalog, customers, sales
+sqlite3 review.db "PRAGMA user_version; PRAGMA integrity_check;"   # 9, ok
 ```
 
-Then launch the app and sign in as **Demo Owner / PIN 1234** (see §6).
+For a working demo inside the app, create the module file in the app-support
+directory (`%APPDATA%\com.newell\bechakena\bechakena_superShop.db` on Windows)
+before first launch, or use the full copy/paste sequence in
+[Clean-machine quickstart](#clean-machine-quickstart-copypaste). Then launch the
+app and sign in as **Demo Owner / PIN 1234** (see §6).
 
 **Backups:** Settings → Backup now writes a clean snapshot; Restore picks one
 up on the next launch. The seeded database passes `PRAGMA integrity_check`
 and is covered by `flutter test test/core/db/schema_seed_test.dart`.
 
-**Optional cloud (Cloud Plan):** multi-device sync mirrors each row into
-Supabase Postgres; the app keeps working forever without it. Setup steps:
+**Future Cloud Plan:** multi-device sync and a hosted database remain roadmap
+work. No sync transport or backend is implemented; setting URL/key flags does
+not enable them. Development scope:
 [`docs/OPERATIONS.md` §5](docs/OPERATIONS.md).
 
 ---
@@ -325,7 +415,7 @@ local data, then relaunch.
 
 After editing any user-facing string, update **both** `lib/l10n/app_en.arb`
 and `lib/l10n/app_bn.arb`, then run `flutter gen-l10n`. After changing table
-definitions re-run `dart run build_runner build --delete-conflicting-outputs`
+definitions re-run `dart run build_runner build`
 (regenerates Drift code), then the schema dump: `dart run tool/dump_schema.dart`.
 
 ---

@@ -19,7 +19,7 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter gen-l10n
-      - run: dart run build_runner build --delete-conflicting-outputs
+      - run: dart run build_runner build
       - run: flutter build windows --release
       - name: Zip Windows bundle
         run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath BechaKena-windows-${{ github.ref_name }}.zip
@@ -42,7 +42,7 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter gen-l10n
-      - run: dart run build_runner build --delete-conflicting-outputs
+      - run: dart run build_runner build
       # Debug-signed until a shop release keystore is configured.
       - run: flutter build apk --release
       - name: Rename APK

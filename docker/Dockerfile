@@ -26,7 +26,7 @@ COPY tool ./tool
 COPY test ./test
 COPY database ./database
 RUN flutter gen-l10n && \
-    dart run build_runner build --delete-conflicting-outputs && \
+    dart run build_runner build && \
     flutter analyze && flutter test && \
     flutter build web --release --base-href /demo/ --no-web-resources-cdn
 

@@ -8,7 +8,7 @@ before structural changes.
 
 ## Commands
 - `flutter pub get` — install deps
-- `dart run build_runner build --delete-conflicting-outputs` — regen Drift/Riverpod code (required after editing tables/providers)
+- `dart run build_runner build` — regen Drift/Riverpod code (required after editing tables/providers)
 - `flutter analyze` — must stay clean
 - `flutter test` — unit + widget tests
 - `flutter run -d linux` — dev on this machine (Windows is the shipping desktop target)
