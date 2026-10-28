@@ -145,8 +145,9 @@ before importing products or loading sample data. Select the shop currency
 The currency uses two decimals and is shared by branches within that module.
 It locks once priced or financial records exist to preserve historical money.
 No foreign exchange or automatic country tax compliance is provided. English
-and Bengali language choices persist on the device. The public web demo is
-pre-seeded in BDT; its sample amounts are not converted.
+and Bengali language choices persist on the device. The public web demo starts
+with BDT as its default currency; sample amounts are not converted. A fresh
+browser creates its own owner name and PIN after the module picker and tour.
 
 ---
 

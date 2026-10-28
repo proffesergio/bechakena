@@ -26,7 +26,7 @@ Build, test and setup instructions are intentionally out of scope here — see
 | Category | **Ecommerce & Retail** |
 | Landing page URL | `https://bkpos.vercel.app/` |
 | Live demo URL | `https://bkpos.vercel.app/demo/` |
-| Demo credentials | **Demo Owner · PIN 1234** — pick either module first; data stays in the visitor's browser |
+| Demo access | Choose Retail or Restaurant, take or skip the tour, then create a browser-local owner name and PIN; load sample items to try a sale. Data stays in the visitor's browser |
 
 ## Category
 
@@ -84,7 +84,7 @@ inside the Flutter binary; the optional Cloud Plan is roadmap-only.
 | 5. Auth & roles | **No networked mutating endpoint ships.** There is no HTTP API, route handler, Edge Function, `ServerSocket`/`HttpServer` or separate admin/API source. All writes go to local SQLite; every local mutation is gated by the session's capability matrix (`lib/features/auth/logic/permissions.dart`). The optional LAN printer uses an outbound socket to a configured printer, accepts no connection and sends no database rows. Client-side RBAC is not a network security boundary. The Cloud Plan backend is roadmap-only |
 | 6. Pinned deps, no critical CVEs | `pubspec.lock` + `site/package-lock.json`; `npm audit` → 0 vulnerabilities; `flutter pub outdated` + OSV scan of all 126 hosted Pub packages (five SDK packages excluded) → 0 advisories. Raw evidence: `docs/dependency-audit/`, summarized in `docs/SECURITY.md#dependency-audit` |
 | 7. Documentation set | `README.md`, `HowToSetup.md`, `CLAUDE.md`, `CHANGELOG.md` at the ZIP root; `docs/SECURITY.md`, `AUDIT_RESPONSE.md` and dependency evidence included |
-| 8. Working live demo | `https://bkpos.vercel.app/demo/` — Demo Owner / PIN 1234 |
+| 8. Working live demo | `https://bkpos.vercel.app/demo/` — first use creates a browser-local owner and PIN, then sample items can be loaded |
 | 9. Mobile buildable, configurable API | Flutter project root + `mobile/README.md`; optional cloud API base URL in `lib/app/config.dart` (roadmap only — no backend ships); icons in `android/` + `ios/` |
 
 ## Before submitting

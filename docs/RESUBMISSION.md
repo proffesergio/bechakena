@@ -14,7 +14,7 @@ claim that Vibe96 has rerun its checks.
 | --- | --- |
 | Landing page | `https://bkpos.vercel.app/` — product presentation |
 | Live demo | `https://bkpos.vercel.app/demo/` — interactive Flutter POS |
-| Demo login | Choose Retail or Restaurant, then Demo Owner / PIN 1234 |
+| Demo first use | Choose Retail or Restaurant, take or skip the tour, then create a browser-local owner name and PIN; load sample items to try a sale |
 | Cover | `site/public/media/cover.png` — 1920×1080, 16:9 |
 | Square landing image | `site/public/media/landing-square.png` — 1080×1080, 1:1 |
 | Source archive | `dist/bechakena-vibe96.zip` |
@@ -27,7 +27,7 @@ or social links. The square artwork is a designed landing preview, not a full
 page browser screenshot. Approved-example links were not supplied in the notice.
 
 The landing page now leads with the offline retail/restaurant purpose and real
-checkout capture. It includes sample demo sign-in instructions, a four-tab
+checkout capture. It includes first-use demo instructions, a four-tab
 product tour, baki khata and inventory features, retail/restaurant workflows,
 technology, editable receipt and stock-planning samples, ownership information,
 FAQs and contact actions. Bangla/English, keyboard-operated tabs, labelled

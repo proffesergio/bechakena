@@ -19,7 +19,8 @@
 
 > **Live demo:** [bkpos.vercel.app/demo](https://bkpos.vercel.app/demo/) —
 > the full POS running in your browser, with demo data that stays on your
-> device. Pick a module, then sign in as **Demo Owner / PIN 1234**.
+> device. Pick a module, take or skip the tour, then create a browser-local
+> owner name and PIN. Load sample items to try a sale.
 > Setup for every target: **[`HowToSetup.md`](HowToSetup.md)**.
 
 <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:0F172A,100:22C55E&height=180&section=header&text=BechaKena&fontSize=40&fontColor=fff&animation=fadeIn&fontAlignY=35&desc=%E0%A6%AC%E0%A7%87%E0%A6%9A%E0%A6%BE%E0%A6%95%E0%A7%87%E0%A6%A8%E0%A6%BE%20%E2%80%A2%20Offline-First%20POS%20for%20BD&descAlignY=55&descAlign=50" />

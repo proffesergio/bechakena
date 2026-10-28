@@ -108,6 +108,9 @@ jobs:
           args=(deploy --prebuilt --yes --token "$VERCEL_TOKEN")
           if [ "$TARGET" = "production" ]; then args+=(--prod); fi
           npx --yes vercel@64.2.0 "${args[@]}"
+      - name: Verify production showcase
+        if: steps.target.outputs.target == 'production'
+        run: python3 scripts/check_deployment.py "$PRODUCTION_URL"
       - name: Record deployment success
         if: steps.target.outputs.target == 'production'
         env:

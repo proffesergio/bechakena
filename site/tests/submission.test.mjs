@@ -22,7 +22,9 @@ test("both landing languages provide real demo instructions and the same content
   assert.deepEqual(Object.keys(copy.en).sort(), Object.keys(copy.bn).sort());
   for (const locale of [copy.en, copy.bn]) {
     assert.equal(locale.demoSteps.length, 3);
-    assert.match(locale.demoSteps[1], /Demo Owner.*1234/);
+    assert.match(locale.demoSteps[1], /PIN/);
+    assert.match(locale.demoBody, /owner|মালিকের/);
+    assert.doesNotMatch(JSON.stringify(locale), /Demo Owner|1234/);
     assert.match(locale.stackBody, /Flutter/);
     assert.equal(locale.tabs.length, 4);
   }
