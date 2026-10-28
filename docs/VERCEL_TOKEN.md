@@ -30,6 +30,13 @@ changing the secret, start a new run rather than waiting for the old job.
 
 ## Deploy the packaged site
 
+GitHub Actions is the deployment owner. `git.deploymentEnabled: false` in
+`vercel.json` disables Vercel's separate Git-triggered source builds; pushes
+to `main` still automatically run the Showcase deploy workflow, including
+tests, packaging, CLI deployment and the live health check. This prevents a
+duplicate Vercel check from failing on the source-build guard. Manual preview
+deployments remain available through the workflow's `preview` target.
+
 This Vercel project uses the **Other** framework preset. A plain `vercel --prod`
 uploads the source tree, which is not a deployable website here. It can report
 **Ready** while `/` and `/demo/` return 404. The repository's `vercel.json`
